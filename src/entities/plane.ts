@@ -48,10 +48,9 @@ export abstract class Plane<T extends StatsData = StatsData> extends BaseEntity 
             return undefined;
         }
 
-        const previousHealth = this.health;
         this.health = Math.max(0, this.health - damage);
         const damageLabel = new DamageLabel(
-            previousHealth - this.health,
+            damage,
             {
                 x: this.position.x + this.size.width / 2 - 40,
                 y: this.position.y - 8,
