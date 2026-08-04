@@ -1,5 +1,6 @@
 import { GameEngine } from "../logic/game-engine";
 import { GameWorld } from "../logic/game-world";
+import type { Wave } from "../logic/wave";
 import { CanvasRenderer } from "../rendering/canvas-renderer";
 import { KeyboardInput } from "./keyboard-input";
 import { PlayerPlane } from "./player-plane";
@@ -17,7 +18,8 @@ export function startGame(): GameEngine {
     const input = new KeyboardInput();
     const player = new PlayerPlane(input);
     const environment = new SpaceEnvironment(canvas.width, canvas.height);
-    const engine = new GameEngine(world, renderer, []);
+    const waves = new Set<Wave>();
+    const engine = new GameEngine(world, renderer, [], waves);
 
     world.setEnvironment(environment);
     world.addEntity(player);

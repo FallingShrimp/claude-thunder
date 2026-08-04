@@ -1,16 +1,22 @@
 import type { Renderer } from "../rendering/renderer";
 import type { GameSystem } from "./game-system";
 import type { GameWorld } from "./game-world";
+import type { Wave } from "./wave";
+import { WaveSystem } from "./wave-system";
 
 export class GameEngine {
     private animationFrameId: number | null = null;
     private previousTime: number | null = null;
+    private readonly waveSystem: WaveSystem;
 
     public constructor(
         private readonly world: GameWorld,
         private readonly renderer: Renderer,
         private readonly systems: readonly GameSystem[],
-    ) { }
+        waves: ReadonlySet<Wave> = new Set(),
+    ) {
+        this.waveSystem = new WaveSystem(world, waves);
+    }
 
     public start(): void {
         if (this.animationFrameId !== null) {
@@ -18,6 +24,10 @@ export class GameEngine {
         }
 
         this.animationFrameId = requestAnimationFrame(this.tick);
+    }
+
+    public switchWave(index: number): void {
+        this.waveSystem.switchTo(index);
     }
 
     public stop(): void {
