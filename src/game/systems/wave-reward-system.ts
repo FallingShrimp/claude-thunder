@@ -22,6 +22,7 @@ export class WaveRewardSystem implements GameSystem {
         private readonly player: Player,
         private readonly input: KeyboardInput,
         private readonly itemPool: readonly ItemFactory[],
+        private readonly getItemWeight: (item: Item) => number,
         private readonly switchWave: (index: number) => void,
         private readonly hasPendingWaveEnemies: () => boolean,
         private readonly setPlayerControlsEnabled: (enabled: boolean) => void,
@@ -60,15 +61,14 @@ export class WaveRewardSystem implements GameSystem {
         this.previousRight = this.input.isPressed("KeyD");
         this.previousConfirm = this.input.isPressed("KeyJ");
 
-        const factories = this.pickFactories();
+        const items = this.pickItems();
         const gap = 24;
         const itemWidth = 96;
         const totalWidth = itemWidth * this.choiceCount
             + gap * (this.choiceCount - 1);
         const startX = (this.screenWidth - totalWidth) / 2;
 
-        for (const [index, factory] of factories.entries()) {
-            const item = factory();
+        for (const [index, item] of items.entries()) {
             item.position.x = startX + index * (itemWidth + gap);
             this.choices.push(item);
             world.addEntity(item);
@@ -127,17 +127,40 @@ export class WaveRewardSystem implements GameSystem {
         }
     }
 
-    private pickFactories(): ItemFactory[] {
-        const shuffled = [...this.itemPool];
+    private pickItems(): Item[] {
+        const candidates = this.itemPool.map((factory) => factory());
+        const picked: Item[] = [];
 
-        for (let index = shuffled.length - 1; index > 0; index -= 1) {
-            const targetIndex = Math.floor(Math.random() * (index + 1));
-            [shuffled[index], shuffled[targetIndex]] = [
-                shuffled[targetIndex],
-                shuffled[index],
-            ];
+        while (picked.length < this.choiceCount) {
+            const weights = candidates.map((item) => {
+                const weight = this.getItemWeight(item);
+                return Number.isFinite(weight) && weight > 0 ? weight : 0;
+            });
+            const totalWeight = weights.reduce((total, weight) => total + weight, 0);
+
+            if (totalWeight <= 0) {
+                throw new RangeError("At least one remaining item must have positive weight.");
+            }
+
+            let roll = Math.random() * totalWeight;
+            let selectedIndex = weights.length - 1;
+
+            for (let index = 0; index < weights.length; index += 1) {
+                roll -= weights[index];
+
+                if (roll < 0) {
+                    selectedIndex = index;
+                    break;
+                }
+            }
+
+            const [selected] = candidates.splice(selectedIndex, 1);
+
+            if (selected !== undefined) {
+                picked.push(selected);
+            }
         }
 
-        return shuffled.slice(0, this.choiceCount);
+        return picked;
     }
 }

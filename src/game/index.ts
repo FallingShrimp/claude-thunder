@@ -5,6 +5,7 @@ import { GameWorld } from "../logic/game-world";
 import type { Wave } from "../logic/wave";
 import { CanvasRenderer } from "../rendering/canvas-renderer";
 import { items } from "./items/stat-upgrade-items";
+import { getQualityWeight, type Quality } from "./items/quality";
 import { ALL_GAME_AUDIO_SOURCES } from "./audio-assets";
 import { KeyboardInput } from "./keyboard-input";
 import { PlayerPlane } from "./player-plane";
@@ -78,6 +79,7 @@ export async function startGame(): Promise<GameEngine> {
         player,
         input,
         itemPool,
+        (item) => getQualityWeight(item.quality as Quality),
         (index) => engine.switchWave(index),
         () => engine.hasPendingWaveEnemies(),
         (enabled) => player.setControlsEnabled(enabled),

@@ -3,7 +3,7 @@ import type { Size2D, Vector2 } from "../core/geometry";
 import type { RenderAppearance } from "../core/render-appearance";
 import type { Player } from "./player";
 
-export abstract class Item extends BaseEntity {
+export abstract class Item<TQuality = unknown> extends BaseEntity {
     public value: number = 0;
     public remainingLifetime: number = 0;
 
@@ -14,6 +14,7 @@ export abstract class Item extends BaseEntity {
         appearance: RenderAppearance,
         public readonly displayName: string,
         public readonly avatarSource: string,
+        public readonly quality: TQuality,
     ) {
         super(id, position, size, appearance);
     }

@@ -5,12 +5,14 @@ import {
     PLAYER_STATS_FORMATS,
     type PlayerStats,
 } from "../player-plane";
+import { getQualityColor, Quality } from "./quality";
 
-export abstract class PlayerStatUpgradeItem<T extends StatsData> extends Item {
+export abstract class PlayerStatUpgradeItem<T extends StatsData>
+    extends Item<Quality> {
     public constructor(
         displayName: string,
         avatarSource: string,
-        color: string,
+        quality: Quality,
         public readonly statsSlot: StatsFormats<T>,
         public readonly statsValue: Partial<T>,
     ) {
@@ -18,9 +20,10 @@ export abstract class PlayerStatUpgradeItem<T extends StatsData> extends Item {
             crypto.randomUUID(),
             { x: 0, y: 280 },
             { width: 96, height: 128 },
-            { shape: "rectangle", color },
+            { shape: "rectangle", color: getQualityColor(quality) },
             displayName,
             avatarSource,
+            quality,
         );
 
         this.zIndex = 100;
@@ -57,7 +60,7 @@ export class AttackPowerUpgradeItem
         super(
             "攻击力 +3",
             "./items/attack-power.svg",
-            "#b74444",
+            Quality.NORMAL,
             PLAYER_STATS_FORMATS,
             { ATK: 3 },
         );
@@ -70,7 +73,7 @@ export class AttackSpeedUpgradeItem
         super(
             "攻击速度 +0.25",
             "./items/attack-speed.svg",
-            "#b88732",
+            Quality.NORMAL,
             PLAYER_STATS_FORMATS,
             { ATK_SPD: 0.25 },
         );
@@ -83,7 +86,7 @@ export class CriticalRateUpgradeItem
         super(
             "暴击率 +3%",
             "./items/critical-rate.svg",
-            "#3d8f68",
+            Quality.RARE,
             PLAYER_STATS_FORMATS,
             { CRIT_RATE: 0.03 },
         );
@@ -96,7 +99,7 @@ export class CriticalDamageUpgradeItem
         super(
             "暴击伤害 +10%",
             "./items/critical-damage.svg",
-            "#6652ad",
+            Quality.RARE,
             PLAYER_STATS_FORMATS,
             { CRIT_DMG: 0.1 },
         );
@@ -108,7 +111,7 @@ export class ShootOffsetUpgradeItem extends PlayerStatUpgradeItem<PlayerStats> {
         super(
             "散射 -0.5°",
             ".",
-            "#880076ff",
+            Quality.WASTE,
             PLAYER_STATS_FORMATS,
             { SHOOT_OFFSET: -0.5 }
         );
@@ -120,7 +123,7 @@ export class MultipleShootUpgradeItem extends PlayerStatUpgradeItem<PlayerStats>
         super(
             "多重射击 +0.1",
             ".",
-            "#138681ff",
+            Quality.RARE,
             PLAYER_STATS_FORMATS,
             { MULTIPLE_SHOOT: 0.1 }
         );
@@ -132,7 +135,7 @@ export class EpicShoot extends PlayerStatUpgradeItem<PlayerStats> {
         super(
             "攻击速度 +1\n散射 +2°",
             ".",
-            "#a13b3bff",
+            Quality.EPIC,
             PLAYER_STATS_FORMATS,
             {
                 ATK_SPD: 1,
