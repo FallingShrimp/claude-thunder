@@ -16,12 +16,12 @@ export class Orange extends Enemy<OrangeStats> {
             { width: 27, height: 55 },
             { shape: "triangle", color: "#ff9100ff" },
             5,
-            5,
+            20,
             ORANGE_STATS_FORMATS,
             {},
         );
 
-        this.speed = 200;
+        this.speed = 250;
         this.velocity.y = this.speed;
         this.scoreValue = 200;
     }

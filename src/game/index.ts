@@ -53,7 +53,11 @@ export async function startGame(): Promise<GameEngine> {
             spawnValue: 463,
             spawnProgress: 0,
             spawnEnemy() {
-                return new Red(Math.random() * (canvas.width - 36), canvas.height);
+                return new Red(
+                    Math.random() * (canvas.width - 36),
+                    canvas.height,
+                    (entity) => world.addEntity(entity),
+                );
             },
         },
         {

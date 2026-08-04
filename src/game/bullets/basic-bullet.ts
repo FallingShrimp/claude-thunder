@@ -41,6 +41,7 @@ export class BasicBullet extends Bullet {
     public override getEntityType(): "bullet" {
         return "bullet";
     }
+
     public override judgeCritical(): [boolean, number] {
         if (this.launcher instanceof PlayerPlane) {
             const state = Math.random() < this.launcher.statsValue.CRIT_RATE;
