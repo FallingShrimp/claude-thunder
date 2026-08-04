@@ -29,5 +29,7 @@ export abstract class BaseEntity extends RenderableTarget {
         };
     }
 
+    public abstract ai(delta: number): void;
+
     public abstract getEntityType(): string;
 }

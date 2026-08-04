@@ -39,6 +39,12 @@ export class GameEngine {
         if (!this.world.paused) {
             this.world.elapsedTime += deltaTime;
 
+            for (const entity of this.world.entities) {
+                if (entity.active) {
+                    entity.ai(deltaTime);
+                }
+            }
+
             for (const system of this.systems) {
                 system.update(this.world, deltaTime);
             }
