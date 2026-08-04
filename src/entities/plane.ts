@@ -55,7 +55,8 @@ export abstract class Plane<T extends StatsData = StatsData> extends BaseEntity 
                 x: this.position.x + this.size.width / 2 - 40,
                 y: this.position.y - 8,
             },
-            isCritical,
+            isCritical ? "#ffb13b" : "#ffffff",
+            isCritical ? "! " : "",
         );
 
         if (this.health === 0) {

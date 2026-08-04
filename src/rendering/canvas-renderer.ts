@@ -107,11 +107,11 @@ export class CanvasRenderer implements Renderer {
         context.save();
         context.globalAlpha = label.opacity;
         context.fillStyle = label.appearance.color;
-        context.font = `${label.critical ? "bold " : ""}20px sans-serif`;
+        context.font = "20px sans-serif";
         context.textAlign = "center";
         context.textBaseline = "middle";
         context.fillText(
-            `${label.critical ? "! " : ""}${Math.round(label.damage)}`,
+            `${label.prefix}${Math.round(label.damage)}${label.suffix}`,
             label.position.x + label.size.width / 2,
             label.position.y + label.size.height / 2,
         );

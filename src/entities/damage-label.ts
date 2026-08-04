@@ -3,24 +3,28 @@ import type { Vector2 } from "../core/geometry";
 
 export class DamageLabel extends BaseEntity {
     public readonly damage: number;
-    public readonly critical: boolean;
+    public readonly prefix: string;
+    public readonly suffix: string;
     public remainingLifetime: number;
     public readonly totalLifetime: number;
 
     public constructor(
         damage: number,
         position: Vector2,
-        critical: boolean = false,
+        color: string = "#ffffff",
+        prefix: string = "",
+        suffix: string = "",
     ) {
         super(
             crypto.randomUUID(),
             position,
             { width: 80, height: 24 },
-            { shape: "rectangle", color: critical ? "#ffb13b" : "#ffffff" },
+            { shape: "rectangle", color },
         );
 
         this.damage = Math.max(0, damage);
-        this.critical = critical;
+        this.prefix = prefix;
+        this.suffix = suffix;
         this.totalLifetime = 0.8;
         this.remainingLifetime = this.totalLifetime;
         this.velocity.y = -48;
