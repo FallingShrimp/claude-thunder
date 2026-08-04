@@ -130,13 +130,13 @@ export class MultipleShootUpgradeItem extends PlayerStatUpgradeItem<PlayerStats>
 export class EpicShoot extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "攻击速度 +1\n散射 +1°",
+            "攻击速度 +1\n散射 +2°",
             ".",
             "#a13b3bff",
             PLAYER_STATS_FORMATS,
             {
                 ATK_SPD: 1,
-                SHOOT_OFFSET: 1
+                SHOOT_OFFSET: 2
             }
         );
     }
