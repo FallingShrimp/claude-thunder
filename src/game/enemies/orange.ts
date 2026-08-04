@@ -15,7 +15,7 @@ export class Orange extends Enemy<OrangeStats> {
             { x, y: -40 },
             { width: 27, height: 55 },
             { shape: "triangle", color: "#ff9100ff" },
-            10,
+            5,
             ORANGE_STATS_FORMATS,
             {},
         );
