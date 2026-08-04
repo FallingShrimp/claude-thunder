@@ -5,6 +5,7 @@ import type { KeyboardInput } from "./keyboard-input";
 
 export class PlayerPlane extends Player {
     private readonly attackInterval: number = 0.15;
+    private controlsEnabled: boolean = true;
 
     public constructor(
         private readonly input: KeyboardInput,
@@ -25,6 +26,12 @@ export class PlayerPlane extends Player {
 
     public override ai(delta: number): void {
         this.fireCooldown = Math.max(0, this.fireCooldown - delta);
+
+        if (!this.controlsEnabled) {
+            this.velocity = { x: 0, y: 0 };
+            return;
+        }
+
         const horizontal = Number(this.input.isPressed("KeyD"))
             - Number(this.input.isPressed("KeyA"));
         const vertical = Number(this.input.isPressed("KeyS"))
@@ -42,6 +49,10 @@ export class PlayerPlane extends Player {
         if (this.input.isPressed("KeyK")) {
             this.defend();
         }
+    }
+
+    public setControlsEnabled(enabled: boolean): void {
+        this.controlsEnabled = enabled;
     }
 
     public override getEntityType(): "player" {
