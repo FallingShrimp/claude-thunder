@@ -21,11 +21,24 @@ import {
 } from "./systems/wave-reward-system";
 import { Red } from "./enemies/red";
 
-export function startGame(): GameEngine {
+export async function startGame(): Promise<GameEngine> {
     const canvas = document.querySelector<HTMLCanvasElement>("#game-canvas");
+    const loadingScreen = document.querySelector<HTMLElement>("#loading-screen");
+    const loadingStatus = document.querySelector<HTMLElement>("#loading-status");
+    const loadingProgress = document.querySelector<HTMLProgressElement>(
+        "#loading-progress",
+    );
 
     if (canvas === null) {
         throw new Error("Game canvas element was not found.");
+    }
+
+    if (
+        loadingScreen === null
+        || loadingStatus === null
+        || loadingProgress === null
+    ) {
+        throw new Error("Game loading screen elements were not found.");
     }
 
     const world = new GameWorld();
@@ -70,12 +83,25 @@ export function startGame(): GameEngine {
         canvas.width,
     ));
 
-    void Promise.all(
-        ALL_GAME_AUDIO_SOURCES.map((source) => audioSystem.loadAudio(source)),
-    ).catch(() => {
-        // 单个资源加载失败不应阻止游戏初始化。
-    });
+    const audioCount = ALL_GAME_AUDIO_SOURCES.length;
+    let processedAudioCount = 0;
 
+    loadingProgress.max = audioCount;
+    loadingProgress.value = 0;
+    loadingStatus.textContent = `正在加载音频……0 / ${audioCount}`;
+
+    await Promise.allSettled(ALL_GAME_AUDIO_SOURCES.map(async (source) => {
+        try {
+            await audioSystem.loadAudio(source);
+        } finally {
+            processedAudioCount += 1;
+            loadingProgress.value = processedAudioCount;
+            loadingStatus.textContent = "正在加载音频……"
+                + `${processedAudioCount} / ${audioCount}`;
+        }
+    }));
+
+    loadingScreen.hidden = true;
     world.setEnvironment(environment);
     world.addEntity(player);
     engine.switchWave(0);
@@ -83,4 +109,4 @@ export function startGame(): GameEngine {
     return engine;
 }
 
-startGame();
+void startGame();

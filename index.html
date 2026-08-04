@@ -5,14 +5,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thunder</title>
+    <style>
+        #game {
+            position: relative;
+            width: fit-content;
+        }
+
+        #loading-screen {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            background: #050817;
+            font-family: sans-serif;
+        }
+
+        #loading-screen[hidden] {
+            display: none;
+        }
+
+        #loading-progress {
+            width: 240px;
+        }
+    </style>
 </head>
 
 <body>
     <main id="game">
         <canvas id="game-canvas" width="480" height="720"></canvas>
         <section id="player-hud" aria-label="玩家状态"></section>
+        <section id="loading-screen" aria-live="polite">
+            <p id="loading-status">正在加载音频……0 / 7</p>
+            <progress id="loading-progress" value="0" max="7">0 / 7</progress>
+        </section>
     </main>
-    <script type="module" src="./dist/game.js"></script>
+    <script type="module" src="/src/game/index.ts"></script>
 </body>
 
 </html>
