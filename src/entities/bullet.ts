@@ -1,8 +1,9 @@
 import { BaseEntity } from "../core/entity";
 import type { Size2D, Vector2 } from "../core/geometry";
 import type { RenderAppearance } from "../core/render-appearance";
+import type { DamageLabel } from "./damage-label";
 import { Enemy } from "./enemy";
-import { Plane } from "./plane";
+import type { Plane } from "./plane";
 import { Player } from "./player";
 
 export type BulletFaction = "player" | "enemy";
@@ -28,17 +29,21 @@ export abstract class Bullet extends BaseEntity {
         return (this.launcher instanceof Player && target instanceof Enemy)
             || (this.launcher instanceof Enemy && target instanceof Player);
     }
-    public hit(target: Plane): boolean {
+    public hit(target: Plane): DamageLabel | undefined {
         if (!this.active || !target.active || !this.canDamage(target)) {
-            return false;
+            return undefined;
         }
-
-        target.takeDamage(this.damage, this.judgeCritical(), this);
+        const [critical, dmg] = this.judgeCritical();
+        const damageLabel = target.takeDamage(
+            dmg,
+            critical,
+            this,
+        );
         this.active = false;
-        return true;
+        return damageLabel;
     }
 
     public abstract override getEntityType(): "bullet";
 
-    public abstract judgeCritical(): boolean
+    public abstract judgeCritical(): [boolean, number];
 }

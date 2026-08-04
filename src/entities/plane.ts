@@ -3,6 +3,7 @@ import type { Size2D, Vector2 } from "../core/geometry";
 import type { RenderAppearance } from "../core/render-appearance";
 import type { StatsData, StatsFormats } from "../core/stats";
 import type { Bullet } from "./bullet";
+import { DamageLabel } from "./damage-label";
 
 export abstract class Plane<T extends StatsData = StatsData> extends BaseEntity {
     public readonly statsSlot: StatsFormats<T>;
@@ -36,18 +37,32 @@ export abstract class Plane<T extends StatsData = StatsData> extends BaseEntity 
         return this.statsValue[key];
     }
 
-    public takeDamage(damage: number, critical: boolean, bullet?: Bullet): void {
+    public takeDamage(
+        damage: number,
+        isCritical: boolean,
+        bullet?: Bullet,
+    ): DamageLabel | undefined {
         void bullet;
 
         if (!this.active || !Number.isFinite(damage) || damage <= 0) {
-            return;
+            return undefined;
         }
 
-        const finalDamage = critical ? damage * 2 : damage;
-        this.health = Math.max(0, this.health - finalDamage);
+        const previousHealth = this.health;
+        this.health = Math.max(0, this.health - damage);
+        const damageLabel = new DamageLabel(
+            previousHealth - this.health,
+            {
+                x: this.position.x + this.size.width / 2 - 40,
+                y: this.position.y - 8,
+            },
+            isCritical,
+        );
 
         if (this.health === 0) {
             this.active = false;
         }
+
+        return damageLabel;
     }
 }

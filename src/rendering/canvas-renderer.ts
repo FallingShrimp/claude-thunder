@@ -1,5 +1,6 @@
 import { BaseEnvironment } from "../core/environment";
 import type { RenderableTarget } from "../core/renderable-target";
+import { DamageLabel } from "../entities/damage-label";
 import { Healthbar } from "../entities/healthbar";
 import { Item } from "../entities/item";
 import type { Renderer } from "./renderer";
@@ -49,6 +50,11 @@ export class CanvasRenderer implements Renderer {
             return;
         }
 
+        if (target instanceof DamageLabel) {
+            this.renderDamageLabel(target);
+            return;
+        }
+
         if (target instanceof Item) {
             this.renderItem(target);
             return;
@@ -92,6 +98,23 @@ export class CanvasRenderer implements Renderer {
             );
         }
 
+        context.restore();
+    }
+
+    private renderDamageLabel(label: DamageLabel): void {
+        const { context } = this;
+
+        context.save();
+        context.globalAlpha = label.opacity;
+        context.fillStyle = label.appearance.color;
+        context.font = `${label.critical ? "bold " : ""}20px sans-serif`;
+        context.textAlign = "center";
+        context.textBaseline = "middle";
+        context.fillText(
+            `${label.critical ? "! " : ""}${Math.round(label.damage)}`,
+            label.position.x + label.size.width / 2,
+            label.position.y + label.size.height / 2,
+        );
         context.restore();
     }
 

@@ -41,12 +41,12 @@ export class BasicBullet extends Bullet {
     public override getEntityType(): "bullet" {
         return "bullet";
     }
-
-    public judgeCritical(): boolean {
+    public judgeCritical(): [boolean, number] {
         if (this.launcher instanceof PlayerPlane) {
-            return Math.random() < this.launcher.statsValue.CRIT_RATE;
+            const state = Math.random() < this.launcher.statsValue.CRIT_RATE;
+            return [state, this.damage * (state ? this.launcher.statsValue.CRIT_DMG : 1)];
         } else {
-            return false;
+            return [false, this.damage];
         }
     }
 }

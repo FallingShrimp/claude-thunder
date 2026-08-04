@@ -27,7 +27,7 @@ export abstract class CollisionSystem implements GameSystem {
                     continue;
                 }
 
-                this.onCollision(left, right, deltaTime);
+                this.onCollision(world, left, right, deltaTime);
             }
         }
     }
@@ -35,6 +35,7 @@ export abstract class CollisionSystem implements GameSystem {
     protected abstract shouldTest(left: BaseEntity, right: BaseEntity): boolean;
 
     protected abstract onCollision(
+        world: GameWorld,
         left: BaseEntity,
         right: BaseEntity,
         deltaTime: number,

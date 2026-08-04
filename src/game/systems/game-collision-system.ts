@@ -2,6 +2,7 @@ import type { BaseEntity } from "../../core/entity";
 import { Bullet } from "../../entities/bullet";
 import { Plane } from "../../entities/plane";
 import { CollisionSystem } from "../../logic/collision-system";
+import type { GameWorld } from "../../logic/game-world";
 
 export class GameCollisionSystem extends CollisionSystem {
     protected override shouldTest(
@@ -12,6 +13,7 @@ export class GameCollisionSystem extends CollisionSystem {
     }
 
     protected override onCollision(
+        world: GameWorld,
         left: BaseEntity,
         right: BaseEntity,
         deltaTime: number,
@@ -20,8 +22,14 @@ export class GameCollisionSystem extends CollisionSystem {
 
         const pair = this.getBulletAndPlane(left, right);
 
-        if (pair !== undefined && pair.plane !== pair.bullet.launcher) {
-            pair.bullet.hit(pair.plane);
+        if (pair === undefined || pair.plane === pair.bullet.launcher) {
+            return;
+        }
+
+        const damageLabel = pair.bullet.hit(pair.plane);
+
+        if (damageLabel !== undefined) {
+            world.addEntity(damageLabel);
         }
     }
 
