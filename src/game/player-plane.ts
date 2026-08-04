@@ -1,10 +1,24 @@
 import type { BaseEntity } from "../core/entity";
+import { DataFormat, defineStats } from "../core/stats";
 import { Player } from "../entities/player";
 import { BasicBullet } from "./bullets/basic-bullet";
 import type { KeyboardInput } from "./keyboard-input";
 
-export class PlayerPlane extends Player {
-    private readonly attackInterval: number = 0.15;
+export type PlayerStats = {
+    ATK: number;
+    ATK_SPD: number;
+    CRIT_RATE: number;
+    CRIT_DMG: number;
+};
+
+const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
+    ATK: DataFormat.VALUE,
+    ATK_SPD: DataFormat.FREQUENCY,
+    CRIT_RATE: DataFormat.PERCENT,
+    CRIT_DMG: DataFormat.PERCENT,
+});
+
+export class PlayerPlane extends Player<PlayerStats> {
     private controlsEnabled: boolean = true;
 
     public constructor(
@@ -17,6 +31,13 @@ export class PlayerPlane extends Player {
             { width: 48, height: 56 },
             { shape: "rectangle", color: "#4da6ff" },
             100,
+            PLAYER_STATS_FORMATS,
+            {
+                ATK: 10,
+                ATK_SPD: 3,
+                CRIT_RATE: 0.05,
+                CRIT_DMG: 2,
+            },
         );
 
         this.speed = 240;
@@ -73,9 +94,10 @@ export class PlayerPlane extends Player {
             x: centerX - bulletWidth / 2,
             y: this.position.y - bulletHeight,
             rotation: -Math.PI / 2,
+            damage: this.readStat("ATK"),
             faction: "player",
         }));
-        this.fireCooldown = this.attackInterval;
+        this.fireCooldown = 1 / this.readStat("ATK_SPD");
     }
 
     private defend(): void {

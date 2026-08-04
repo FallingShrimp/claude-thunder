@@ -4,6 +4,8 @@ export { BaseEnvironment } from "./core/environment";
 export type { Size2D, Vector2 } from "./core/geometry";
 export type { RenderAppearance, RenderShape } from "./core/render-appearance";
 export { RenderableTarget } from "./core/renderable-target";
+export { DataFormat, defineStats } from "./core/stats";
+export type { StatsData, StatsFormats } from "./core/stats";
 export * from "./entities";
 export * from "./logic";
 export * from "./rendering";

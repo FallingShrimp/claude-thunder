@@ -1,6 +1,11 @@
+import { defineStats } from "../../core/stats";
 import { Enemy } from "../../entities/enemy";
 
-export class Red extends Enemy {
+type RedStats = Record<never, number>;
+
+const RED_STATS_FORMATS = defineStats<RedStats>({});
+
+export class Red extends Enemy<RedStats> {
     public constructor(
         x: number,
         private readonly screenHeight: number,
@@ -11,6 +16,8 @@ export class Red extends Enemy {
             { width: 36, height: 40 },
             { shape: "triangle", color: "#ff3030" },
             20,
+            RED_STATS_FORMATS,
+            {},
         );
 
         this.speed = 120;
