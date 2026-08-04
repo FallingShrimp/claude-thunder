@@ -1,3 +1,4 @@
+export * from "./audio";
 export { BaseEntity } from "./core/entity";
 export type { CollisionBounds } from "./core/entity";
 export { BaseEnvironment } from "./core/environment";
