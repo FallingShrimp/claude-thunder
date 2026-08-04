@@ -14,7 +14,7 @@ import {
     type ItemFactory,
     WaveRewardSystem,
 } from "./systems/wave-reward-system";
-import { Red } from "./enemies/red";
+import { Red, Orange } from "./enemies";
 
 export async function startGame(): Promise<GameEngine> {
     const canvas = document.querySelector<HTMLCanvasElement>("#game-canvas");
@@ -50,15 +50,21 @@ export async function startGame(): Promise<GameEngine> {
         {
             startIndex: 0,
             endIndex: Number.POSITIVE_INFINITY,
-            spawnValue: 250,
+            spawnValue: 463,
             spawnProgress: 0,
-            spawnEnemy: () => {
-                const enemyWidth = 36;
-                const x = Math.random() * (canvas.width - enemyWidth);
-
-                return new Red(x, canvas.height);
+            spawnEnemy() {
+                return new Red(Math.random() * (canvas.width - 36), canvas.height);
             },
         },
+        {
+            startIndex: 1,
+            endIndex: Number.POSITIVE_INFINITY,
+            spawnValue: 371,
+            spawnProgress: 0,
+            spawnEnemy() {
+                return new Orange(Math.random() * (canvas.width - 27), canvas.height);
+            },
+        }
     ]);
     const itemPool: ItemFactory[] = items.map(e => () => new e());
     const systems: GameSystem[] = [new GameCollisionSystem()];
