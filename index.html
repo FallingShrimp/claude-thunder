@@ -582,10 +582,10 @@
                 <p><span class="key">空格</span> 释放技能（消耗能量）</p>
                 <p class="hint">攻击命中敌人、触发完美格挡、受击时都会获得能量</p>
             </div>
-            <button class="start-btn" onclick="beginGame()">开始游戏</button>
+            <button class="start-btn" id="startButton">开始游戏</button>
             <p class="start-hint">按 Enter / 空格 或点击按钮开始</p>
             <p class="char-hint">你可以配置你喜欢的角色作为游戏主角</p>
-            <button class="config-btn" onclick="showCharConfig()">角色配置</button>
+            <button class="config-btn" id="showConfigButton">角色配置</button>
         </div>
     </div>
     <!-- 角色配置弹窗 -->
@@ -598,8 +598,8 @@
             </div>
             <div class="config-section">
                 <label>角色图片</label>
-                <div class="upload-area" id="uploadArea" onclick="document.getElementById('charImage').click()">
-                    <input type="file" id="charImage" accept="image/*" onchange="previewImage(event)">
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="charImage" accept="image/*">
                     <div class="upload-placeholder" id="uploadPlaceholder">
                         <span class="upload-icon">📷</span>
                         <p>点击或拖拽上传图片</p>
@@ -608,9 +608,9 @@
                 </div>
             </div>
             <div class="config-actions">
-                <button class="save-btn" onclick="saveCharConfig()">保存配置</button>
-                <button class="reset-btn" onclick="resetCharConfig()">重置配置</button>
-                <button class="cancel-btn" onclick="hideCharConfig()">取消</button>
+                <button class="save-btn" id="saveConfigButton">保存配置</button>
+                <button class="reset-btn" id="resetConfigButton">重置配置</button>
+                <button class="cancel-btn" id="cancelConfigButton">取消</button>
             </div>
         </div>
     </div>
@@ -696,9 +696,9 @@
     <div id="gameOver">
         <h1>游戏结束</h1>
         <p style="font-size:24px;margin-bottom:20px">最终分数: <span id="finalScore">0</span></p>
-        <button onclick="restartGame()">重新开始</button>
+        <button id="restartButton">重新开始</button>
     </div>
-    <script src="./game.js"></script>
+    <script type="module" src="./dist/game.js"></script>
 </body>
 
 </html>
