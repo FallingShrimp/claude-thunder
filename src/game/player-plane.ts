@@ -72,6 +72,10 @@ export class PlayerPlane extends Player<PlayerStats> {
         }
     }
 
+    public override upgrade(): void {
+        // 玩家通过道具升级，波次系统只升级敌机。
+    }
+
     public setControlsEnabled(enabled: boolean): void {
         this.controlsEnabled = enabled;
     }

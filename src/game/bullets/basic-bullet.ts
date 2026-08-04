@@ -40,22 +40,6 @@ export class BasicBullet extends Bullet {
         this.position.y += this.velocity.y * delta;
     }
 
-    public collidesWith(target: BaseEntity): boolean {
-        const bulletWidth = this.collisionBounds.size.width * this.scale.x;
-        const bulletHeight = this.collisionBounds.size.height * this.scale.y;
-        const targetWidth = target.collisionBounds.size.width * target.scale.x;
-        const targetHeight = target.collisionBounds.size.height * target.scale.y;
-        const bulletX = this.position.x + this.collisionBounds.offset.x;
-        const bulletY = this.position.y + this.collisionBounds.offset.y;
-        const targetX = target.position.x + target.collisionBounds.offset.x;
-        const targetY = target.position.y + target.collisionBounds.offset.y;
-
-        return bulletX < targetX + targetWidth
-            && bulletX + bulletWidth > targetX
-            && bulletY < targetY + targetHeight
-            && bulletY + bulletHeight > targetY;
-    }
-
     public canDamage(target: Plane): boolean {
         return (this.launcher instanceof Player && target instanceof Enemy)
             || (this.launcher instanceof Enemy && target instanceof Player);

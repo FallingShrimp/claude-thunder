@@ -41,7 +41,17 @@ export class WaveSystem {
                 wave.spawnProgress >= 100
                 && enemyCount < WaveSystem.maxEnemyCount
             ) {
-                this.world.addEntity(wave.spawnEnemy());
+                const enemy = wave.spawnEnemy();
+
+                for (
+                    let upgradeCount = 0;
+                    upgradeCount < this.currentIndex;
+                    upgradeCount += 1
+                ) {
+                    enemy.upgrade();
+                }
+
+                this.world.addEntity(enemy);
                 wave.spawnProgress -= 100;
                 enemyCount += 1;
             }

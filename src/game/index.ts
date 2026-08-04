@@ -1,4 +1,5 @@
 import { GameEngine } from "../logic/game-engine";
+import type { GameSystem } from "../logic/game-system";
 import { GameWorld } from "../logic/game-world";
 import type { Wave } from "../logic/wave";
 import { CanvasRenderer } from "../rendering/canvas-renderer";
@@ -11,7 +12,7 @@ import {
 import { KeyboardInput } from "./keyboard-input";
 import { PlayerPlane } from "./player-plane";
 import { SpaceEnvironment } from "./space-environment";
-import { BasicBulletCollisionSystem } from "./systems/basic-bullet-collision-system";
+import { GameCollisionSystem } from "./systems/game-collision-system";
 import {
     type ItemFactory,
     WaveRewardSystem,
@@ -53,7 +54,7 @@ export function startGame(): GameEngine {
         () => new CriticalRateUpgradeItem(),
         () => new CriticalDamageUpgradeItem(),
     ];
-    const systems = [new BasicBulletCollisionSystem()];
+    const systems: GameSystem[] = [new GameCollisionSystem()];
     const engine = new GameEngine(world, renderer, systems, waves);
 
     systems.push(new WaveRewardSystem(

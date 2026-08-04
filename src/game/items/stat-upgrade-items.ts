@@ -55,7 +55,7 @@ export class AttackPowerUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "强袭核心 +2",
+            "攻击力 +2",
             "./items/attack-power.svg",
             "#b74444",
             PLAYER_STATS_FORMATS,
@@ -68,7 +68,7 @@ export class AttackSpeedUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "疾射模块 +0.1",
+            "攻击速度 +0.1",
             "./items/attack-speed.svg",
             "#b88732",
             PLAYER_STATS_FORMATS,
@@ -81,7 +81,7 @@ export class CriticalRateUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "精准镜片 +2%",
+            "暴击率 +2%",
             "./items/critical-rate.svg",
             "#3d8f68",
             PLAYER_STATS_FORMATS,
@@ -94,7 +94,7 @@ export class CriticalDamageUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "毁灭棱镜 +5%",
+            "暴击伤害 +5%",
             "./items/critical-damage.svg",
             "#6652ad",
             PLAYER_STATS_FORMATS,

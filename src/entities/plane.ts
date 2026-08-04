@@ -30,6 +30,8 @@ export abstract class Plane<T extends StatsData = StatsData> extends BaseEntity 
         this.fireCooldown = 0;
     }
 
+    public abstract upgrade(): void;
+
     public readStat<K extends keyof T>(key: K): T[K] {
         return this.statsValue[key];
     }
