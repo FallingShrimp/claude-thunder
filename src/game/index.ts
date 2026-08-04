@@ -3,10 +3,11 @@ import { GameWorld } from "../logic/game-world";
 import type { Wave } from "../logic/wave";
 import { CanvasRenderer } from "../rendering/canvas-renderer";
 import {
-    PlaceholderItemBlue,
-    PlaceholderItemGreen,
-    PlaceholderItemRed,
-} from "./items/placeholder-items";
+    AttackPowerUpgradeItem,
+    AttackSpeedUpgradeItem,
+    CriticalDamageUpgradeItem,
+    CriticalRateUpgradeItem,
+} from "./items/stat-upgrade-items";
 import { KeyboardInput } from "./keyboard-input";
 import { PlayerPlane } from "./player-plane";
 import { SpaceEnvironment } from "./space-environment";
@@ -47,9 +48,10 @@ export function startGame(): GameEngine {
         },
     ]);
     const itemPool: ItemFactory[] = [
-        () => new PlaceholderItemRed(),
-        () => new PlaceholderItemGreen(),
-        () => new PlaceholderItemBlue(),
+        () => new AttackPowerUpgradeItem(),
+        () => new AttackSpeedUpgradeItem(),
+        () => new CriticalRateUpgradeItem(),
+        () => new CriticalDamageUpgradeItem(),
     ];
     const systems = [new BasicBulletCollisionSystem()];
     const engine = new GameEngine(world, renderer, systems, waves);

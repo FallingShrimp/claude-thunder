@@ -11,7 +11,7 @@ export type PlayerStats = {
     CRIT_DMG: number;
 };
 
-const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
+export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     ATK: DataFormat.VALUE,
     ATK_SPD: DataFormat.FREQUENCY,
     CRIT_RATE: DataFormat.PERCENT,

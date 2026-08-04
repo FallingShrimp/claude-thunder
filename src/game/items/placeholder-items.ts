@@ -12,6 +12,8 @@ export abstract class PlaceholderItem extends Item {
             { x, y: 280 },
             { width: 96, height: 128 },
             { shape: "rectangle", color },
+            "占位道具",
+            "",
         );
 
         this.zIndex = 100;
