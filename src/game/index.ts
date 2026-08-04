@@ -4,12 +4,7 @@ import type { GameSystem } from "../logic/game-system";
 import { GameWorld } from "../logic/game-world";
 import type { Wave } from "../logic/wave";
 import { CanvasRenderer } from "../rendering/canvas-renderer";
-import {
-    AttackPowerUpgradeItem,
-    AttackSpeedUpgradeItem,
-    CriticalDamageUpgradeItem,
-    CriticalRateUpgradeItem,
-} from "./items/stat-upgrade-items";
+import { items } from "./items/stat-upgrade-items";
 import { ALL_GAME_AUDIO_SOURCES } from "./audio-assets";
 import { KeyboardInput } from "./keyboard-input";
 import { PlayerPlane } from "./player-plane";
@@ -65,12 +60,7 @@ export async function startGame(): Promise<GameEngine> {
             },
         },
     ]);
-    const itemPool: ItemFactory[] = [
-        () => new AttackPowerUpgradeItem(),
-        () => new AttackSpeedUpgradeItem(),
-        () => new CriticalRateUpgradeItem(),
-        () => new CriticalDamageUpgradeItem(),
-    ];
+    const itemPool: ItemFactory[] = items.map(e => () => new e());
     const systems: GameSystem[] = [new GameCollisionSystem()];
     const engine = new GameEngine(world, renderer, systems, waves);
 

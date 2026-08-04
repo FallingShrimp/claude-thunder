@@ -102,3 +102,36 @@ export class CriticalDamageUpgradeItem
         );
     }
 }
+
+export class ShootOffsetUpgradeItem extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "散射 -0.5°",
+            ".",
+            "#880076ff",
+            PLAYER_STATS_FORMATS,
+            { SHOOT_OFFSET: -0.5 }
+        );
+    }
+}
+
+export class MultipleShootUpgradeItem extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "多重射击 +0.25",
+            ".",
+            "#138681ff",
+            PLAYER_STATS_FORMATS,
+            { MULTIPLE_SHOOT: 0.25 }
+        );
+    }
+}
+
+export const items = [
+    AttackPowerUpgradeItem,
+    AttackSpeedUpgradeItem,
+    CriticalRateUpgradeItem,
+    CriticalDamageUpgradeItem,
+    ShootOffsetUpgradeItem,
+    MultipleShootUpgradeItem
+];

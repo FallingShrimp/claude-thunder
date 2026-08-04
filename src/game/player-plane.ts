@@ -2,6 +2,8 @@ import type { AudioSystem } from "../audio/audio-system";
 import type { BaseEntity } from "../core/entity";
 import { DataFormat, defineStats } from "../core/stats";
 import { Player } from "../entities/player";
+import { radians } from "../util/math";
+import { randomFloat, randomInt, rate } from "../util/random";
 import { GAME_AUDIO_SOURCES } from "./audio-assets";
 import { BasicBullet } from "./bullets/basic-bullet";
 import type { KeyboardInput } from "./keyboard-input";
@@ -11,6 +13,8 @@ export type PlayerStats = {
     ATK_SPD: number;
     CRIT_RATE: number;
     CRIT_DMG: number;
+    MULTIPLE_SHOOT: number;
+    SHOOT_OFFSET: number;
 };
 
 export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
@@ -18,6 +22,8 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     ATK_SPD: DataFormat.FREQUENCY,
     CRIT_RATE: DataFormat.PERCENT,
     CRIT_DMG: DataFormat.PERCENT,
+    MULTIPLE_SHOOT: DataFormat.VALUE,
+    SHOOT_OFFSET: DataFormat.ANGLE
 });
 
 export class PlayerPlane extends Player<PlayerStats> {
@@ -40,6 +46,8 @@ export class PlayerPlane extends Player<PlayerStats> {
                 ATK_SPD: 3,
                 CRIT_RATE: 0.05,
                 CRIT_DMG: 2,
+                MULTIPLE_SHOOT: 0,
+                SHOOT_OFFSET: 3
             },
         );
 
@@ -96,14 +104,18 @@ export class PlayerPlane extends Player<PlayerStats> {
         const bulletHeight = 16;
         const centerX = this.position.x + this.size.width / 2;
 
-        this.spawnEntity(new BasicBullet({
-            launcher: this,
-            x: centerX - bulletWidth / 2,
-            y: this.position.y - bulletHeight,
-            rotation: -Math.PI / 2,
-            damage: this.readStat("ATK"),
-            faction: "player",
-        }));
+        const { MULTIPLE_SHOOT } = this.statsValue;
+        const bulletCount = 1 + Math.floor(MULTIPLE_SHOOT) + Number(rate(MULTIPLE_SHOOT - Math.floor(MULTIPLE_SHOOT)));
+        for (let i = 0; i < bulletCount; i++) {
+            this.spawnEntity(new BasicBullet({
+                launcher: this,
+                x: centerX - bulletWidth / 2,
+                y: this.position.y - bulletHeight,
+                rotation: -Math.PI / 2 + radians(randomFloat(-1, 1) * this.readStat("SHOOT_OFFSET")),
+                damage: this.readStat("ATK"),
+                faction: "player",
+            }));
+        }
         void this.audioSystem.playAudio(GAME_AUDIO_SOURCES.pew).catch(() => {
             // 浏览器可能在用户交互前禁止播放音频，静默忽略即可。
         });
