@@ -1,5 +1,6 @@
 import { BaseEnvironment } from "../core/environment";
 import type { RenderableTarget } from "../core/renderable-target";
+import { Healthbar } from "../entities/healthbar";
 import type { Renderer } from "./renderer";
 
 export class CanvasRenderer implements Renderer {
@@ -40,6 +41,11 @@ export class CanvasRenderer implements Renderer {
             return;
         }
 
+        if (target instanceof Healthbar) {
+            this.renderHealthbar(target);
+            return;
+        }
+
         const centerX = target.position.x + target.size.width / 2;
         const centerY = target.position.y + target.size.height / 2;
 
@@ -48,6 +54,7 @@ export class CanvasRenderer implements Renderer {
         context.fillStyle = target.appearance.color;
         context.translate(centerX, centerY);
         context.rotate(target.rotation);
+        context.scale(target.scale.x, target.scale.y);
 
         if (target.appearance.shape === "ellipse") {
             context.beginPath();
@@ -77,6 +84,26 @@ export class CanvasRenderer implements Renderer {
             );
         }
 
+        context.restore();
+    }
+
+    private renderHealthbar(healthbar: Healthbar): void {
+        const { context } = this;
+        const foregroundWidth = healthbar.size.width
+            * healthbar.foregroundProgress;
+        const middleWidth = healthbar.size.width * healthbar.middleProgress;
+
+        context.save();
+        context.globalAlpha = healthbar.opacity;
+        context.translate(healthbar.position.x, healthbar.position.y);
+        context.rotate(healthbar.rotation);
+        context.scale(healthbar.scale.x, healthbar.scale.y);
+        context.fillStyle = healthbar.backgroundColor;
+        context.fillRect(0, 0, healthbar.size.width, healthbar.size.height);
+        context.fillStyle = healthbar.middleColor;
+        context.fillRect(0, 0, middleWidth, healthbar.size.height);
+        context.fillStyle = healthbar.foregroundColor;
+        context.fillRect(0, 0, foregroundWidth, healthbar.size.height);
         context.restore();
     }
 }

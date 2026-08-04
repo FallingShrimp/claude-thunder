@@ -1,5 +1,7 @@
 import type { BaseEntity } from "../core/entity";
 import type { BaseEnvironment } from "../core/environment";
+import { Healthbar } from "../entities/healthbar";
+import { Plane } from "../entities/plane";
 
 export class GameWorld {
     public elapsedTime: number = 0;
@@ -9,6 +11,17 @@ export class GameWorld {
 
     public addEntity(entity: BaseEntity): void {
         this.entities.push(entity);
+
+        if (entity instanceof Plane && !this.hasHealthbar(entity)) {
+            this.entities.push(new Healthbar(entity));
+        }
+    }
+
+    private hasHealthbar(entity: Plane): boolean {
+        return this.entities.some(
+            (candidate) => candidate instanceof Healthbar
+                && candidate.entity === entity,
+        );
     }
 
     public setEnvironment(environment: BaseEnvironment): void {

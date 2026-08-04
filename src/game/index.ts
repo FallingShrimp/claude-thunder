@@ -5,6 +5,7 @@ import { CanvasRenderer } from "../rendering/canvas-renderer";
 import { KeyboardInput } from "./keyboard-input";
 import { PlayerPlane } from "./player-plane";
 import { SpaceEnvironment } from "./space-environment";
+import { BasicBulletCollisionSystem } from "./systems/basic-bullet-collision-system";
 import { RedWave } from "./waves/red-wave";
 
 export function startGame(): GameEngine {
@@ -17,12 +18,16 @@ export function startGame(): GameEngine {
     const world = new GameWorld();
     const renderer = new CanvasRenderer(canvas);
     const input = new KeyboardInput();
-    const player = new PlayerPlane(input);
+    const player = new PlayerPlane(
+        input,
+        (entity) => world.addEntity(entity),
+    );
     const environment = new SpaceEnvironment(canvas.width, canvas.height);
     const waves = new Set<Wave>([
         new RedWave(canvas.width, canvas.height),
     ]);
-    const engine = new GameEngine(world, renderer, [], waves);
+    const systems = [new BasicBulletCollisionSystem()];
+    const engine = new GameEngine(world, renderer, systems, waves);
 
     world.setEnvironment(environment);
     world.addEntity(player);

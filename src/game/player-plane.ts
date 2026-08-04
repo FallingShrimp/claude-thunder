@@ -1,8 +1,15 @@
+import type { BaseEntity } from "../core/entity";
 import { Player } from "../entities/player";
+import { BasicBullet } from "./bullets/basic-bullet";
 import type { KeyboardInput } from "./keyboard-input";
 
 export class PlayerPlane extends Player {
-    public constructor(private readonly input: KeyboardInput) {
+    private readonly attackInterval: number = 0.15;
+
+    public constructor(
+        private readonly input: KeyboardInput,
+        private readonly spawnEntity: (entity: BaseEntity) => void,
+    ) {
         super(
             "player",
             { x: 216, y: 640 },
@@ -13,9 +20,11 @@ export class PlayerPlane extends Player {
 
         this.speed = 240;
         this.lives = 3;
+        this.fireCooldown = 0;
     }
 
     public override ai(delta: number): void {
+        this.fireCooldown = Math.max(0, this.fireCooldown - delta);
         const horizontal = Number(this.input.isPressed("KeyD"))
             - Number(this.input.isPressed("KeyA"));
         const vertical = Number(this.input.isPressed("KeyS"))
@@ -40,7 +49,22 @@ export class PlayerPlane extends Player {
     }
 
     private attack(): void {
-        // 攻击逻辑将在游戏内容确定后实现。
+        if (this.fireCooldown > 0) {
+            return;
+        }
+
+        const bulletWidth = 6;
+        const bulletHeight = 16;
+        const centerX = this.position.x + this.size.width / 2;
+
+        this.spawnEntity(new BasicBullet({
+            launcher: this,
+            x: centerX - bulletWidth / 2,
+            y: this.position.y - bulletHeight,
+            rotation: -Math.PI / 2,
+            faction: "player",
+        }));
+        this.fireCooldown = this.attackInterval;
     }
 
     private defend(): void {
