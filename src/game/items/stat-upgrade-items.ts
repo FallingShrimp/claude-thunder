@@ -127,11 +127,27 @@ export class MultipleShootUpgradeItem extends PlayerStatUpgradeItem<PlayerStats>
     }
 }
 
+export class EpicShoot extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "攻击速度 +0.35\n散射 +2°",
+            ".",
+            "#a13b3bff",
+            PLAYER_STATS_FORMATS,
+            {
+                ATK_SPD: 0.35,
+                SHOOT_OFFSET: 2
+            }
+        );
+    }
+}
+
 export const items = [
     AttackPowerUpgradeItem,
     AttackSpeedUpgradeItem,
     CriticalRateUpgradeItem,
     CriticalDamageUpgradeItem,
     ShootOffsetUpgradeItem,
-    MultipleShootUpgradeItem
+    MultipleShootUpgradeItem,
+    EpicShoot
 ];
