@@ -1,3 +1,4 @@
+import { BaseEnvironment } from "../core/environment";
 import type { RenderableTarget } from "../core/renderable-target";
 import type { Renderer } from "./renderer";
 
@@ -30,6 +31,15 @@ export class CanvasRenderer implements Renderer {
 
     private renderTarget(target: RenderableTarget): void {
         const { context } = this;
+
+        if (target instanceof BaseEnvironment) {
+            context.save();
+            context.globalAlpha = target.opacity;
+            target.draw(context);
+            context.restore();
+            return;
+        }
+
         const centerX = target.position.x + target.size.width / 2;
         const centerY = target.position.y + target.size.height / 2;
 

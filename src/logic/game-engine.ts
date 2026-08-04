@@ -38,6 +38,7 @@ export class GameEngine {
 
         if (!this.world.paused) {
             this.world.elapsedTime += deltaTime;
+            this.world.environment?.update(deltaTime);
 
             for (const entity of this.world.entities) {
                 if (entity.active) {
@@ -51,7 +52,10 @@ export class GameEngine {
 
             this.world.removeInactiveEntities();
             this.renderer.clear();
-            this.renderer.render(this.world.entities);
+            this.renderer.render([
+                ...(this.world.environment === null ? [] : [this.world.environment]),
+                ...this.world.entities,
+            ]);
         }
 
         this.animationFrameId = requestAnimationFrame(this.tick);

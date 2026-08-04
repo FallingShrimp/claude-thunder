@@ -1,5 +1,6 @@
 export { BaseEntity } from "./core/entity";
 export type { CollisionBounds } from "./core/entity";
+export { BaseEnvironment } from "./core/environment";
 export type { Size2D, Vector2 } from "./core/geometry";
 export type { RenderAppearance, RenderShape } from "./core/render-appearance";
 export { RenderableTarget } from "./core/renderable-target";
