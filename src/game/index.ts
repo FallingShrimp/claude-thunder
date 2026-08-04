@@ -15,7 +15,7 @@ import {
     type ItemFactory,
     WaveRewardSystem,
 } from "./systems/wave-reward-system";
-import { RedWave } from "./waves/red-wave";
+import { Red } from "./enemies/red";
 
 export function startGame(): GameEngine {
     const canvas = document.querySelector<HTMLCanvasElement>("#game-canvas");
@@ -33,7 +33,18 @@ export function startGame(): GameEngine {
     );
     const environment = new SpaceEnvironment(canvas.width, canvas.height);
     const waves = new Set<Wave>([
-        new RedWave(canvas.width, canvas.height),
+        {
+            startIndex: 0,
+            endIndex: Number.POSITIVE_INFINITY,
+            spawnValue: 100,
+            spawnProgress: 0,
+            spawnEnemy: () => {
+                const enemyWidth = 36;
+                const x = Math.random() * (canvas.width - enemyWidth);
+
+                return new Red(x, canvas.height);
+            },
+        },
     ]);
     const itemPool: ItemFactory[] = [
         () => new PlaceholderItemRed(),
