@@ -1,3 +1,4 @@
+import { AudioSystem } from "../audio/audio-system";
 import { GameEngine } from "../logic/game-engine";
 import type { GameSystem } from "../logic/game-system";
 import { GameWorld } from "../logic/game-world";
@@ -9,6 +10,7 @@ import {
     CriticalDamageUpgradeItem,
     CriticalRateUpgradeItem,
 } from "./items/stat-upgrade-items";
+import { ALL_GAME_AUDIO_SOURCES } from "./audio-assets";
 import { KeyboardInput } from "./keyboard-input";
 import { PlayerPlane } from "./player-plane";
 import { SpaceEnvironment } from "./space-environment";
@@ -29,8 +31,10 @@ export function startGame(): GameEngine {
     const world = new GameWorld();
     const renderer = new CanvasRenderer(canvas);
     const input = new KeyboardInput();
+    const audioSystem = new AudioSystem();
     const player = new PlayerPlane(
         input,
+        audioSystem,
         (entity) => world.addEntity(entity),
     );
     const environment = new SpaceEnvironment(canvas.width, canvas.height);
@@ -65,6 +69,12 @@ export function startGame(): GameEngine {
         (enabled) => player.setControlsEnabled(enabled),
         canvas.width,
     ));
+
+    void Promise.all(
+        ALL_GAME_AUDIO_SOURCES.map((source) => audioSystem.loadAudio(source)),
+    ).catch(() => {
+        // 单个资源加载失败不应阻止游戏初始化。
+    });
 
     world.setEnvironment(environment);
     world.addEntity(player);

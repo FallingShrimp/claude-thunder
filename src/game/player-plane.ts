@@ -1,6 +1,8 @@
+import type { AudioSystem } from "../audio/audio-system";
 import type { BaseEntity } from "../core/entity";
 import { DataFormat, defineStats } from "../core/stats";
 import { Player } from "../entities/player";
+import { GAME_AUDIO_SOURCES } from "./audio-assets";
 import { BasicBullet } from "./bullets/basic-bullet";
 import type { KeyboardInput } from "./keyboard-input";
 
@@ -23,6 +25,7 @@ export class PlayerPlane extends Player<PlayerStats> {
 
     public constructor(
         private readonly input: KeyboardInput,
+        private readonly audioSystem: AudioSystem,
         private readonly spawnEntity: (entity: BaseEntity) => void,
     ) {
         super(
@@ -101,6 +104,9 @@ export class PlayerPlane extends Player<PlayerStats> {
             damage: this.readStat("ATK"),
             faction: "player",
         }));
+        void this.audioSystem.playAudio(GAME_AUDIO_SOURCES.pew).catch(() => {
+            // 浏览器可能在用户交互前禁止播放音频，静默忽略即可。
+        });
         this.fireCooldown = 1 / this.readStat("ATK_SPD");
     }
 
