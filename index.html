@@ -2,696 +2,703 @@
 <html lang="zh-CN">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-	<title>Claude VS 雷电</title>
-	<style>
-		* {
-			margin: 0;
-			padding: 0;
-			box-sizing: border-box;
-		}
-
-		html,
-		body {
-			background: #000;
-			width: 100%;
-			height: 100%;
-			overflow: hidden;
-		}
-
-		#gameContainer {
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			width: 100%;
-			height: 100%;
-			position: relative;
-		}
-
-		#gameCanvas {
-			border: 2px solid #333;
-			display: block;
-			max-width: 100%;
-			max-height: 100%;
-			object-fit: contain;
-		}
-
-		@media screen and (max-width: 768px) {
-			#stats {
-				display: none !important;
-			}
-
-			#gameCanvas {
-				width: 100vw;
-				height: 100vh;
-				border: none;
-			}
-		}
-
-		#touchControls {
-			position: fixed;
-			bottom: 20px;
-			right: 20px;
-			display: flex;
-			flex-direction: column;
-			gap: 15px;
-			z-index: 100;
-		}
-
-		.touch-btn {
-			width: 70px;
-			height: 70px;
-			border-radius: 50%;
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			align-items: center;
-			background: rgba(217, 119, 6, 0.8);
-			border: 2px solid #ffe066;
-			box-shadow: 0 4px 15px rgba(217, 119, 6, 0.5);
-			cursor: pointer;
-			user-select: none;
-			transition: all 0.15s ease;
-		}
-
-		.touch-btn:active {
-			transform: scale(0.95);
-			background: rgba(255, 224, 102, 0.9);
-		}
-
-		.touch-btn.ready {
-			background: rgba(255, 224, 102, 0.8);
-			box-shadow: 0 0 20px rgba(255, 224, 102, 0.6);
-			animation: pulse 1s infinite;
-		}
-
-		@keyframes pulse {
-
-			0%,
-			100% {
-				box-shadow: 0 0 20px rgba(255, 224, 102, 0.6);
-			}
-
-			50% {
-				box-shadow: 0 0 30px rgba(255, 224, 102, 0.9);
-			}
-		}
-
-		.btn-icon {
-			font-size: 24px;
-		}
-
-		.btn-label {
-			font-size: 10px;
-			color: #fff;
-			margin-top: 2px;
-		}
-
-		#stats {
-			width: 140px;
-			background: rgba(8, 14, 32, 0.9);
-			border: 2px solid #d97706;
-			border-radius: 10px;
-			padding: 15px;
-			color: #fff;
-			font-family: Arial, sans-serif;
-			box-shadow: 0 0 20px rgba(217, 119, 6, 0.3);
-		}
-
-		#stats h3 {
-			text-align: center;
-			color: #ffe066;
-			font-size: 14px;
-			margin-bottom: 12px;
-			border-bottom: 1px solid #d97706;
-			padding-bottom: 8px;
-		}
-
-		.stat-row {
-			display: flex;
-			justify-content: space-between;
-			margin-bottom: 8px;
-			font-size: 12px;
-		}
-
-		.stat-label {
-			color: #8899aa;
-		}
-
-		.stat-value {
-			color: #fff;
-			font-weight: bold;
-		}
-
-		#stats .status-bar {
-			margin-top: 12px;
-			padding-top: 10px;
-			border-top: 1px solid rgba(217, 119, 6, 0.3);
-		}
-
-		#stats .status-item {
-			margin-bottom: 8px;
-		}
-
-		#stats .status-label {
-			font-size: 11px;
-			color: #8899aa;
-			margin-bottom: 3px;
-		}
-
-		#stats .status-label.active {
-			color: #fff;
-		}
-
-		#stats .progress-container {
-			height: 14px;
-			background: rgba(255, 255, 255, 0.1);
-			border-radius: 3px;
-			overflow: hidden;
-			position: relative;
-		}
-
-		#stats .progress-bar {
-			height: 100%;
-			border-radius: 3px;
-			transition: width 0.1s linear;
-		}
-
-		#stats .progress-bar.shield {
-			background: linear-gradient(90deg, #2d7a2d, #7fff7f);
-		}
-
-		#stats .progress-bar.parry {
-			background: linear-gradient(90deg, #1a6b7a, #00e5ff);
-		}
-
-		#stats .progress-bar.parry-perfect {
-			background: linear-gradient(90deg, #b8860b, #ffd700);
-		}
-
-		#stats .progress-bar.overdrive {
-			background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00ffff, #0000ff, #8b00ff, #ff0000);
-			background-size: 200% 100%;
-			animation: overdrive-rainbow 1s linear infinite;
-		}
-
-		@keyframes overdrive-rainbow {
-			0% {
-				background-position: 0% 50%;
-			}
-
-			100% {
-				background-position: 200% 50%;
-			}
-		}
-
-		#stats .progress-bar.cooldown {
-			background: rgba(255, 255, 255, 0.2);
-		}
-
-		#stats .progress-bar.inactive {
-			background: rgba(255, 255, 255, 0.1);
-			width: 100% !important;
-		}
-
-		#stats .status-text {
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			font-size: 9px;
-			color: #fff;
-			text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
-			white-space: nowrap;
-		}
-
-		#gameOver {
-			display: none;
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			color: #fff;
-			text-align: center;
-			font-family: Arial, sans-serif;
-		}
-
-		#gameOver h1 {
-			font-size: 48px;
-			color: #f00;
-			margin-bottom: 20px;
-		}
-
-		#gameOver button {
-			padding: 12px 30px;
-			font-size: 20px;
-			cursor: pointer;
-			background: #d97706;
-			border: none;
-			color: #fff;
-			border-radius: 8px;
-		}
-
-		#loading {
-			position: absolute;
-			top: 0;
-			left: 0;
-			width: 100%;
-			height: 100%;
-			background: #000;
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			align-items: center;
-			color: #fff;
-			font-family: Arial, sans-serif;
-			font-size: 18px;
-			z-index: 10;
-		}
-
-		#loading .spinner {
-			width: 48px;
-			height: 48px;
-			border: 5px solid #333;
-			border-top-color: #d97706;
-			border-radius: 50%;
-			animation: spin 1s linear infinite;
-			margin-bottom: 16px;
-		}
-
-		@keyframes spin {
-			to {
-				transform: rotate(360deg);
-			}
-		}
-
-		#startMenu {
-			position: fixed;
-			top: 0;
-			left: 0;
-			width: 100%;
-			height: 100%;
-			background: rgba(5, 10, 26, 0.85);
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			z-index: 100;
-		}
-
-		.menu-panel {
-			background: rgba(12, 18, 42, 0.95);
-			border: 2px solid #d97706;
-			border-radius: 22px;
-			padding: 40px 50px;
-			text-align: center;
-			box-shadow: 0 0 30px rgba(217, 119, 6, 0.4);
-			max-width: 520px;
-			width: 90%;
-		}
-
-		.menu-title {
-			color: #ffe066;
-			font-size: 42px;
-			font-weight: bold;
-			text-shadow: 0 0 20px rgba(255, 224, 102, 0.5);
-			margin-bottom: 30px;
-		}
-
-		.menu-instructions h2 {
-			color: #4dabf7;
-			font-size: 22px;
-			margin-bottom: 15px;
-		}
-
-		.menu-instructions p {
-			color: #e6edf7;
-			font-size: 17px;
-			margin: 8px 0;
-		}
-
-		.menu-instructions .key {
-			display: inline-block;
-			background: rgba(217, 119, 6, 0.2);
-			border: 1px solid #d97706;
-			border-radius: 4px;
-			padding: 2px 8px;
-			color: #ffe066;
-			font-weight: bold;
-			min-width: 40px;
-		}
-
-		.menu-instructions .hint {
-			color: #9fb3c8;
-			font-size: 14px;
-			margin-top: 15px;
-		}
-
-		.start-btn {
-			margin-top: 30px;
-			padding: 12px 40px;
-			font-size: 20px;
-			font-weight: bold;
-			color: #ffe066;
-			background: rgba(255, 224, 102, 0.16);
-			border: 2px solid #ffe066;
-			border-radius: 24px;
-			cursor: pointer;
-			transition: all 0.3s ease;
-			box-shadow: 0 0 15px rgba(255, 224, 102, 0.3);
-		}
-
-		.start-btn:hover {
-			background: rgba(255, 224, 102, 0.3);
-			box-shadow: 0 0 25px rgba(255, 224, 102, 0.5);
-			transform: scale(1.05);
-		}
-
-		.start-hint {
-			color: #9fb3c8;
-			font-size: 13px;
-			margin-top: 20px;
-		}
-
-		.char-hint {
-			color: #9fb3c8;
-			font-size: 13px;
-			margin-top: 15px;
-		}
-
-		.config-btn {
-			margin-top: 10px;
-			padding: 8px 24px;
-			font-size: 14px;
-			color: #4dabf7;
-			background: rgba(77, 171, 247, 0.1);
-			border: 1px solid #4dabf7;
-			border-radius: 12px;
-			cursor: pointer;
-			transition: all 0.3s ease;
-		}
-
-		.config-btn:hover {
-			background: rgba(77, 171, 247, 0.2);
-			box-shadow: 0 0 15px rgba(77, 171, 247, 0.3);
-		}
-
-		.modal {
-			display: none;
-			position: fixed;
-			top: 0;
-			left: 0;
-			width: 100%;
-			height: 100%;
-			background: rgba(0, 0, 0, 0.8);
-			justify-content: center;
-			align-items: center;
-			z-index: 200;
-		}
-
-		.modal-content {
-			background: rgba(12, 18, 42, 0.98);
-			border: 2px solid #d97706;
-			border-radius: 16px;
-			padding: 30px 40px;
-			width: 90%;
-			max-width: 450px;
-			text-align: center;
-			box-shadow: 0 0 30px rgba(217, 119, 6, 0.3);
-		}
-
-		.modal-content h2 {
-			color: #ffe066;
-			font-size: 28px;
-			margin-bottom: 25px;
-			text-shadow: 0 0 15px rgba(255, 224, 102, 0.4);
-		}
-
-		.config-section {
-			margin-bottom: 20px;
-			text-align: left;
-		}
-
-		.config-section label {
-			display: block;
-			color: #e6edf7;
-			font-size: 15px;
-			margin-bottom: 8px;
-		}
-
-		.config-section input[type="text"] {
-			width: 100%;
-			padding: 10px 15px;
-			font-size: 16px;
-			background: rgba(255, 255, 255, 0.1);
-			border: 1px solid #d97706;
-			border-radius: 8px;
-			color: #fff;
-			outline: none;
-			transition: border-color 0.3s ease;
-		}
-
-		.config-section input[type="text"]:focus {
-			border-color: #ffe066;
-		}
-
-		.upload-area {
-			position: relative;
-			width: 100%;
-			height: 150px;
-			border: 2px dashed #d97706;
-			border-radius: 10px;
-			cursor: pointer;
-			overflow: hidden;
-		}
-
-		.upload-area:hover {
-			border-color: #ffe066;
-			background: rgba(255, 224, 102, 0.05);
-		}
-
-		.upload-area.dragover {
-			border-color: #ffe066;
-			background: rgba(255, 224, 102, 0.15);
-			transform: scale(1.02);
-		}
-
-		.upload-placeholder {
-			display: flex;
-			flex-direction: column;
-			justify-content: center;
-			align-items: center;
-			height: 100%;
-			color: #9fb3c8;
-		}
-
-		.upload-icon {
-			font-size: 36px;
-			margin-bottom: 10px;
-		}
-
-		.upload-placeholder p {
-			font-size: 14px;
-		}
-
-		.upload-area img.preview {
-			display: block;
-			width: 100%;
-			height: 100%;
-			object-fit: contain;
-		}
-
-		#charImage {
-			display: none;
-		}
-
-		.config-actions {
-			display: flex;
-			gap: 15px;
-			justify-content: center;
-			margin-top: 25px;
-		}
-
-		.save-btn,
-		.cancel-btn {
-			padding: 10px 30px;
-			font-size: 16px;
-			font-weight: bold;
-			border-radius: 12px;
-			cursor: pointer;
-			transition: all 0.3s ease;
-		}
-
-		.save-btn {
-			background: rgba(77, 171, 247, 0.2);
-			border: 2px solid #4dabf7;
-			color: #4dabf7;
-		}
-
-		.save-btn:hover {
-			background: rgba(77, 171, 247, 0.3);
-			box-shadow: 0 0 20px rgba(77, 171, 247, 0.4);
-		}
-
-		.reset-btn {
-			background: rgba(255, 69, 69, 0.2);
-			border: 2px solid #ff453a;
-			color: #ff453a;
-		}
-
-		.reset-btn:hover {
-			background: rgba(255, 69, 69, 0.3);
-			box-shadow: 0 0 20px rgba(255, 69, 69, 0.4);
-		}
-
-		.cancel-btn {
-			background: rgba(255, 255, 255, 0.1);
-			border: 2px solid #9fb3c8;
-			color: #9fb3c8;
-		}
-
-		.cancel-btn:hover {
-			background: rgba(255, 255, 255, 0.15);
-			border-color: #fff;
-			color: #fff;
-		}
-	</style>
-	<link rel="shortcut icon" href="./assets/textures/claude.png" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Claude VS 雷电</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            background: #000;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        #gameCanvas {
+            border: 2px solid #333;
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        @media screen and (max-width: 700px) {
+            #stats {
+                display: none !important;
+            }
+
+            #gameCanvas {
+                width: 100vw;
+                height: 100vh;
+                border: none;
+            }
+        }
+
+        #touchControls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .touch-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(217, 119, 6, 0.8);
+            border: 2px solid #ffe066;
+            box-shadow: 0 4px 15px rgba(217, 119, 6, 0.5);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s ease;
+        }
+
+        .touch-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 224, 102, 0.9);
+        }
+
+        .touch-btn.ready {
+            background: rgba(255, 224, 102, 0.8);
+            box-shadow: 0 0 20px rgba(255, 224, 102, 0.6);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(255, 224, 102, 0.6);
+            }
+
+            50% {
+                box-shadow: 0 0 30px rgba(255, 224, 102, 0.9);
+            }
+        }
+
+        .btn-icon {
+            font-size: 24px;
+        }
+
+        .btn-label {
+            font-size: 10px;
+            color: #fff;
+            margin-top: 2px;
+        }
+
+        #stats {
+            position: fixed;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            z-index: 5;
+            width: 140px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            background: rgba(8, 14, 32, 0.9);
+            border: 2px solid #d97706;
+            border-radius: 10px;
+            padding: 15px;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            box-shadow: 0 0 20px rgba(217, 119, 6, 0.3);
+        }
+
+        #stats h3 {
+            text-align: center;
+            color: #ffe066;
+            font-size: 14px;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #d97706;
+            padding-bottom: 8px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .stat-label {
+            color: #8899aa;
+        }
+
+        .stat-value {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        #stats .status-bar {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(217, 119, 6, 0.3);
+        }
+
+        #stats .status-item {
+            margin-bottom: 8px;
+        }
+
+        #stats .status-label {
+            font-size: 11px;
+            color: #8899aa;
+            margin-bottom: 3px;
+        }
+
+        #stats .status-label.active {
+            color: #fff;
+        }
+
+        #stats .progress-container {
+            height: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #stats .progress-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.1s linear;
+        }
+
+        #stats .progress-bar.shield {
+            background: linear-gradient(90deg, #2d7a2d, #7fff7f);
+        }
+
+        #stats .progress-bar.parry {
+            background: linear-gradient(90deg, #1a6b7a, #00e5ff);
+        }
+
+        #stats .progress-bar.parry-perfect {
+            background: linear-gradient(90deg, #b8860b, #ffd700);
+        }
+
+        #stats .progress-bar.overdrive {
+            background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #00ffff, #0000ff, #8b00ff, #ff0000);
+            background-size: 200% 100%;
+            animation: overdrive-rainbow 1s linear infinite;
+        }
+
+        @keyframes overdrive-rainbow {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            100% {
+                background-position: 200% 50%;
+            }
+        }
+
+        #stats .progress-bar.cooldown {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #stats .progress-bar.inactive {
+            background: rgba(255, 255, 255, 0.1);
+            width: 100% !important;
+        }
+
+        #stats .status-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 9px;
+            color: #fff;
+            text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+            white-space: nowrap;
+        }
+
+        #gameOver {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        #gameOver h1 {
+            font-size: 48px;
+            color: #f00;
+            margin-bottom: 20px;
+        }
+
+        #gameOver button {
+            padding: 12px 30px;
+            font-size: 20px;
+            cursor: pointer;
+            background: #d97706;
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+        }
+
+        #loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            z-index: 10;
+        }
+
+        #loading .spinner {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #333;
+            border-top-color: #d97706;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #startMenu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 10, 26, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .menu-panel {
+            background: rgba(12, 18, 42, 0.95);
+            border: 2px solid #d97706;
+            border-radius: 22px;
+            padding: 40px 50px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(217, 119, 6, 0.4);
+            max-width: 520px;
+            width: 90%;
+        }
+
+        .menu-title {
+            color: #ffe066;
+            font-size: 42px;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(255, 224, 102, 0.5);
+            margin-bottom: 30px;
+        }
+
+        .menu-instructions h2 {
+            color: #4dabf7;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .menu-instructions p {
+            color: #e6edf7;
+            font-size: 17px;
+            margin: 8px 0;
+        }
+
+        .menu-instructions .key {
+            display: inline-block;
+            background: rgba(217, 119, 6, 0.2);
+            border: 1px solid #d97706;
+            border-radius: 4px;
+            padding: 2px 8px;
+            color: #ffe066;
+            font-weight: bold;
+            min-width: 40px;
+        }
+
+        .menu-instructions .hint {
+            color: #9fb3c8;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+
+        .start-btn {
+            margin-top: 30px;
+            padding: 12px 40px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffe066;
+            background: rgba(255, 224, 102, 0.16);
+            border: 2px solid #ffe066;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(255, 224, 102, 0.3);
+        }
+
+        .start-btn:hover {
+            background: rgba(255, 224, 102, 0.3);
+            box-shadow: 0 0 25px rgba(255, 224, 102, 0.5);
+            transform: scale(1.05);
+        }
+
+        .start-hint {
+            color: #9fb3c8;
+            font-size: 13px;
+            margin-top: 20px;
+        }
+
+        .char-hint {
+            color: #9fb3c8;
+            font-size: 13px;
+            margin-top: 15px;
+        }
+
+        .config-btn {
+            margin-top: 10px;
+            padding: 8px 24px;
+            font-size: 14px;
+            color: #4dabf7;
+            background: rgba(77, 171, 247, 0.1);
+            border: 1px solid #4dabf7;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .config-btn:hover {
+            background: rgba(77, 171, 247, 0.2);
+            box-shadow: 0 0 15px rgba(77, 171, 247, 0.3);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+
+        .modal-content {
+            background: rgba(12, 18, 42, 0.98);
+            border: 2px solid #d97706;
+            border-radius: 16px;
+            padding: 30px 40px;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(217, 119, 6, 0.3);
+        }
+
+        .modal-content h2 {
+            color: #ffe066;
+            font-size: 28px;
+            margin-bottom: 25px;
+            text-shadow: 0 0 15px rgba(255, 224, 102, 0.4);
+        }
+
+        .config-section {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .config-section label {
+            display: block;
+            color: #e6edf7;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .config-section input[type="text"] {
+            width: 100%;
+            padding: 10px 15px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #d97706;
+            border-radius: 8px;
+            color: #fff;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .config-section input[type="text"]:focus {
+            border-color: #ffe066;
+        }
+
+        .upload-area {
+            position: relative;
+            width: 100%;
+            height: 150px;
+            border: 2px dashed #d97706;
+            border-radius: 10px;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: #ffe066;
+            background: rgba(255, 224, 102, 0.05);
+        }
+
+        .upload-area.dragover {
+            border-color: #ffe066;
+            background: rgba(255, 224, 102, 0.15);
+            transform: scale(1.02);
+        }
+
+        .upload-placeholder {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: #9fb3c8;
+        }
+
+        .upload-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .upload-placeholder p {
+            font-size: 14px;
+        }
+
+        .upload-area img.preview {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        #charImage {
+            display: none;
+        }
+
+        .config-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .save-btn,
+        .cancel-btn {
+            padding: 10px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .save-btn {
+            background: rgba(77, 171, 247, 0.2);
+            border: 2px solid #4dabf7;
+            color: #4dabf7;
+        }
+
+        .save-btn:hover {
+            background: rgba(77, 171, 247, 0.3);
+            box-shadow: 0 0 20px rgba(77, 171, 247, 0.4);
+        }
+
+        .reset-btn {
+            background: rgba(255, 69, 69, 0.2);
+            border: 2px solid #ff453a;
+            color: #ff453a;
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 69, 69, 0.3);
+            box-shadow: 0 0 20px rgba(255, 69, 69, 0.4);
+        }
+
+        .cancel-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #9fb3c8;
+            color: #9fb3c8;
+        }
+
+        .cancel-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #fff;
+            color: #fff;
+        }
+    </style>
+    <link rel="shortcut icon" href="./assets/textures/claude.png" type="image/x-icon">
 </head>
 
 <body>
-	<div id="loading">
-		<div class="spinner"></div>
-		<p>正在加载…</p>
-	</div>
-	<div id="startMenu">
-		<div class="menu-panel">
-			<h1 class="menu-title">Claude VS 雷电</h1>
-			<div class="menu-instructions">
-				<h2>操作说明</h2>
-				<p><span class="key">WSAD - 滑动战机</span> 移动</p>
-				<p><span class="key">J - 按住屏幕</span> 射击</p>
-				<p><span class="key">K - 松开屏幕</span> 格挡</p>
-				<p><span class="key">空格</span> 释放技能（消耗能量）</p>
-				<p class="hint">攻击命中敌人、触发完美格挡、受击时都会获得能量</p>
-			</div>
-			<button class="start-btn" onclick="beginGame()">开始游戏</button>
-			<p class="start-hint">按 Enter / 空格 或点击按钮开始</p>
-			<p class="char-hint">你可以配置你喜欢的角色作为游戏主角</p>
-			<button class="config-btn" onclick="showCharConfig()">角色配置</button>
-		</div>
-	</div>
-	<!-- 角色配置弹窗 -->
-	<div id="charConfig" class="modal">
-		<div class="modal-content">
-			<h2>角色配置</h2>
-			<div class="config-section">
-				<label>角色名字</label>
-				<input type="text" id="charName" placeholder="输入角色名字">
-			</div>
-			<div class="config-section">
-				<label>角色图片</label>
-				<div class="upload-area" id="uploadArea" onclick="document.getElementById('charImage').click()">
-					<input type="file" id="charImage" accept="image/*" onchange="previewImage(event)">
-					<div class="upload-placeholder" id="uploadPlaceholder">
-						<span class="upload-icon">📷</span>
-						<p>点击或拖拽上传图片</p>
-					</div>
-					<img id="previewImage" class="preview" style="display: none;">
-				</div>
-			</div>
-			<div class="config-actions">
-				<button class="save-btn" onclick="saveCharConfig()">保存配置</button>
-				<button class="reset-btn" onclick="resetCharConfig()">重置配置</button>
-				<button class="cancel-btn" onclick="hideCharConfig()">取消</button>
-			</div>
-		</div>
-	</div>
-	<div id="gameContainer">
-		<canvas id="gameCanvas" width="480" height="700"></canvas>
-	</div>
-	<div id="touchControls">
-		<div id="skillButton" class="touch-btn skill-btn">
-			<span class="btn-icon">🌟</span>
-			<span class="btn-label">技能</span>
-		</div>
-	</div>
-	<div id="stats">
-		<h3 id="statsTitle">Claude</h3>
-		<div class="stat-row">
-			<span class="stat-label">分数</span>
-			<span class="stat-value" id="statScore">0</span>
-		</div>
-		<div class="stat-row">
-			<span class="stat-label">生命</span>
-			<span class="stat-value" id="statLives">3</span>
-		</div>
-		<div class="stat-row">
-			<span class="stat-label">关卡</span>
-			<span class="stat-value" id="statLevel">1</span>
-		</div>
-		<div class="stat-row">
-			<span class="stat-label">能量</span>
-			<span class="stat-value" id="statEnergy">0/100</span>
-		</div>
-		<div class="stat-row">
-			<span class="stat-label">多重射击</span>
-			<span class="stat-value" id="statBulletCount">1</span>
-		</div>
-		<div class="stat-row">
-			<span class="stat-label">攻击速度</span>
-			<span class="stat-value" id="statAtkSpeed">1.00</span>
-		</div>
-		<div class="stat-row">
-			<span class="stat-label">子弹速度</span>
-			<span class="stat-value" id="statBulletSpeed">5.0</span>
-		</div>
-		<div class="stat-row">
-			<span class="stat-label">能量再生效率</span>
-			<span class="stat-value" id="statEnergyRegen">1.00</span>
-		</div>
-		<div class="stat-row">
-			<span class="stat-label">穿透</span>
-			<span class="stat-value" id="statPierce">0%</span>
-		</div>
-		<div class="stat-row">
-			<span class="stat-label">折射</span>
-			<span class="stat-value" id="statRicochet">0%</span>
-		</div>
-		<div class="stat-row">
-			<span class="stat-label">超频反弹</span>
-			<span class="stat-value" id="statOverloadRicochet">0</span>
-		</div>
-		<div class="status-bar">
-			<div class="status-item">
-				<div class="status-label" id="overdriveLabel">超频进度</div>
-				<div class="progress-container">
-					<div class="progress-bar inactive" id="overdriveBar"></div>
-					<span class="status-text" id="overdriveText">0/5</span>
-				</div>
-			</div>
-			<div class="status-item">
-				<div class="status-label" id="shieldLabel">护盾未激活</div>
-				<div class="progress-container">
-					<div class="progress-bar inactive" id="shieldBar"></div>
-					<span class="status-text" id="shieldText">--</span>
-				</div>
-			</div>
-			<div class="status-item">
-				<div class="status-label" id="parryLabel">格挡未激活</div>
-				<div class="progress-container">
-					<div class="progress-bar inactive" id="parryBar"></div>
-					<span class="status-text" id="parryText">--</span>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div id="gameOver">
-		<h1>游戏结束</h1>
-		<p style="font-size:24px;margin-bottom:20px">最终分数: <span id="finalScore">0</span></p>
-		<button onclick="restartGame()">重新开始</button>
-	</div>
-	<script src="./game.js"></script>
+    <div id="loading">
+        <div class="spinner"></div>
+        <p>正在加载…</p>
+    </div>
+    <div id="startMenu">
+        <div class="menu-panel">
+            <h1 class="menu-title">Claude VS 雷电</h1>
+            <div class="menu-instructions">
+                <h2>操作说明</h2>
+                <p><span class="key">WSAD - 滑动战机</span> 移动</p>
+                <p><span class="key">J - 按住屏幕</span> 射击</p>
+                <p><span class="key">K - 松开屏幕</span> 格挡</p>
+                <p><span class="key">空格</span> 释放技能（消耗能量）</p>
+                <p class="hint">攻击命中敌人、触发完美格挡、受击时都会获得能量</p>
+            </div>
+            <button class="start-btn" onclick="beginGame()">开始游戏</button>
+            <p class="start-hint">按 Enter / 空格 或点击按钮开始</p>
+            <p class="char-hint">你可以配置你喜欢的角色作为游戏主角</p>
+            <button class="config-btn" onclick="showCharConfig()">角色配置</button>
+        </div>
+    </div>
+    <!-- 角色配置弹窗 -->
+    <div id="charConfig" class="modal">
+        <div class="modal-content">
+            <h2>角色配置</h2>
+            <div class="config-section">
+                <label>角色名字</label>
+                <input type="text" id="charName" placeholder="输入角色名字">
+            </div>
+            <div class="config-section">
+                <label>角色图片</label>
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('charImage').click()">
+                    <input type="file" id="charImage" accept="image/*" onchange="previewImage(event)">
+                    <div class="upload-placeholder" id="uploadPlaceholder">
+                        <span class="upload-icon">📷</span>
+                        <p>点击或拖拽上传图片</p>
+                    </div>
+                    <img id="previewImage" class="preview" style="display: none;">
+                </div>
+            </div>
+            <div class="config-actions">
+                <button class="save-btn" onclick="saveCharConfig()">保存配置</button>
+                <button class="reset-btn" onclick="resetCharConfig()">重置配置</button>
+                <button class="cancel-btn" onclick="hideCharConfig()">取消</button>
+            </div>
+        </div>
+    </div>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="480" height="700"></canvas>
+    </div>
+    <div id="touchControls">
+        <div id="skillButton" class="touch-btn skill-btn">
+            <span class="btn-icon">🌟</span>
+            <span class="btn-label">技能</span>
+        </div>
+    </div>
+    <div id="stats">
+        <h3 id="statsTitle">Claude</h3>
+        <div class="stat-row">
+            <span class="stat-label">分数</span>
+            <span class="stat-value" id="statScore">0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">生命</span>
+            <span class="stat-value" id="statLives">3</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">关卡</span>
+            <span class="stat-value" id="statLevel">1</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">能量</span>
+            <span class="stat-value" id="statEnergy">0/100</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">多重射击</span>
+            <span class="stat-value" id="statBulletCount">1</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">攻击速度</span>
+            <span class="stat-value" id="statAtkSpeed">1.00</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">子弹速度</span>
+            <span class="stat-value" id="statBulletSpeed">5.0</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">能量再生效率</span>
+            <span class="stat-value" id="statEnergyRegen">1.00</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">穿透</span>
+            <span class="stat-value" id="statPierce">0%</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">折射</span>
+            <span class="stat-value" id="statRicochet">0%</span>
+        </div>
+        <div class="stat-row">
+            <span class="stat-label">超频反弹</span>
+            <span class="stat-value" id="statOverloadRicochet">0</span>
+        </div>
+        <div class="status-bar">
+            <div class="status-item">
+                <div class="status-label" id="overdriveLabel">超频进度</div>
+                <div class="progress-container">
+                    <div class="progress-bar inactive" id="overdriveBar"></div>
+                    <span class="status-text" id="overdriveText">0/5</span>
+                </div>
+            </div>
+            <div class="status-item">
+                <div class="status-label" id="shieldLabel">护盾未激活</div>
+                <div class="progress-container">
+                    <div class="progress-bar inactive" id="shieldBar"></div>
+                    <span class="status-text" id="shieldText">--</span>
+                </div>
+            </div>
+            <div class="status-item">
+                <div class="status-label" id="parryLabel">格挡未激活</div>
+                <div class="progress-container">
+                    <div class="progress-bar inactive" id="parryBar"></div>
+                    <span class="status-text" id="parryText">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="gameOver">
+        <h1>游戏结束</h1>
+        <p style="font-size:24px;margin-bottom:20px">最终分数: <span id="finalScore">0</span></p>
+        <button onclick="restartGame()">重新开始</button>
+    </div>
+    <script src="./game.js"></script>
 </body>
 
 </html>
