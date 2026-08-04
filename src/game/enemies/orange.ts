@@ -13,14 +13,14 @@ export class Orange extends Enemy<OrangeStats> {
         super(
             crypto.randomUUID(),
             { x, y: -40 },
-            { width: 27, height: 45 },
+            { width: 27, height: 55 },
             { shape: "triangle", color: "#ff9100ff" },
             10,
             ORANGE_STATS_FORMATS,
             {},
         );
 
-        this.speed = 160;
+        this.speed = 200;
         this.velocity.y = this.speed;
         this.scoreValue = 200;
     }

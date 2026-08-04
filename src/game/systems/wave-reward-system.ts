@@ -23,6 +23,7 @@ export class WaveRewardSystem implements GameSystem {
         private readonly input: KeyboardInput,
         private readonly itemPool: readonly ItemFactory[],
         private readonly switchWave: (index: number) => void,
+        private readonly hasPendingWaveEnemies: () => boolean,
         private readonly setPlayerControlsEnabled: (enabled: boolean) => void,
         private readonly screenWidth: number,
     ) { }
@@ -41,7 +42,7 @@ export class WaveRewardSystem implements GameSystem {
 
         if (hasEnemies) {
             this.waveHadEnemies = true;
-        } else if (this.waveHadEnemies) {
+        } else if (this.waveHadEnemies && !this.hasPendingWaveEnemies()) {
             this.beginSelection(world);
         }
     }

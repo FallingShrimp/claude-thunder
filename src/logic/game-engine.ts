@@ -30,6 +30,10 @@ export class GameEngine {
         this.waveSystem.switchTo(index);
     }
 
+    public hasPendingWaveEnemies(): boolean {
+        return this.waveSystem.hasPendingEnemies();
+    }
+
     public stop(): void {
         if (this.animationFrameId !== null) {
             cancelAnimationFrame(this.animationFrameId);
@@ -55,6 +59,8 @@ export class GameEngine {
                     entity.ai(deltaTime);
                 }
             }
+
+            this.waveSystem.update();
 
             for (const system of this.systems) {
                 system.update(this.world, deltaTime);

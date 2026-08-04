@@ -75,6 +75,7 @@ export async function startGame(): Promise<GameEngine> {
         input,
         itemPool,
         (index) => engine.switchWave(index),
+        () => engine.hasPendingWaveEnemies(),
         (enabled) => player.setControlsEnabled(enabled),
         canvas.width,
     ));

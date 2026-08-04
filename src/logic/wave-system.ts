@@ -7,6 +7,8 @@ export class WaveSystem {
 
     public currentIndex: number = 0;
 
+    private nextWaveIndex: number = 0;
+
     public constructor(
         private readonly world: GameWorld,
         private readonly waves: ReadonlySet<Wave>,
@@ -18,29 +20,56 @@ export class WaveSystem {
         }
 
         this.currentIndex = index;
+        this.queueEnemies();
         this.spawnEnemies();
+    }
+
+    public update(): void {
+        this.spawnEnemies();
+    }
+
+    public hasPendingEnemies(): boolean {
+        for (const wave of this.waves) {
+            if (this.isSuitable(wave) && wave.spawnProgress >= 100) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private queueEnemies(): void {
+        for (const wave of this.waves) {
+            if (this.isSuitable(wave)) {
+                wave.spawnProgress += wave.spawnValue;
+            }
+        }
     }
 
     private spawnEnemies(): void {
         let enemyCount = this.world.entities.filter(
             (entity) => entity.active && entity instanceof Enemy,
         ).length;
+        const suitableWaves = [...this.waves].filter(
+            (wave) => this.isSuitable(wave),
+        );
 
-        for (const wave of this.waves) {
-            if (enemyCount >= WaveSystem.maxEnemyCount) {
-                return;
-            }
+        if (suitableWaves.length === 0) {
+            return;
+        }
 
-            if (!this.isSuitable(wave)) {
-                continue;
-            }
+        while (enemyCount < WaveSystem.maxEnemyCount) {
+            let spawnedInThisPass = false;
+            const passStartIndex = this.nextWaveIndex % suitableWaves.length;
 
-            wave.spawnProgress += wave.spawnValue;
+            for (let offset = 0; offset < suitableWaves.length; offset += 1) {
+                const waveIndex = (passStartIndex + offset) % suitableWaves.length;
+                const wave = suitableWaves[waveIndex];
 
-            while (
-                wave.spawnProgress >= 100
-                && enemyCount < WaveSystem.maxEnemyCount
-            ) {
+                if (wave.spawnProgress < 100) {
+                    continue;
+                }
+
                 const enemy = wave.spawnEnemy();
 
                 for (
@@ -54,6 +83,16 @@ export class WaveSystem {
                 this.world.addEntity(enemy);
                 wave.spawnProgress -= 100;
                 enemyCount += 1;
+                spawnedInThisPass = true;
+                this.nextWaveIndex = (waveIndex + 1) % suitableWaves.length;
+
+                if (enemyCount >= WaveSystem.maxEnemyCount) {
+                    return;
+                }
+            }
+
+            if (!spawnedInThisPass) {
+                return;
             }
         }
     }
