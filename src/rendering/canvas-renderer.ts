@@ -61,6 +61,13 @@ export class CanvasRenderer implements Renderer {
                 Math.PI * 2,
             );
             context.fill();
+        } else if (target.appearance.shape === "triangle") {
+            context.beginPath();
+            context.moveTo(-target.size.width / 2, -target.size.height / 2);
+            context.lineTo(target.size.width / 2, -target.size.height / 2);
+            context.lineTo(0, target.size.height / 2);
+            context.closePath();
+            context.fill();
         } else {
             context.fillRect(
                 -target.size.width / 2,
