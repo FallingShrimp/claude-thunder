@@ -55,11 +55,11 @@ export class AttackPowerUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "攻击力 +2",
+            "攻击力 +3",
             "./items/attack-power.svg",
             "#b74444",
             PLAYER_STATS_FORMATS,
-            { ATK: 2 },
+            { ATK: 3 },
         );
     }
 }
@@ -68,11 +68,11 @@ export class AttackSpeedUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "攻击速度 +0.1",
+            "攻击速度 +0.25",
             "./items/attack-speed.svg",
             "#b88732",
             PLAYER_STATS_FORMATS,
-            { ATK_SPD: 0.1 },
+            { ATK_SPD: 0.25 },
         );
     }
 }
@@ -81,11 +81,11 @@ export class CriticalRateUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "暴击率 +2%",
+            "暴击率 +3%",
             "./items/critical-rate.svg",
             "#3d8f68",
             PLAYER_STATS_FORMATS,
-            { CRIT_RATE: 0.02 },
+            { CRIT_RATE: 0.03 },
         );
     }
 }
@@ -94,11 +94,11 @@ export class CriticalDamageUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "暴击伤害 +5%",
+            "暴击伤害 +10%",
             "./items/critical-damage.svg",
             "#6652ad",
             PLAYER_STATS_FORMATS,
-            { CRIT_DMG: 0.05 },
+            { CRIT_DMG: 0.1 },
         );
     }
 }
@@ -118,11 +118,11 @@ export class ShootOffsetUpgradeItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class MultipleShootUpgradeItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "多重射击 +0.25",
+            "多重射击 +0.1",
             ".",
             "#138681ff",
             PLAYER_STATS_FORMATS,
-            { MULTIPLE_SHOOT: 0.25 }
+            { MULTIPLE_SHOOT: 0.1 }
         );
     }
 }
@@ -130,13 +130,13 @@ export class MultipleShootUpgradeItem extends PlayerStatUpgradeItem<PlayerStats>
 export class EpicShoot extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "攻击速度 +0.35\n散射 +2°",
+            "攻击速度 +1\n散射 +1°",
             ".",
             "#a13b3bff",
             PLAYER_STATS_FORMATS,
             {
-                ATK_SPD: 0.35,
-                SHOOT_OFFSET: 2
+                ATK_SPD: 1,
+                SHOOT_OFFSET: 1
             }
         );
     }
