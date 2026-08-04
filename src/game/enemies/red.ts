@@ -47,9 +47,9 @@ export class Red extends Enemy<RedStats> {
     }
 
     public override upgrade(): void {
-        this.maxHealth *= 1.15;
+        this.maxHealth *= 1.2;
         this.health = this.maxHealth;
-        this.scoreValue += 15;
+        this.scoreValue += 25;
     }
 
     public override getEntityType(): "enemy" {

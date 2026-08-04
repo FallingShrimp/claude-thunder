@@ -35,9 +35,9 @@ export class Orange extends Enemy<OrangeStats> {
     }
 
     public override upgrade(): void {
-        this.maxHealth *= 1.12;
+        this.maxHealth *= 1.15;
         this.health = this.maxHealth;
-        this.scoreValue += 11;
+        this.scoreValue += 14;
     }
 
     public override getEntityType(): "enemy" {
