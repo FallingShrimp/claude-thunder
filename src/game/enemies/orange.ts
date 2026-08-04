@@ -16,6 +16,7 @@ export class Orange extends Enemy<OrangeStats> {
             { width: 27, height: 55 },
             { shape: "triangle", color: "#ff9100ff" },
             5,
+            5,
             ORANGE_STATS_FORMATS,
             {},
         );
@@ -34,9 +35,9 @@ export class Orange extends Enemy<OrangeStats> {
     }
 
     public override upgrade(): void {
-        this.maxHealth *= 1.04;
+        this.maxHealth *= 1.12;
         this.health = this.maxHealth;
-        this.scoreValue += 8;
+        this.scoreValue += 11;
     }
 
     public override getEntityType(): "enemy" {

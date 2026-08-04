@@ -40,6 +40,7 @@ export class PlayerPlane extends Player<PlayerStats> {
             { width: 48, height: 56 },
             { shape: "rectangle", color: "#4da6ff" },
             100,
+            10,
             PLAYER_STATS_FORMATS,
             {
                 ATK: 10,

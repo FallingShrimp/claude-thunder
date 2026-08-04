@@ -10,6 +10,7 @@ export abstract class Plane<T extends StatsData = StatsData> extends BaseEntity 
     public statsValue: T;
     public health: number;
     public maxHealth: number;
+    public collisionDamage: number;
     public speed: number;
     public fireCooldown: number;
 
@@ -19,6 +20,7 @@ export abstract class Plane<T extends StatsData = StatsData> extends BaseEntity 
         size: Size2D,
         appearance: RenderAppearance,
         maxHealth: number,
+        collisionDamage: number,
         statsSlot: StatsFormats<T>,
         statsValue: T,
     ) {
@@ -27,6 +29,7 @@ export abstract class Plane<T extends StatsData = StatsData> extends BaseEntity 
         this.statsValue = statsValue;
         this.health = maxHealth;
         this.maxHealth = maxHealth;
+        this.collisionDamage = collisionDamage;
         this.speed = 0;
         this.fireCooldown = 0;
     }

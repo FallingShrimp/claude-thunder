@@ -16,6 +16,7 @@ export class Red extends Enemy<RedStats> {
             { width: 36, height: 40 },
             { shape: "triangle", color: "#ff3030" },
             10,
+            10,
             RED_STATS_FORMATS,
             {},
         );
@@ -34,9 +35,9 @@ export class Red extends Enemy<RedStats> {
     }
 
     public override upgrade(): void {
-        this.maxHealth *= 1.05;
+        this.maxHealth *= 1.15;
         this.health = this.maxHealth;
-        this.scoreValue += 10;
+        this.scoreValue += 15;
     }
 
     public override getEntityType(): "enemy" {
