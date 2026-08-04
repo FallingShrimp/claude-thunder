@@ -1,8 +1,6 @@
 import type { BaseEntity } from "../../core/entity";
 import { Bullet, type BulletFaction } from "../../entities/bullet";
-import { Enemy } from "../../entities/enemy";
-import type { Plane } from "../../entities/plane";
-import { Player } from "../../entities/player";
+import { PlayerPlane } from "../player-plane";
 
 export interface BasicBulletOptions {
     id?: string;
@@ -40,22 +38,15 @@ export class BasicBullet extends Bullet {
         this.position.y += this.velocity.y * delta;
     }
 
-    public canDamage(target: Plane): boolean {
-        return (this.launcher instanceof Player && target instanceof Enemy)
-            || (this.launcher instanceof Enemy && target instanceof Player);
-    }
-
-    public hit(target: Plane, critical: boolean = false): boolean {
-        if (!this.active || !target.active || !this.canDamage(target)) {
-            return false;
-        }
-
-        target.takeDamage(this.damage, critical, this);
-        this.active = false;
-        return true;
-    }
-
     public override getEntityType(): "bullet" {
         return "bullet";
+    }
+
+    public judgeCritical(): boolean {
+        if (this.launcher instanceof PlayerPlane) {
+            return Math.random() < this.launcher.statsValue.CRIT_RATE;
+        } else {
+            return false;
+        }
     }
 }

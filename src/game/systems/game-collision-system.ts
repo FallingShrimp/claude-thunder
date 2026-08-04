@@ -1,7 +1,7 @@
 import type { BaseEntity } from "../../core/entity";
+import { Bullet } from "../../entities/bullet";
 import { Plane } from "../../entities/plane";
 import { CollisionSystem } from "../../logic/collision-system";
-import { BasicBullet } from "../bullets/basic-bullet";
 
 export class GameCollisionSystem extends CollisionSystem {
     protected override shouldTest(
@@ -28,12 +28,12 @@ export class GameCollisionSystem extends CollisionSystem {
     private getBulletAndPlane(
         left: BaseEntity,
         right: BaseEntity,
-    ): { bullet: BasicBullet; plane: Plane } | undefined {
-        if (left instanceof BasicBullet && right instanceof Plane) {
+    ): { bullet: Bullet; plane: Plane } | undefined {
+        if (left instanceof Bullet && right instanceof Plane) {
             return { bullet: left, plane: right };
         }
 
-        if (right instanceof BasicBullet && left instanceof Plane) {
+        if (right instanceof Bullet && left instanceof Plane) {
             return { bullet: right, plane: left };
         }
 

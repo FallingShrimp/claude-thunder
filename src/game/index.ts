@@ -38,7 +38,7 @@ export function startGame(): GameEngine {
         {
             startIndex: 0,
             endIndex: Number.POSITIVE_INFINITY,
-            spawnValue: 100,
+            spawnValue: 250,
             spawnProgress: 0,
             spawnEnemy: () => {
                 const enemyWidth = 36;
