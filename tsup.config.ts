@@ -1,8 +1,11 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-    entry: ["src/index.ts"],
-    format: ["esm", "cjs"],
+    entry: {
+        index: "src/index.ts",
+        game: "src/game/index.ts",
+    },
+    format: ["esm"],
     dts: true,
     clean: true,
 });
