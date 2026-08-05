@@ -17,6 +17,7 @@ export type PlayerStats = {
     CRIT_RATE: number;
     CRIT_DMG: number;
     COUNTER_MULTIPLIER: number;
+    COUNTER_COUNT: number;
     MULTIPLE_SHOOT: number;
     SHOOT_OFFSET: number;
     LUCK: number;
@@ -28,6 +29,7 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     CRIT_RATE: DataFormat.PERCENT,
     CRIT_DMG: DataFormat.PERCENT,
     COUNTER_MULTIPLIER: DataFormat.PERCENT,
+    COUNTER_COUNT: DataFormat.VALUE,
     MULTIPLE_SHOOT: DataFormat.VALUE,
     SHOOT_OFFSET: DataFormat.ANGLE,
     LUCK: DataFormat.VALUE,
@@ -70,6 +72,7 @@ export class PlayerPlane extends Player<PlayerStats> {
                 CRIT_RATE: 0.05,
                 CRIT_DMG: 2,
                 COUNTER_MULTIPLIER: 1,
+                COUNTER_COUNT: 1,
                 MULTIPLE_SHOOT: 0,
                 SHOOT_OFFSET: 3,
                 LUCK: 0,
@@ -138,21 +141,28 @@ export class PlayerPlane extends Player<PlayerStats> {
     }
 
     public counterAttack(target: BaseEntity): void {
-        const bulletWidth = 20;
-        const bulletHeight = 16;
         const centerX = this.position.x + this.size.width / 2;
         const centerY = this.position.y + this.size.height / 2;
         const targetCenterX = target.position.x + target.size.width / 2;
         const targetCenterY = target.position.y + target.size.height / 2;
 
+        this.counterAttackAtAngle(Math.atan2(
+            targetCenterY - centerY,
+            targetCenterX - centerX,
+        ));
+    }
+
+    public counterAttackAtAngle(rotation: number): void {
+        const bulletWidth = 40;
+        const bulletHeight = 32;
+        const centerX = this.position.x + this.size.width / 2;
+        const centerY = this.position.y + this.size.height / 2;
+
         this.spawnEntity(new FireballBullet({
             launcher: this,
             x: centerX - bulletWidth / 2,
             y: centerY - bulletHeight / 2,
-            rotation: Math.atan2(
-                targetCenterY - centerY,
-                targetCenterX - centerX,
-            ),
+            rotation,
             damage: this.readStat("ATK")
                 * (1 + this.readStat("COUNTER_MULTIPLIER")),
             faction: "player",

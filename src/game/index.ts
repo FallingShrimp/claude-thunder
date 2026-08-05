@@ -10,6 +10,7 @@ import { ALL_GAME_AUDIO_SOURCES } from "./audio-assets";
 import { KeyboardInput } from "./keyboard-input";
 import { PlayerPlane } from "./player-plane";
 import { SpaceEnvironment } from "./space-environment";
+import { FireballTrailSystem } from "./systems/fireball-trail-system";
 import { GameCollisionSystem } from "./systems/game-collision-system";
 import {
     type ItemFactory,
@@ -101,6 +102,7 @@ export async function startGame(): Promise<GameEngine> {
     const itemPool: ItemFactory[] = items.map(e => () => new e());
     const systems: GameSystem[] = [
         world.particles,
+        new FireballTrailSystem(),
         new GameCollisionSystem((amplitude, duration, frequency, decay) => {
             renderer.camera.shake({ amplitude, duration, frequency, decay });
         }),

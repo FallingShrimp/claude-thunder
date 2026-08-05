@@ -13,7 +13,7 @@ export class FireballBullet extends BasicBullet {
 
         this.travelRotation = options.rotation;
         this.appearance = { shape: "triangle", color: "#ff6b1a" };
-        this.size = { width: 20, height: 16 };
+        this.size = { width: 40, height: 32 };
         this.collisionBounds.size = { ...this.size };
         this.rotation = this.travelRotation + Math.PI;
         this.canParry = false;

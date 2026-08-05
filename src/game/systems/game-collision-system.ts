@@ -54,7 +54,11 @@ export class GameCollisionSystem extends CollisionSystem {
 
                 if (parry !== "none") {
                     bulletPair.bullet.active = false;
-                    bulletPair.plane.counterAttack(bulletPair.bullet.launcher);
+                    this.emitCounterAttacks(
+                        world,
+                        bulletPair.plane,
+                        bulletPair.bullet.launcher,
+                    );
                     this.emitParryEffect(world, bulletPair.plane, parry);
 
                     if (parry === "perfect") {
@@ -115,6 +119,14 @@ export class GameCollisionSystem extends CollisionSystem {
         const parry = player?.resolveParry() ?? "none";
 
         if (player !== undefined && parry !== "none") {
+            const counterCount = Math.ceil(
+                Math.max(0, Math.floor(player.readStat("COUNTER_COUNT"))) * 0.5,
+            );
+
+            for (let index = 0; index < counterCount; index++) {
+                player.counterAttackAtAngle(Math.random() * Math.PI * 2);
+            }
+
             this.emitParryEffect(world, player, parry);
         }
 
@@ -166,6 +178,44 @@ export class GameCollisionSystem extends CollisionSystem {
                 accelerationY: 45,
                 drag: 2,
             });
+        }
+    }
+
+    private emitCounterAttacks(
+        world: GameWorld,
+        player: PlayerPlane,
+        primaryTarget: BaseEntity,
+    ): void {
+        player.counterAttack(primaryTarget);
+
+        const extraCount = Math.max(
+            0,
+            Math.floor(player.readStat("COUNTER_COUNT")) - 1,
+        );
+
+        if (extraCount === 0) {
+            return;
+        }
+
+        const candidates = world.entities.filter(
+            (entity): entity is Enemy => entity instanceof Enemy
+                && entity.active
+                && entity !== primaryTarget,
+        );
+        const selectedCount = Math.min(extraCount, candidates.length);
+
+        for (let index = 0; index < selectedCount; index++) {
+            const selectedIndex = index + Math.floor(
+                Math.random() * (candidates.length - index),
+            );
+            const selected = candidates[selectedIndex];
+            candidates[selectedIndex] = candidates[index];
+            candidates[index] = selected;
+            player.counterAttack(selected);
+        }
+
+        for (let index = selectedCount; index < extraCount; index++) {
+            player.counterAttackAtAngle(Math.random() * Math.PI * 2);
         }
     }
 
