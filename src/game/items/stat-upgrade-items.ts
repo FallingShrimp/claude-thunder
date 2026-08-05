@@ -206,7 +206,7 @@ export class ThunderSplit extends PlayerStatUpgradeItem<PlayerStats> {
         super(
             "攻击命中后分裂出雷电",
             ".",
-            Quality.EPIC,
+            Quality.NORMAL,
             PLAYER_STATS_FORMATS,
             {
                 THUNDER_SPLIT_COUNT: 1
