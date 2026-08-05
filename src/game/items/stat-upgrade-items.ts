@@ -271,5 +271,6 @@ export const items = [
     ChainCounter,
     ThunderSplit,
     ThunderChain,
-    ThunderPower
+    ThunderPower,
+    ThunderRange
 ];
