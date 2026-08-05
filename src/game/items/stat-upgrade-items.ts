@@ -58,7 +58,7 @@ export class AttackPowerUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "伤害增加",
+            "攻击力提高",
             "./items/attack-power.svg",
             Quality.NORMAL,
             PLAYER_STATS_FORMATS,
@@ -88,7 +88,7 @@ export class CriticalRateUpgradeItem
             "./items/critical-rate.svg",
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
-            { CRIT_RATE: 0.04 },
+            { CRIT_RATE: 0.08 },
         );
     }
 }
@@ -121,7 +121,7 @@ export class ShootOffsetUpgradeItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class MultipleShootUpgradeItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "有概率多重射击",
+            "有概率额外射出子弹",
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
@@ -139,7 +139,7 @@ export class EpicShoot extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             {
                 ATK_SPD: 1,
-                SHOOT_OFFSET: 2
+                SHOOT_OFFSET: 3
             }
         );
     }

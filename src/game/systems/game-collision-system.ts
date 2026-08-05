@@ -256,6 +256,7 @@ export class GameCollisionSystem extends CollisionSystem {
 
             if (damageLabel !== undefined) {
                 world.addEntity(damageLabel);
+                this.chainThunder(world, thunder, hitEnemy);
             }
         }
     }
