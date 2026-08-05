@@ -285,12 +285,16 @@ export class GameCollisionSystem extends CollisionSystem {
             0,
             thunder.launcher.readStat("THUNDER_RANGE"),
         );
-        let nearest: Enemy | undefined;
+        let nearest: Enemy | BallThunderBullet | undefined;
         let nearestDistanceSquared = thunderRange * thunderRange;
 
         for (const entity of world.entities) {
+            const isEnemy = entity instanceof Enemy;
+            const isFriendlyBallThunder = entity instanceof BallThunderBullet
+                && entity.launcher === thunder.launcher;
+
             if (
-                !(entity instanceof Enemy)
+                (!isEnemy && !isFriendlyBallThunder)
                 || !entity.active
                 || entity === hitEnemy
                 || thunder.chainTargetIds.has(entity.id)
@@ -320,6 +324,11 @@ export class GameCollisionSystem extends CollisionSystem {
         const offsetY = targetY - originY;
         const nextChains = thunder.remainingChains - 1;
         thunder.remainingChains = 0;
+
+        if (nearest instanceof BallThunderBullet) {
+            thunder.chainTargetIds.add(nearest.id);
+        }
+
         void this.playAudio(GAME_AUDIO_SOURCES.thunderChain);
         const chainedThunder = thunder.launcher.emitThunder(
             originX,
@@ -334,6 +343,87 @@ export class GameCollisionSystem extends CollisionSystem {
         if (damageLabel !== undefined) {
             world.addEntity(damageLabel);
         }
+
+        if (nearest instanceof BallThunderBullet) {
+            this.chainFromBallThunderNode(world, chainedThunder, nearest);
+        }
+    }
+
+    private chainFromBallThunderNode(
+        world: GameWorld,
+        thunder: ThunderBullet,
+        ballThunder: BallThunderBullet,
+    ): void {
+        if (
+            thunder.remainingChains <= 0
+            || !(thunder.launcher instanceof PlayerPlane)
+        ) {
+            return;
+        }
+
+        const originX = ballThunder.position.x + ballThunder.size.width / 2;
+        const originY = ballThunder.position.y + ballThunder.size.height / 2;
+        const thunderRange = Math.max(
+            0,
+            thunder.launcher.readStat("THUNDER_RANGE"),
+        );
+        let nearest: Enemy | BallThunderBullet | undefined;
+        let nearestDistanceSquared = thunderRange * thunderRange;
+
+        for (const entity of world.entities) {
+            const isEnemy = entity instanceof Enemy;
+            const isFriendlyBallThunder = entity instanceof BallThunderBullet
+                && entity.launcher === thunder.launcher;
+
+            if (
+                (!isEnemy && !isFriendlyBallThunder)
+                || !entity.active
+                || entity === ballThunder
+                || thunder.chainTargetIds.has(entity.id)
+            ) {
+                continue;
+            }
+
+            const targetX = entity.position.x + entity.size.width / 2;
+            const targetY = entity.position.y + entity.size.height / 2;
+            const offsetX = targetX - originX;
+            const offsetY = targetY - originY;
+            const distanceSquared = offsetX * offsetX + offsetY * offsetY;
+
+            if (distanceSquared <= nearestDistanceSquared) {
+                nearest = entity;
+                nearestDistanceSquared = distanceSquared;
+            }
+        }
+
+        if (nearest === undefined) {
+            return;
+        }
+
+        const targetX = nearest.position.x + nearest.size.width / 2;
+        const targetY = nearest.position.y + nearest.size.height / 2;
+        const offsetX = targetX - originX;
+        const offsetY = targetY - originY;
+        const nextChains = thunder.remainingChains - 1;
+        thunder.remainingChains = 0;
+
+        if (nearest instanceof BallThunderBullet) {
+            thunder.chainTargetIds.add(nearest.id);
+        }
+
+        void this.playAudio(GAME_AUDIO_SOURCES.thunderChain);
+        const chainedThunder = thunder.launcher.emitThunder(
+            originX,
+            originY,
+            Math.atan2(offsetY, offsetX),
+            Math.hypot(offsetX, offsetY),
+            nextChains,
+            thunder.chainTargetIds,
+        );
+
+        if (nearest instanceof BallThunderBullet) {
+            this.chainFromBallThunderNode(world, chainedThunder, nearest);
+        }
     }
 
     private chainBallThunderToEnemy(
@@ -345,6 +435,7 @@ export class GameCollisionSystem extends CollisionSystem {
             return;
         }
 
+        ballThunder.chainTargetIds.add(ballThunder.id);
         const originX = ballThunder.position.x + ballThunder.size.width / 2;
         const originY = ballThunder.position.y + ballThunder.size.height / 2;
         const targetX = hitEnemy.position.x + hitEnemy.size.width / 2;
