@@ -167,7 +167,7 @@ export class CounterAttack extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             {
-                COUNTER_MULTIPLIER: 0.3
+                COUNTER_MULTIPLIER: 0.4
             }
         );
     }
