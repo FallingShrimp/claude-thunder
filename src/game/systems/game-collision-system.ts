@@ -269,6 +269,11 @@ export class GameCollisionSystem extends CollisionSystem {
             return;
         }
 
+        if (thunder instanceof BallThunderBullet) {
+            this.chainBallThunderToEnemy(world, thunder, hitEnemy);
+            return;
+        }
+
         thunder.chainTargetIds.add(hitEnemy.id);
         const originX = hitEnemy.position.x + hitEnemy.size.width / 2;
         const originY = hitEnemy.position.y + hitEnemy.size.height / 2;
@@ -322,6 +327,41 @@ export class GameCollisionSystem extends CollisionSystem {
         if (damageLabel !== undefined) {
             world.addEntity(damageLabel);
         }
+    }
+
+    private chainBallThunderToEnemy(
+        world: GameWorld,
+        ballThunder: BallThunderBullet,
+        hitEnemy: Enemy,
+    ): void {
+        if (!(ballThunder.launcher instanceof PlayerPlane)) {
+            return;
+        }
+
+        const originX = ballThunder.position.x + ballThunder.size.width / 2;
+        const originY = ballThunder.position.y + ballThunder.size.height / 2;
+        const targetX = hitEnemy.position.x + hitEnemy.size.width / 2;
+        const targetY = hitEnemy.position.y + hitEnemy.size.height / 2;
+        const offsetX = targetX - originX;
+        const offsetY = targetY - originY;
+        const nextChains = ballThunder.remainingChains - 1;
+        ballThunder.remainingChains = 0;
+        void this.playAudio(GAME_AUDIO_SOURCES.thunderChain);
+        const chainedThunder = ballThunder.launcher.emitThunder(
+            originX,
+            originY,
+            Math.atan2(offsetY, offsetX),
+            Math.hypot(offsetX, offsetY),
+            nextChains,
+            ballThunder.chainTargetIds,
+        );
+        const damageLabel = chainedThunder.hitOnSpawn(hitEnemy);
+
+        if (damageLabel !== undefined) {
+            world.addEntity(damageLabel);
+        }
+
+        this.chainThunder(world, chainedThunder, hitEnemy);
     }
 
     private refractFireball(
