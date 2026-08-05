@@ -58,7 +58,7 @@ export class AttackPowerUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "攻击力 +3",
+            "伤害增加",
             "./items/attack-power.svg",
             Quality.NORMAL,
             PLAYER_STATS_FORMATS,
@@ -71,7 +71,7 @@ export class AttackSpeedUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "攻击速度 +0.25",
+            "射速小幅提高",
             "./items/attack-speed.svg",
             Quality.NORMAL,
             PLAYER_STATS_FORMATS,
@@ -84,7 +84,7 @@ export class CriticalRateUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "暴击率 +4%",
+            "有机会产生暴击",
             "./items/critical-rate.svg",
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
@@ -97,7 +97,7 @@ export class CriticalDamageUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "暴击伤害 +25%",
+            "暴击伤害大幅增加",
             "./items/critical-damage.svg",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
@@ -109,7 +109,7 @@ export class CriticalDamageUpgradeItem
 export class ShootOffsetUpgradeItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "散射 -0.5°",
+            "射击更加精准",
             ".",
             Quality.WASTE,
             PLAYER_STATS_FORMATS,
@@ -121,7 +121,7 @@ export class ShootOffsetUpgradeItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class MultipleShootUpgradeItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "多重射击 +0.1",
+            "有概率多重射击",
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
@@ -133,7 +133,7 @@ export class MultipleShootUpgradeItem extends PlayerStatUpgradeItem<PlayerStats>
 export class EpicShoot extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "攻击速度 +1\n散射 +2°",
+            "射速大幅提高但精准度降低",
             ".",
             Quality.LEGENDARY,
             PLAYER_STATS_FORMATS,
