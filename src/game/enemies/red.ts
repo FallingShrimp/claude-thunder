@@ -26,6 +26,7 @@ export class Red extends Enemy<RedStats> {
             {},
         );
 
+        this.rotation = Math.PI / 2;
         this.speed = 120;
         this.velocity.y = this.speed;
         this.scoreValue = 100;

@@ -33,6 +33,7 @@ export class Cyan extends Enemy<CyanStats> {
             {},
         );
 
+        this.rotation = Math.PI / 2;
         this.speed = 100;
         this.velocity.y = this.speed;
         this.scoreValue = 250;

@@ -13,7 +13,7 @@ export class Orange extends Enemy<OrangeStats> {
         super(
             crypto.randomUUID(),
             { x, y: -40 },
-            { width: 27, height: 55 },
+            { width: 55, height: 27 },
             { shape: "triangle", color: "#ff9100ff" },
             5,
             20,
@@ -21,6 +21,7 @@ export class Orange extends Enemy<OrangeStats> {
             {},
         );
 
+        this.rotation = Math.PI / 2;
         this.speed = 250;
         this.velocity.y = this.speed;
         this.scoreValue = 200;

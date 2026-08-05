@@ -83,10 +83,12 @@ export class CanvasRenderer implements Renderer {
             );
             context.fill();
         } else if (target.appearance.shape === "triangle") {
+            // 所有具有方向性的形状都以局部坐标系的 +X 方向为零度朝向，
+            // 从而让 rotation 与使用 cos/sin 计算出的移动方向保持一致。
             context.beginPath();
-            context.moveTo(-target.size.width / 2, -target.size.height / 2);
-            context.lineTo(target.size.width / 2, -target.size.height / 2);
-            context.lineTo(0, target.size.height / 2);
+            context.moveTo(target.size.width / 2, 0);
+            context.lineTo(-target.size.width / 2, -target.size.height / 2);
+            context.lineTo(-target.size.width / 2, target.size.height / 2);
             context.closePath();
             context.fill();
         } else {

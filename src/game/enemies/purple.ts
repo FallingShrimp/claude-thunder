@@ -26,6 +26,7 @@ export class Purple extends Enemy<PurpleStats> {
             {},
         );
 
+        this.rotation = Math.PI / 2;
         this.speed = 60;
         this.velocity.y = this.speed;
         this.scoreValue = 350;
