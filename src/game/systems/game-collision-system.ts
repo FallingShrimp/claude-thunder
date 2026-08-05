@@ -1,3 +1,4 @@
+import type { AudioSystem } from "../../audio/audio-system";
 import type { BaseEntity } from "../../core/entity";
 import { Bullet } from "../../entities/bullet";
 import { Enemy } from "../../entities/enemy";
@@ -8,12 +9,14 @@ import type { GameWorld } from "../../logic/game-world";
 import { BallThunderBullet } from "../bullets/ball-thunder-bullet";
 import { FireballBullet } from "../bullets/fireball-bullet";
 import { ThunderBullet } from "../bullets/thunder-bullet";
+import { GAME_AUDIO_SOURCES } from "../audio-assets";
 import { emitBurst } from "../particles/burst";
 import { emitRing } from "../particles/ring";
 import { PlayerPlane, type ParryResult } from "../player-plane";
 
 export class GameCollisionSystem extends CollisionSystem {
     public constructor(
+        private readonly audioSystem: AudioSystem,
         private readonly shakeCamera: (
             amplitude: number,
             duration: number,
@@ -305,6 +308,7 @@ export class GameCollisionSystem extends CollisionSystem {
         const offsetY = targetY - originY;
         const nextChains = thunder.remainingChains - 1;
         thunder.remainingChains = 0;
+        void this.playAudio(GAME_AUDIO_SOURCES.thunderChain);
         const chainedThunder = thunder.launcher.emitThunder(
             originX,
             originY,
@@ -349,6 +353,7 @@ export class GameCollisionSystem extends CollisionSystem {
         const targetX = target.position.x + target.size.width / 2;
         const targetY = target.position.y + target.size.height / 2;
 
+        void this.playAudio(GAME_AUDIO_SOURCES.laserShot);
         const refractedFireball = new FireballBullet({
             launcher: fireball.launcher,
             x: originX - 20,
@@ -460,6 +465,14 @@ export class GameCollisionSystem extends CollisionSystem {
                 startAngle: Math.PI / 64,
                 drag: 0.6,
             });
+        }
+    }
+
+    private async playAudio(source: string): Promise<void> {
+        try {
+            await this.audioSystem.playAudio(source);
+        } catch {
+            // 浏览器可能在用户交互前禁止播放音频，静默忽略即可。
         }
     }
 

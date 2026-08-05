@@ -103,9 +103,12 @@ export async function startGame(): Promise<GameEngine> {
     const systems: GameSystem[] = [
         world.particles,
         new FireballTrailSystem(),
-        new GameCollisionSystem((amplitude, duration, frequency, decay) => {
-            renderer.camera.shake({ amplitude, duration, frequency, decay });
-        }),
+        new GameCollisionSystem(
+            audioSystem,
+            (amplitude, duration, frequency, decay) => {
+                renderer.camera.shake({ amplitude, duration, frequency, decay });
+            },
+        ),
     ];
     const engine = new GameEngine(world, renderer, systems, waves);
 

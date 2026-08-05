@@ -206,7 +206,7 @@ export class ThunderSplit extends PlayerStatUpgradeItem<PlayerStats> {
         super(
             "攻击产生球状闪电",
             ".",
-            Quality.NORMAL,
+            Quality.RARE,
             PLAYER_STATS_FORMATS,
             {
                 THUNDER_SPLIT_COUNT: 1
@@ -220,7 +220,7 @@ export class ThunderChain extends PlayerStatUpgradeItem<PlayerStats> {
         super(
             "球状闪电可连锁放电",
             ".",
-            Quality.RARE,
+            Quality.NORMAL,
             PLAYER_STATS_FORMATS,
             {
                 THUNDER_CHAIN_COUNT: 1
@@ -237,7 +237,7 @@ export class ThunderPower extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             {
-                THUNDER_MULTIPLIER: 0.2
+                THUNDER_MULTIPLIER: 0.35
             }
         );
     }
