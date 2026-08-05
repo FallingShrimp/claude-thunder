@@ -4,8 +4,9 @@ import type { GameSystem } from "../logic/game-system";
 import { GameWorld } from "../logic/game-world";
 import type { Wave } from "../logic/wave";
 import { CanvasRenderer } from "../rendering/canvas-renderer";
+import { LabelWeightItem } from "./items/label-weight-item";
+import { getQualityWeight, Quality } from "./items/quality";
 import { items } from "./items/stat-upgrade-items";
-import { getQualityWeight, type Quality } from "./items/quality";
 import { ALL_GAME_AUDIO_SOURCES } from "./audio-assets";
 import { KeyboardInput } from "./keyboard-input";
 import { PlayerPlane } from "./player-plane";
@@ -99,7 +100,22 @@ export async function startGame(): Promise<GameEngine> {
             },
         },
     ]);
-    const itemPool: ItemFactory[] = items.map(e => () => new e());
+    const labelWeightItemFactories: ItemFactory[] = [
+        ["通用倾向", "通用"],
+        ["暴击倾向", "暴击"],
+        ["反击倾向", "反击"],
+        ["雷电倾向", "雷电"],
+    ].map(([displayName, targetLabel]) => () => new LabelWeightItem({
+        displayName,
+        avatarSource: ".",
+        quality: Quality.EPIC,
+        targetLabel,
+        weightIncrement: 20,
+    }));
+    const itemPool: ItemFactory[] = [
+        ...items.map((ItemType) => () => new ItemType()),
+        ...labelWeightItemFactories,
+    ];
     const systems: GameSystem[] = [
         world.particles,
         new FireballTrailSystem(),
@@ -109,22 +125,21 @@ export async function startGame(): Promise<GameEngine> {
                 renderer.camera.shake({ amplitude, duration, frequency, decay });
             },
         ),
+        new WaveRewardSystem(
+            player,
+            input,
+            itemPool,
+            (item) => getQualityWeight(
+                item.quality as Quality,
+                player.readStat("LUCK"),
+            ),
+            (index) => engine.switchWave(index),
+            () => engine.hasPendingWaveEnemies(),
+            (enabled) => player.setControlsEnabled(enabled),
+            canvas.width,
+        )
     ];
     const engine = new GameEngine(world, renderer, systems, waves);
-
-    systems.push(new WaveRewardSystem(
-        player,
-        input,
-        itemPool,
-        (item) => getQualityWeight(
-            item.quality as Quality,
-            player.readStat("LUCK"),
-        ),
-        (index) => engine.switchWave(index),
-        () => engine.hasPendingWaveEnemies(),
-        (enabled) => player.setControlsEnabled(enabled),
-        canvas.width,
-    ));
 
     const audioCount = ALL_GAME_AUDIO_SOURCES.length;
     let processedAudioCount = 0;
