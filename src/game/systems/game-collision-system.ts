@@ -6,6 +6,7 @@ import { Player } from "../../entities/player";
 import { CollisionSystem } from "../../logic/collision-system";
 import type { GameWorld } from "../../logic/game-world";
 import { FireballBullet } from "../bullets/fireball-bullet";
+import { ThunderBullet } from "../bullets/thunder-bullet";
 import { emitBurst } from "../particles/burst";
 import { emitRing } from "../particles/ring";
 import { PlayerPlane, type ParryResult } from "../player-plane";
@@ -28,6 +29,16 @@ export class GameCollisionSystem extends CollisionSystem {
     ): boolean {
         return this.getBulletAndPlane(left, right) !== undefined
             || this.getOpposingPlanes(left, right) !== undefined;
+    }
+
+    protected override intersects(left: BaseEntity, right: BaseEntity): boolean {
+        const bulletPair = this.getBulletAndPlane(left, right);
+
+        if (bulletPair?.bullet instanceof ThunderBullet) {
+            return bulletPair.bullet.intersects(bulletPair.plane);
+        }
+
+        return super.intersects(left, right);
     }
 
     protected override onCollision(
@@ -84,14 +95,28 @@ export class GameCollisionSystem extends CollisionSystem {
 
             if (
                 damageLabel !== undefined
-                && bulletPair.bullet instanceof FireballBullet
                 && bulletPair.plane instanceof Enemy
             ) {
-                this.refractFireball(
-                    world,
-                    bulletPair.bullet,
-                    bulletPair.plane,
-                );
+                if (bulletPair.bullet instanceof FireballBullet) {
+                    this.refractFireball(
+                        world,
+                        bulletPair.bullet,
+                        bulletPair.plane,
+                    );
+                }
+
+                if (bulletPair.bullet instanceof ThunderBullet) {
+                    this.chainThunder(
+                        world,
+                        bulletPair.bullet,
+                        bulletPair.plane,
+                    );
+                } else if (bulletPair.bullet.launcher instanceof PlayerPlane) {
+                    this.splitThunder(
+                        bulletPair.bullet.launcher,
+                        bulletPair.plane,
+                    );
+                }
             }
 
             if (damageLabel !== undefined) {
@@ -192,6 +217,90 @@ export class GameCollisionSystem extends CollisionSystem {
                 drag: 2,
             });
         }
+    }
+
+    private splitThunder(player: PlayerPlane, hitEnemy: Enemy): void {
+        const splitCount = Math.max(
+            0,
+            Math.floor(player.readStat("THUNDER_SPLIT_COUNT")),
+        );
+
+        if (splitCount === 0) {
+            return;
+        }
+
+        const originX = hitEnemy.position.x + hitEnemy.size.width / 2;
+        const originY = hitEnemy.position.y + hitEnemy.size.height / 2;
+        const hitTargetIds = new Set([hitEnemy.id]);
+
+        for (let index = 0; index < splitCount; index++) {
+            player.emitThunder(
+                originX,
+                originY,
+                Math.random() * Math.PI * 2,
+                ThunderBullet.splitLength,
+                undefined,
+                hitTargetIds,
+            );
+        }
+    }
+
+    private chainThunder(
+        world: GameWorld,
+        thunder: ThunderBullet,
+        hitEnemy: Enemy,
+    ): void {
+        if (thunder.remainingChains <= 0) {
+            return;
+        }
+
+        thunder.chainTargetIds.add(hitEnemy.id);
+        const originX = hitEnemy.position.x + hitEnemy.size.width / 2;
+        const originY = hitEnemy.position.y + hitEnemy.size.height / 2;
+        let nearest: Enemy | undefined;
+        let nearestDistanceSquared = ThunderBullet.chainRange
+            * ThunderBullet.chainRange;
+
+        for (const entity of world.entities) {
+            if (
+                !(entity instanceof Enemy)
+                || !entity.active
+                || entity === hitEnemy
+                || thunder.chainTargetIds.has(entity.id)
+            ) {
+                continue;
+            }
+
+            const targetX = entity.position.x + entity.size.width / 2;
+            const targetY = entity.position.y + entity.size.height / 2;
+            const offsetX = targetX - originX;
+            const offsetY = targetY - originY;
+            const distanceSquared = offsetX * offsetX + offsetY * offsetY;
+
+            if (distanceSquared <= nearestDistanceSquared) {
+                nearest = entity;
+                nearestDistanceSquared = distanceSquared;
+            }
+        }
+
+        if (!(thunder.launcher instanceof PlayerPlane) || nearest === undefined) {
+            return;
+        }
+
+        const targetX = nearest.position.x + nearest.size.width / 2;
+        const targetY = nearest.position.y + nearest.size.height / 2;
+        const offsetX = targetX - originX;
+        const offsetY = targetY - originY;
+        const nextChains = thunder.remainingChains - 1;
+        thunder.remainingChains = 0;
+        thunder.launcher.emitThunder(
+            originX,
+            originY,
+            Math.atan2(offsetY, offsetX),
+            Math.hypot(offsetX, offsetY),
+            nextChains,
+            thunder.chainTargetIds,
+        );
     }
 
     private refractFireball(

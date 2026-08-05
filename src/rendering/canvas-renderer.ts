@@ -3,6 +3,7 @@ import type { RenderableTarget } from "../core/renderable-target";
 import { DamageLabel } from "../entities/damage-label";
 import { Healthbar } from "../entities/healthbar";
 import { Item } from "../entities/item";
+import { ThunderBullet } from "../game/bullets/thunder-bullet";
 import { PlayerPlane } from "../game/player-plane";
 import { ParticleSystem } from "../logic/systems/particle-system";
 import { CameraShakeController } from "./camera-shake-controller";
@@ -65,6 +66,11 @@ export class CanvasRenderer implements Renderer {
             return;
         }
 
+        if (target instanceof ThunderBullet) {
+            this.renderThunder(target);
+            return;
+        }
+
         if (target instanceof DamageLabel) {
             this.renderDamageLabel(target);
             return;
@@ -120,6 +126,43 @@ export class CanvasRenderer implements Renderer {
         if (target instanceof PlayerPlane && target.guarding) {
             this.renderPlayerShield(target);
         }
+    }
+
+    private renderThunder(thunder: ThunderBullet): void {
+        const { context } = this;
+        const segments = Math.max(2, Math.ceil(thunder.size.width / 24));
+        const normalX = -Math.sin(thunder.rotation);
+        const normalY = Math.cos(thunder.rotation);
+
+        context.save();
+        context.globalAlpha = thunder.opacity;
+        context.lineCap = "round";
+        context.lineJoin = "round";
+        context.shadowColor = "#5defff";
+        context.shadowBlur = 14;
+        context.strokeStyle = "#45dfff";
+        context.lineWidth = 7;
+        context.beginPath();
+        context.moveTo(thunder.originX, thunder.originY);
+
+        for (let index = 1; index < segments; index++) {
+            const progress = index / segments;
+            const jitter = (Math.random() - 0.5) * 18;
+            context.lineTo(
+                thunder.originX + (thunder.endX - thunder.originX) * progress
+                + normalX * jitter,
+                thunder.originY + (thunder.endY - thunder.originY) * progress
+                + normalY * jitter,
+            );
+        }
+
+        context.lineTo(thunder.endX, thunder.endY);
+        context.stroke();
+        context.shadowBlur = 5;
+        context.strokeStyle = "#f4ffff";
+        context.lineWidth = 2;
+        context.stroke();
+        context.restore();
     }
 
     private renderDamageLabel(label: DamageLabel): void {

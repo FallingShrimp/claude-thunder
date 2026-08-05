@@ -201,6 +201,48 @@ export class ChainCounter extends PlayerStatUpgradeItem<PlayerStats> {
     }
 }
 
+export class ThunderSplit extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "攻击命中后分裂出雷电",
+            ".",
+            Quality.EPIC,
+            PLAYER_STATS_FORMATS,
+            {
+                THUNDER_SPLIT_COUNT: 1
+            }
+        );
+    }
+}
+
+export class ThunderChain extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "雷电可连锁攻击",
+            ".",
+            Quality.RARE,
+            PLAYER_STATS_FORMATS,
+            {
+                THUNDER_CHAIN_COUNT: 1
+            }
+        );
+    }
+}
+
+export class ThunderPower extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "提高雷电伤害",
+            ".",
+            Quality.RARE,
+            PLAYER_STATS_FORMATS,
+            {
+                THUNDER_MULTIPLIER: 0.2
+            }
+        );
+    }
+}
+
 export const items = [
     AttackPowerUpgradeItem,
     AttackSpeedUpgradeItem,
@@ -212,5 +254,8 @@ export const items = [
     Luck,
     CounterAttack,
     CounterCount,
-    ChainCounter
+    ChainCounter,
+    ThunderSplit,
+    ThunderChain,
+    ThunderPower
 ];
