@@ -3,6 +3,8 @@ import type { RenderableTarget } from "../core/renderable-target";
 import { DamageLabel } from "../entities/damage-label";
 import { Healthbar } from "../entities/healthbar";
 import { Item } from "../entities/item";
+import { PlayerPlane } from "../game/player-plane";
+import { ParticleSystem } from "../logic/systems/particle-system";
 import type { Renderer } from "./renderer";
 
 export class CanvasRenderer implements Renderer {
@@ -42,6 +44,11 @@ export class CanvasRenderer implements Renderer {
             context.globalAlpha = target.opacity;
             target.draw(context);
             context.restore();
+            return;
+        }
+
+        if (target instanceof ParticleSystem) {
+            target.draw(context);
             return;
         }
 
@@ -101,6 +108,10 @@ export class CanvasRenderer implements Renderer {
         }
 
         context.restore();
+
+        if (target instanceof PlayerPlane && target.guarding) {
+            this.renderPlayerShield(target);
+        }
     }
 
     private renderDamageLabel(label: DamageLabel): void {
@@ -193,6 +204,33 @@ export class CanvasRenderer implements Renderer {
         image.src = source;
         this.itemAvatarCache.set(source, image);
         return image;
+    }
+
+    private renderPlayerShield(player: PlayerPlane): void {
+        const { context } = this;
+        const centerX = player.position.x + player.size.width / 2;
+        const centerY = player.position.y + player.size.height / 2;
+        const radius = Math.max(player.size.width, player.size.height) * 0.72;
+        const perfect = player.guardElapsed <= PlayerPlane.perfectParryDuration;
+        const pulse = 1 + Math.sin(player.guardElapsed * 18) * 0.04;
+
+        context.save();
+        context.translate(centerX, centerY);
+        context.scale(pulse, pulse);
+        context.strokeStyle = perfect ? "#f8ffff" : "#5bbcff";
+        context.shadowColor = perfect ? "#8fffff" : "#1677ff";
+        context.shadowBlur = perfect ? 18 : 10;
+        context.globalAlpha = perfect ? 0.95 : 0.65;
+        context.lineWidth = perfect ? 4 : 3;
+        context.beginPath();
+        context.arc(0, 0, radius, 0, Math.PI * 2);
+        context.stroke();
+        context.globalAlpha *= 0.35;
+        context.lineWidth = 9;
+        context.beginPath();
+        context.arc(0, 0, radius, 0, Math.PI * 2);
+        context.stroke();
+        context.restore();
     }
 
     private renderHealthbar(healthbar: Healthbar): void {

@@ -3,7 +3,7 @@ import type { BaseEntity } from "../core/entity";
 import { DataFormat, defineStats } from "../core/stats";
 import { Player } from "../entities/player";
 import { radians } from "../util/math";
-import { randomFloat, randomInt, rate } from "../util/random";
+import { randomFloat, rate } from "../util/random";
 import { GAME_AUDIO_SOURCES } from "./audio-assets";
 import { BasicBullet } from "./bullets/basic-bullet";
 import type { KeyboardInput } from "./keyboard-input";
@@ -28,8 +28,20 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     LUCK: DataFormat.VALUE,
 });
 
+export type ParryResult = "none" | "guard" | "perfect";
+
 export class PlayerPlane extends Player<PlayerStats> {
+    public static readonly guardDuration: number = 2;
+    public static readonly perfectParryDuration: number = 1;
+    public static readonly guardCooldownBase: number = 1;
+    public static readonly guardCooldownPenalty: number = 1.5;
+
+    public guardElapsed: number = 0;
+    public guardCooldown: number = 0;
+    public guarding: boolean = false;
+
     private controlsEnabled: boolean = true;
+    private previousGuardKey: boolean = false;
 
     public constructor(
         private readonly input: KeyboardInput,
@@ -62,9 +74,12 @@ export class PlayerPlane extends Player<PlayerStats> {
 
     public override ai(delta: number): void {
         this.fireCooldown = Math.max(0, this.fireCooldown - delta);
+        this.guardCooldown = Math.max(0, this.guardCooldown - delta);
 
         if (!this.controlsEnabled) {
             this.velocity = { x: 0, y: 0 };
+            this.endGuard(PlayerPlane.guardCooldownBase);
+            this.previousGuardKey = this.input.isPressed("KeyK");
             return;
         }
 
@@ -82,9 +97,7 @@ export class PlayerPlane extends Player<PlayerStats> {
             this.attack();
         }
 
-        if (this.input.isPressed("KeyK")) {
-            this.defend();
-        }
+        this.updateGuard(delta);
     }
 
     public override upgrade(): void {
@@ -93,6 +106,24 @@ export class PlayerPlane extends Player<PlayerStats> {
 
     public setControlsEnabled(enabled: boolean): void {
         this.controlsEnabled = enabled;
+    }
+
+    public resolveParry(canParry: boolean = true): ParryResult {
+        if (!this.guarding || !canParry) {
+            return "none";
+        }
+
+        if (this.guardElapsed <= PlayerPlane.perfectParryDuration) {
+            this.endGuard(0);
+            void this.playParryAudio(GAME_AUDIO_SOURCES.perfectParry);
+            return "perfect";
+        }
+
+        this.endGuard(
+            PlayerPlane.guardCooldownBase * PlayerPlane.guardCooldownPenalty,
+        );
+        void this.playParryAudio(GAME_AUDIO_SOURCES.unexactParry);
+        return "guard";
     }
 
     public override getEntityType(): "player" {
@@ -126,7 +157,49 @@ export class PlayerPlane extends Player<PlayerStats> {
         this.fireCooldown = 1 / this.readStat("ATK_SPD");
     }
 
-    private defend(): void {
-        // 防御逻辑将在游戏内容确定后实现。
+    private updateGuard(delta: number): void {
+        const guardKey = this.input.isPressed("KeyK");
+
+        if (
+            guardKey
+            && !this.previousGuardKey
+            && !this.guarding
+            && this.guardCooldown === 0
+        ) {
+            this.guarding = true;
+            this.guardElapsed = 0;
+        }
+
+        if (this.guarding) {
+            if (!guardKey) {
+                this.endGuard(PlayerPlane.guardCooldownBase);
+            } else {
+                this.guardElapsed += delta;
+
+                if (this.guardElapsed >= PlayerPlane.guardDuration) {
+                    this.endGuard(PlayerPlane.guardCooldownBase);
+                }
+            }
+        }
+
+        this.previousGuardKey = guardKey;
+    }
+
+    private endGuard(cooldown: number): void {
+        if (!this.guarding) {
+            return;
+        }
+
+        this.guarding = false;
+        this.guardElapsed = 0;
+        this.guardCooldown = cooldown;
+    }
+
+    private async playParryAudio(source: string): Promise<void> {
+        try {
+            await this.audioSystem.playAudio(source);
+        } catch {
+            // 浏览器可能在用户交互前禁止播放音频，静默忽略即可。
+        }
     }
 }

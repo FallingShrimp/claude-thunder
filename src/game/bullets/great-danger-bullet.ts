@@ -12,6 +12,7 @@ export class GreatDangerBullet extends DangerBullet {
 
         this.speed = 360;
         this.damage = 10;
+        this.canParry = false;
         this.size = { width: 25, height: 25 };
         this.collisionBounds.size = { ...this.size };
         this.appearance = { shape: "rectangle", color: "#a855f7" };

@@ -29,6 +29,7 @@ export class BasicBullet extends Bullet {
         this.speed = options.speed ?? 420;
         this.damage = options.damage ?? 10;
         this.faction = options.faction ?? "player";
+        this.canParry = true;
     }
 
     public override ai(delta: number): void {

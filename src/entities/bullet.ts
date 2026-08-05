@@ -13,6 +13,7 @@ export abstract class Bullet extends BaseEntity {
     public damage: number = 0;
     public faction: BulletFaction = "player";
     public remainingLifetime: number = 0;
+    public canParry: boolean = false;
 
     protected constructor(
         id: string,
