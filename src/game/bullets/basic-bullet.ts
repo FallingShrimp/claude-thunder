@@ -30,15 +30,25 @@ export class BasicBullet extends Bullet {
         this.rotation = options.rotation;
         this.speed = options.speed ?? BasicBullet.defaultSpeed;
         this.damage = options.damage ?? 10;
+        this.remainingLifetime = 4;
         this.faction = options.faction ?? "player";
         this.canParry = true;
     }
 
     public override ai(delta: number): void {
-        this.velocity.x = Math.cos(this.rotation) * this.speed;
-        this.velocity.y = Math.sin(this.rotation) * this.speed;
+        this.advance(delta, this.rotation);
+    }
+
+    protected advance(delta: number, rotation: number): void {
+        this.velocity.x = Math.cos(rotation) * this.speed;
+        this.velocity.y = Math.sin(rotation) * this.speed;
         this.position.x += this.velocity.x * delta;
         this.position.y += this.velocity.y * delta;
+        this.remainingLifetime = Math.max(0, this.remainingLifetime - delta);
+
+        if (this.remainingLifetime === 0) {
+            this.active = false;
+        }
     }
 
     public override getEntityType(): "bullet" {

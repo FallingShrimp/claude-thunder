@@ -31,8 +31,17 @@ export class GameWorld {
     }
 
     public removeInactiveEntities(): void {
-        const activeEntities = this.entities.filter((entity) => entity.active);
-        this.entities.length = 0;
-        this.entities.push(...activeEntities);
+        let writeIndex = 0;
+
+        for (let readIndex = 0; readIndex < this.entities.length; readIndex++) {
+            const entity = this.entities[readIndex];
+
+            if (entity.active) {
+                this.entities[writeIndex] = entity;
+                writeIndex += 1;
+            }
+        }
+
+        this.entities.length = writeIndex;
     }
 }

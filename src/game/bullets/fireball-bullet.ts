@@ -33,9 +33,6 @@ export class FireballBullet extends BasicBullet {
     }
 
     public override ai(delta: number): void {
-        this.velocity.x = Math.cos(this.travelRotation) * this.speed;
-        this.velocity.y = Math.sin(this.travelRotation) * this.speed;
-        this.position.x += this.velocity.x * delta;
-        this.position.y += this.velocity.y * delta;
+        this.advance(delta, this.travelRotation);
     }
 }
