@@ -251,6 +251,8 @@ export class GameCollisionSystem extends CollisionSystem {
                 originY,
                 Math.random() * Math.PI * 2,
                 hitTargetIds,
+                hitEnemy,
+                (source) => this.findNearestTraceTarget(world, source),
             );
             const damageLabel = thunder.hitOnSpawn(hitEnemy);
 
@@ -259,6 +261,39 @@ export class GameCollisionSystem extends CollisionSystem {
                 this.chainThunder(world, thunder, hitEnemy);
             }
         }
+    }
+
+    private findNearestTraceTarget(
+        world: GameWorld,
+        source: BallThunderBullet,
+    ): Enemy | undefined {
+        const sourceX = source.position.x + source.size.width / 2;
+        const sourceY = source.position.y + source.size.height / 2;
+        let nearest: Enemy | undefined;
+        let nearestDistanceSquared = Number.POSITIVE_INFINITY;
+
+        for (const entity of world.entities) {
+            if (
+                !(entity instanceof Enemy)
+                || !entity.active
+                || source.chainTargetIds.has(entity.id)
+            ) {
+                continue;
+            }
+
+            const targetX = entity.position.x + entity.size.width / 2;
+            const targetY = entity.position.y + entity.size.height / 2;
+            const offsetX = targetX - sourceX;
+            const offsetY = targetY - sourceY;
+            const distanceSquared = offsetX * offsetX + offsetY * offsetY;
+
+            if (distanceSquared < nearestDistanceSquared) {
+                nearest = entity;
+                nearestDistanceSquared = distanceSquared;
+            }
+        }
+
+        return nearest;
     }
 
     private chainThunder(

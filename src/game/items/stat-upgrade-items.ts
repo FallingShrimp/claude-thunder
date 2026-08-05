@@ -257,6 +257,20 @@ export class ThunderRange extends PlayerStatUpgradeItem<PlayerStats> {
     }
 }
 
+export class ThunderTrace extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "球状闪电可追踪敌人",
+            ".",
+            Quality.RARE,
+            PLAYER_STATS_FORMATS,
+            {
+                THUNDER_BALL_TRACE: 0.25
+            }
+        );
+    }
+}
+
 export const items = [
     AttackPowerUpgradeItem,
     AttackSpeedUpgradeItem,
@@ -272,5 +286,6 @@ export const items = [
     ThunderSplit,
     ThunderChain,
     ThunderPower,
-    ThunderRange
+    ThunderRange,
+    ThunderTrace
 ];

@@ -3,6 +3,7 @@ import type { BaseEntity } from "../core/entity";
 import { DataFormat, defineStats } from "../core/stats";
 import type { Bullet } from "../entities/bullet";
 import type { DamageLabel } from "../entities/damage-label";
+import type { Enemy } from "../entities/enemy";
 import { Player } from "../entities/player";
 import { radians } from "../util/math";
 import { randomFloat, rate } from "../util/random";
@@ -25,6 +26,7 @@ export type PlayerStats = {
     THUNDER_CHAIN_COUNT: number;
     THUNDER_MULTIPLIER: number;
     THUNDER_RANGE: number;
+    THUNDER_BALL_TRACE: number;
     MULTIPLE_SHOOT: number;
     SHOOT_OFFSET: number;
     LUCK: number;
@@ -42,6 +44,7 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     THUNDER_CHAIN_COUNT: DataFormat.VALUE,
     THUNDER_MULTIPLIER: DataFormat.PERCENT,
     THUNDER_RANGE: DataFormat.VALUE,
+    THUNDER_BALL_TRACE: DataFormat.ANGLE,
     MULTIPLE_SHOOT: DataFormat.VALUE,
     SHOOT_OFFSET: DataFormat.ANGLE,
     LUCK: DataFormat.VALUE,
@@ -90,6 +93,7 @@ export class PlayerPlane extends Player<PlayerStats> {
                 THUNDER_CHAIN_COUNT: 0,
                 THUNDER_MULTIPLIER: 1,
                 THUNDER_RANGE: 320,
+                THUNDER_BALL_TRACE: 0,
                 MULTIPLE_SHOOT: 0,
                 SHOOT_OFFSET: 3,
                 LUCK: 0,
@@ -223,6 +227,8 @@ export class PlayerPlane extends Player<PlayerStats> {
         centerY: number,
         rotation: number,
         chainTargetIds?: ReadonlySet<string>,
+        traceTarget?: Enemy,
+        findTraceTarget?: (source: BallThunderBullet) => Enemy | undefined,
     ): BallThunderBullet {
         const size = 24;
         const thunder = new BallThunderBullet({
@@ -233,6 +239,9 @@ export class PlayerPlane extends Player<PlayerStats> {
             damage: this.readStat("ATK")
                 * this.readStat("THUNDER_MULTIPLIER"),
             faction: "player",
+            traceAngle: this.readStat("THUNDER_BALL_TRACE"),
+            traceTarget,
+            findTraceTarget,
             remainingChains: Math.max(
                 0,
                 Math.floor(this.readStat("THUNDER_CHAIN_COUNT")),
