@@ -79,7 +79,10 @@ export async function startGame(): Promise<GameEngine> {
         player,
         input,
         itemPool,
-        (item) => getQualityWeight(item.quality as Quality),
+        (item) => getQualityWeight(
+            item.quality as Quality,
+            player.readStat("LUCK"),
+        ),
         (index) => engine.switchWave(index),
         () => engine.hasPendingWaveEnemies(),
         (enabled) => player.setControlsEnabled(enabled),

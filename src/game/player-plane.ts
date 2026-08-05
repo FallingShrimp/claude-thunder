@@ -15,6 +15,7 @@ export type PlayerStats = {
     CRIT_DMG: number;
     MULTIPLE_SHOOT: number;
     SHOOT_OFFSET: number;
+    LUCK: number;
 };
 
 export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
@@ -23,7 +24,8 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     CRIT_RATE: DataFormat.PERCENT,
     CRIT_DMG: DataFormat.PERCENT,
     MULTIPLE_SHOOT: DataFormat.VALUE,
-    SHOOT_OFFSET: DataFormat.ANGLE
+    SHOOT_OFFSET: DataFormat.ANGLE,
+    LUCK: DataFormat.VALUE,
 });
 
 export class PlayerPlane extends Player<PlayerStats> {
@@ -48,7 +50,8 @@ export class PlayerPlane extends Player<PlayerStats> {
                 CRIT_RATE: 0.05,
                 CRIT_DMG: 2,
                 MULTIPLE_SHOOT: 0,
-                SHOOT_OFFSET: 3
+                SHOOT_OFFSET: 3,
+                LUCK: 0,
             },
         );
 
