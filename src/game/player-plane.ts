@@ -86,7 +86,7 @@ export class PlayerPlane extends Player<PlayerStats> {
                 COUNTER_REFRACTION: 0,
                 THUNDER_SPLIT_COUNT: 0,
                 THUNDER_CHAIN_COUNT: 0,
-                THUNDER_MULTIPLIER: 0.5,
+                THUNDER_MULTIPLIER: 1,
                 MULTIPLE_SHOOT: 0,
                 SHOOT_OFFSET: 3,
                 LUCK: 0,
