@@ -14,6 +14,8 @@ export abstract class Plane<T extends StatsData = StatsData> extends BaseEntity 
     public speed: number;
     public fireCooldown: number;
 
+    private invincibilityRemaining: number = 0;
+
     protected constructor(
         id: string,
         position: Vector2,
@@ -36,6 +38,34 @@ export abstract class Plane<T extends StatsData = StatsData> extends BaseEntity 
 
     public abstract upgrade(): void;
 
+    public get isInvincible(): boolean {
+        return this.invincibilityRemaining > 0;
+    }
+
+    public invincible(duration: number): void {
+        if (!Number.isFinite(duration) || duration < 0) {
+            throw new RangeError(
+                "Invincibility duration must be a finite non-negative number.",
+            );
+        }
+
+        this.invincibilityRemaining = Math.max(
+            this.invincibilityRemaining,
+            duration,
+        );
+    }
+
+    public updateInvincibility(delta: number): void {
+        if (delta <= 0 || this.invincibilityRemaining === 0) {
+            return;
+        }
+
+        this.invincibilityRemaining = Math.max(
+            0,
+            this.invincibilityRemaining - delta,
+        );
+    }
+
     public readStat<K extends keyof T>(key: K): T[K] {
         return this.statsValue[key];
     }
@@ -47,7 +77,12 @@ export abstract class Plane<T extends StatsData = StatsData> extends BaseEntity 
     ): DamageLabel | undefined {
         void bullet;
 
-        if (!this.active || !Number.isFinite(damage) || damage <= 0) {
+        if (
+            !this.active
+            || this.isInvincible
+            || !Number.isFinite(damage)
+            || damage <= 0
+        ) {
             return undefined;
         }
 

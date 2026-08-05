@@ -60,7 +60,7 @@ export class GameCollisionSystem extends CollisionSystem {
                         return;
                     }
 
-                    const damageLabel = bulletPair.plane.takeDamage(
+                    const damageLabel = bulletPair.plane.takeGuardDamage(
                         bulletPair.bullet.damage * 0.75,
                         false,
                         bulletPair.bullet,
@@ -125,10 +125,14 @@ export class GameCollisionSystem extends CollisionSystem {
             : planePair.first.collisionDamage;
         const firstDamageLabel = planePair.first === player && parry === "perfect"
             ? undefined
-            : planePair.first.takeDamage(firstIncomingDamage, false);
+            : planePair.first === player && parry === "guard"
+                ? player.takeGuardDamage(firstIncomingDamage, false)
+                : planePair.first.takeDamage(firstIncomingDamage, false);
         const secondDamageLabel = planePair.second === player && parry === "perfect"
             ? undefined
-            : planePair.second.takeDamage(secondIncomingDamage, false);
+            : planePair.second === player && parry === "guard"
+                ? player.takeGuardDamage(secondIncomingDamage, false)
+                : planePair.second.takeDamage(secondIncomingDamage, false);
 
         if (firstDamageLabel !== undefined) {
             world.addEntity(firstDamageLabel);

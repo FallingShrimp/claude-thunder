@@ -1,3 +1,4 @@
+import { Plane } from "../entities/plane";
 import type { Renderer } from "../rendering/renderer";
 import type { GameSystem } from "./game-system";
 import type { GameWorld } from "./game-world";
@@ -56,6 +57,10 @@ export class GameEngine {
             this.world.environment?.update(deltaTime);
             for (const entity of this.world.entities) {
                 if (entity.active) {
+                    if (entity instanceof Plane) {
+                        entity.updateInvincibility(deltaTime);
+                    }
+
                     entity.ai(deltaTime);
                 }
             }

@@ -1,6 +1,8 @@
 import type { AudioSystem } from "../audio/audio-system";
 import type { BaseEntity } from "../core/entity";
 import { DataFormat, defineStats } from "../core/stats";
+import type { Bullet } from "../entities/bullet";
+import type { DamageLabel } from "../entities/damage-label";
 import { Player } from "../entities/player";
 import { radians } from "../util/math";
 import { randomFloat, rate } from "../util/random";
@@ -35,6 +37,9 @@ export class PlayerPlane extends Player<PlayerStats> {
     public static readonly perfectParryDuration: number = 1;
     public static readonly guardCooldownBase: number = 1;
     public static readonly guardCooldownPenalty: number = 1.5;
+    public static readonly damageInvincibilityDuration: number = 1;
+    public static readonly perfectParryInvincibilityDuration: number = 2;
+    public static readonly guardInvincibilityDuration: number = 0.5;
 
     public guardElapsed: number = 0;
     public guardCooldown: number = 0;
@@ -104,6 +109,30 @@ export class PlayerPlane extends Player<PlayerStats> {
         // 玩家通过道具升级，波次系统只升级敌机。
     }
 
+    public override takeDamage(
+        damage: number,
+        isCritical: boolean,
+        bullet?: Bullet,
+    ): DamageLabel | undefined {
+        const damageLabel = super.takeDamage(damage, isCritical, bullet);
+
+        if (damageLabel !== undefined) {
+            this.invincible(PlayerPlane.damageInvincibilityDuration);
+        }
+
+        return damageLabel;
+    }
+
+    public takeGuardDamage(
+        damage: number,
+        isCritical: boolean,
+        bullet?: Bullet,
+    ): DamageLabel | undefined {
+        const damageLabel = super.takeDamage(damage, isCritical, bullet);
+        this.invincible(PlayerPlane.guardInvincibilityDuration);
+        return damageLabel;
+    }
+
     public setControlsEnabled(enabled: boolean): void {
         this.controlsEnabled = enabled;
     }
@@ -115,6 +144,7 @@ export class PlayerPlane extends Player<PlayerStats> {
 
         if (this.guardElapsed <= PlayerPlane.perfectParryDuration) {
             this.endGuard(0);
+            this.invincible(PlayerPlane.perfectParryInvincibilityDuration);
             void this.playParryAudio(GAME_AUDIO_SOURCES.perfectParry);
             return "perfect";
         }
