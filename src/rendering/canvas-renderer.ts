@@ -5,9 +5,12 @@ import { Healthbar } from "../entities/healthbar";
 import { Item } from "../entities/item";
 import { PlayerPlane } from "../game/player-plane";
 import { ParticleSystem } from "../logic/systems/particle-system";
+import { CameraShakeController } from "./camera-shake-controller";
 import type { Renderer } from "./renderer";
 
 export class CanvasRenderer implements Renderer {
+    public readonly camera = new CameraShakeController();
+
     private readonly context: CanvasRenderingContext2D;
     private readonly itemAvatarCache = new Map<string, HTMLImageElement>();
     private readonly failedItemAvatars = new Set<string>();
@@ -31,9 +34,14 @@ export class CanvasRenderer implements Renderer {
             .filter((target) => target.visible)
             .sort((left, right) => left.zIndex - right.zIndex);
 
+        this.context.save();
+        this.context.translate(this.camera.offset.x, this.camera.offset.y);
+
         for (const target of sortedTargets) {
             this.renderTarget(target);
         }
+
+        this.context.restore();
     }
 
     private renderTarget(target: RenderableTarget): void {

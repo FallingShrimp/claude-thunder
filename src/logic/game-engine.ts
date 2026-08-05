@@ -52,6 +52,7 @@ export class GameEngine {
 
         if (!this.world.paused) {
             this.world.elapsedTime += deltaTime;
+            this.renderer.camera.update(deltaTime);
             this.world.environment?.update(deltaTime);
             for (const entity of this.world.entities) {
                 if (entity.active) {

@@ -10,6 +10,17 @@ import { emitRing } from "../particles/ring";
 import { PlayerPlane, type ParryResult } from "../player-plane";
 
 export class GameCollisionSystem extends CollisionSystem {
+    public constructor(
+        private readonly shakeCamera: (
+            amplitude: number,
+            duration: number,
+            frequency?: number,
+            decay?: number,
+        ) => void = () => undefined,
+    ) {
+        super();
+    }
+
     protected override shouldTest(
         left: BaseEntity,
         right: BaseEntity,
@@ -162,6 +173,12 @@ export class GameCollisionSystem extends CollisionSystem {
         const centerY = player.position.y + player.size.height / 2;
         const perfect = result === "perfect";
 
+        this.shakeCamera(
+            perfect ? 30 : 7,
+            perfect ? 0.72 : 0.24,
+            perfect ? 24 : 34,
+            perfect ? 1.35 : 2.4,
+        );
         emitRing(world.particles, {
             x: centerX,
             y: centerY,

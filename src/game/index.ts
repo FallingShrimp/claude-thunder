@@ -99,7 +99,12 @@ export async function startGame(): Promise<GameEngine> {
         },
     ]);
     const itemPool: ItemFactory[] = items.map(e => () => new e());
-    const systems: GameSystem[] = [world.particles, new GameCollisionSystem()];
+    const systems: GameSystem[] = [
+        world.particles,
+        new GameCollisionSystem((amplitude, duration, frequency, decay) => {
+            renderer.camera.shake({ amplitude, duration, frequency, decay });
+        }),
+    ];
     const engine = new GameEngine(world, renderer, systems, waves);
 
     systems.push(new WaveRewardSystem(
