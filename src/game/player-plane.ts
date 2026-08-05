@@ -7,6 +7,7 @@ import { Player } from "../entities/player";
 import { radians } from "../util/math";
 import { randomFloat, rate } from "../util/random";
 import { GAME_AUDIO_SOURCES } from "./audio-assets";
+import { BallThunderBullet } from "./bullets/ball-thunder-bullet";
 import { BasicBullet } from "./bullets/basic-bullet";
 import { FireballBullet } from "./bullets/fireball-bullet";
 import { ThunderBullet } from "./bullets/thunder-bullet";
@@ -196,8 +197,8 @@ export class PlayerPlane extends Player<PlayerStats> {
             Math.floor(this.readStat("THUNDER_CHAIN_COUNT")),
         ),
         chainTargetIds?: ReadonlySet<string>,
-    ): void {
-        this.spawnEntity(new ThunderBullet({
+    ): ThunderBullet {
+        const thunder = new ThunderBullet({
             launcher: this,
             originX,
             originY,
@@ -208,7 +209,36 @@ export class PlayerPlane extends Player<PlayerStats> {
             faction: "player",
             remainingChains,
             chainTargetIds,
-        }));
+        });
+
+        this.spawnEntity(thunder);
+        return thunder;
+    }
+
+    public emitBallThunder(
+        centerX: number,
+        centerY: number,
+        rotation: number,
+        chainTargetIds?: ReadonlySet<string>,
+    ): BallThunderBullet {
+        const size = 24;
+        const thunder = new BallThunderBullet({
+            launcher: this,
+            x: centerX - size / 2,
+            y: centerY - size / 2,
+            rotation,
+            damage: this.readStat("ATK")
+                * this.readStat("THUNDER_MULTIPLIER"),
+            faction: "player",
+            remainingChains: Math.max(
+                0,
+                Math.floor(this.readStat("THUNDER_CHAIN_COUNT")),
+            ),
+            chainTargetIds,
+        });
+
+        this.spawnEntity(thunder);
+        return thunder;
     }
 
     public setControlsEnabled(enabled: boolean): void {

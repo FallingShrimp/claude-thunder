@@ -204,7 +204,7 @@ export class ChainCounter extends PlayerStatUpgradeItem<PlayerStats> {
 export class ThunderSplit extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "攻击命中后分裂出雷电",
+            "攻击产生球状闪电",
             ".",
             Quality.NORMAL,
             PLAYER_STATS_FORMATS,
@@ -218,7 +218,7 @@ export class ThunderSplit extends PlayerStatUpgradeItem<PlayerStats> {
 export class ThunderChain extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "雷电可连锁攻击",
+            "球状闪电可连锁放电",
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,

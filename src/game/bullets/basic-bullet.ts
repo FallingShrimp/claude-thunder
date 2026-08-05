@@ -1,6 +1,6 @@
 import type { BaseEntity } from "../../core/entity";
 import { Bullet, type BulletFaction } from "../../entities/bullet";
-import { PlayerPlane } from "../player-plane";
+import { Player } from "../../entities/player";
 
 export interface BasicBulletOptions {
     id?: string;
@@ -56,11 +56,17 @@ export class BasicBullet extends Bullet {
     }
 
     public override judgeCritical(): [boolean, number] {
-        if (this.launcher instanceof PlayerPlane) {
-            const state = Math.random() < this.launcher.statsValue.CRIT_RATE;
-            return [state, this.damage * (state ? this.launcher.statsValue.CRIT_DMG : 1)];
-        } else {
-            return [false, this.damage];
+        if (this.launcher instanceof Player) {
+            const stats = this.launcher.statsValue as {
+                CRIT_RATE?: number;
+                CRIT_DMG?: number;
+            };
+            const criticalRate = stats.CRIT_RATE ?? 0;
+            const criticalDamage = stats.CRIT_DMG ?? 1;
+            const state = Math.random() < criticalRate;
+            return [state, this.damage * (state ? criticalDamage : 1)];
         }
+
+        return [false, this.damage];
     }
 }

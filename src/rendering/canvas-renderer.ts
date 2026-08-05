@@ -3,6 +3,7 @@ import type { RenderableTarget } from "../core/renderable-target";
 import { DamageLabel } from "../entities/damage-label";
 import { Healthbar } from "../entities/healthbar";
 import { Item } from "../entities/item";
+import { BallThunderBullet } from "../game/bullets/ball-thunder-bullet";
 import { ThunderBullet } from "../game/bullets/thunder-bullet";
 import { PlayerPlane } from "../game/player-plane";
 import { ParticleSystem } from "../logic/systems/particle-system";
@@ -71,6 +72,11 @@ export class CanvasRenderer implements Renderer {
             return;
         }
 
+        if (target instanceof BallThunderBullet) {
+            this.renderBallThunder(target);
+            return;
+        }
+
         if (target instanceof DamageLabel) {
             this.renderDamageLabel(target);
             return;
@@ -126,6 +132,51 @@ export class CanvasRenderer implements Renderer {
         if (target instanceof PlayerPlane && target.guarding) {
             this.renderPlayerShield(target);
         }
+    }
+
+    private renderBallThunder(ball: BallThunderBullet): void {
+        const { context } = this;
+        const centerX = ball.position.x + ball.size.width / 2;
+        const centerY = ball.position.y + ball.size.height / 2;
+        const radius = ball.size.width / 2;
+
+        context.save();
+        context.globalAlpha = ball.opacity;
+        context.translate(centerX, centerY);
+        context.shadowColor = "#5defff";
+        context.shadowBlur = 18;
+        context.fillStyle = "#3ddfff";
+        context.beginPath();
+        context.arc(0, 0, radius, 0, Math.PI * 2);
+        context.fill();
+        context.shadowBlur = 7;
+        context.fillStyle = "#efffff";
+        context.beginPath();
+        context.arc(0, 0, radius * 0.45, 0, Math.PI * 2);
+        context.fill();
+        context.strokeStyle = "#dfffff";
+        context.lineWidth = 1.5;
+
+        for (let index = 0; index < 4; index++) {
+            const angle = Math.random() * Math.PI * 2;
+            const innerRadius = radius * 0.25;
+            context.beginPath();
+            context.moveTo(
+                Math.cos(angle) * innerRadius,
+                Math.sin(angle) * innerRadius,
+            );
+            context.lineTo(
+                Math.cos(angle + 0.25) * radius * 0.7,
+                Math.sin(angle + 0.25) * radius * 0.7,
+            );
+            context.lineTo(
+                Math.cos(angle) * radius * 1.2,
+                Math.sin(angle) * radius * 1.2,
+            );
+            context.stroke();
+        }
+
+        context.restore();
     }
 
     private renderThunder(thunder: ThunderBullet): void {

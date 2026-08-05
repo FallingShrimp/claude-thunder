@@ -30,15 +30,43 @@ export abstract class Bullet extends BaseEntity {
     }
 
     public canDamage(target: Plane): boolean {
-        return !this.hitTargets.has(target.id)
-            && (
-                (this.launcher instanceof Player && target instanceof Enemy)
-                || (this.launcher instanceof Enemy && target instanceof Player)
-            );
+        return !this.hitTargets.has(target.id) && this.isOpposingTarget(target);
     }
 
     public hit(target: Plane): DamageLabel | undefined {
-        if (!this.active || !target.active || !this.canDamage(target)) {
+        if (!this.canDamage(target)) {
+            return undefined;
+        }
+
+        const damageLabel = this.resolveHit(target);
+
+        if (this.penetrate > 0) {
+            this.penetrate--;
+        } else {
+            this.active = false;
+        }
+
+        return damageLabel;
+    }
+
+    public hitOnSpawn(target: Plane): DamageLabel | undefined {
+        if (
+            this.hitTargets.has(target.id)
+            || !this.isOpposingTarget(target)
+        ) {
+            return undefined;
+        }
+
+        return this.resolveHit(target);
+    }
+
+    private isOpposingTarget(target: Plane): boolean {
+        return (this.launcher instanceof Player && target instanceof Enemy)
+            || (this.launcher instanceof Enemy && target instanceof Player);
+    }
+
+    private resolveHit(target: Plane): DamageLabel | undefined {
+        if (!this.active || !target.active) {
             return undefined;
         }
 
@@ -49,12 +77,6 @@ export abstract class Bullet extends BaseEntity {
             critical,
             this,
         );
-
-        if (this.penetrate > 0) {
-            this.penetrate--;
-        } else {
-            this.active = false;
-        }
 
         return damageLabel;
     }

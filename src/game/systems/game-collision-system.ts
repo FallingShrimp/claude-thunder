@@ -5,6 +5,7 @@ import { Plane } from "../../entities/plane";
 import { Player } from "../../entities/player";
 import { CollisionSystem } from "../../logic/collision-system";
 import type { GameWorld } from "../../logic/game-world";
+import { BallThunderBullet } from "../bullets/ball-thunder-bullet";
 import { FireballBullet } from "../bullets/fireball-bullet";
 import { ThunderBullet } from "../bullets/thunder-bullet";
 import { emitBurst } from "../particles/burst";
@@ -105,7 +106,10 @@ export class GameCollisionSystem extends CollisionSystem {
                     );
                 }
 
-                if (bulletPair.bullet instanceof ThunderBullet) {
+                if (
+                    bulletPair.bullet instanceof ThunderBullet
+                    || bulletPair.bullet instanceof BallThunderBullet
+                ) {
                     this.chainThunder(
                         world,
                         bulletPair.bullet,
@@ -113,6 +117,7 @@ export class GameCollisionSystem extends CollisionSystem {
                     );
                 } else if (bulletPair.bullet.launcher instanceof PlayerPlane) {
                     this.splitThunder(
+                        world,
                         bulletPair.bullet.launcher,
                         bulletPair.plane,
                     );
@@ -219,7 +224,11 @@ export class GameCollisionSystem extends CollisionSystem {
         }
     }
 
-    private splitThunder(player: PlayerPlane, hitEnemy: Enemy): void {
+    private splitThunder(
+        world: GameWorld,
+        player: PlayerPlane,
+        hitEnemy: Enemy,
+    ): void {
         const splitCount = Math.max(
             0,
             Math.floor(player.readStat("THUNDER_SPLIT_COUNT")),
@@ -234,20 +243,23 @@ export class GameCollisionSystem extends CollisionSystem {
         const hitTargetIds = new Set([hitEnemy.id]);
 
         for (let index = 0; index < splitCount; index++) {
-            player.emitThunder(
+            const thunder = player.emitBallThunder(
                 originX,
                 originY,
                 Math.random() * Math.PI * 2,
-                ThunderBullet.splitLength,
-                undefined,
                 hitTargetIds,
             );
+            const damageLabel = thunder.hitOnSpawn(hitEnemy);
+
+            if (damageLabel !== undefined) {
+                world.addEntity(damageLabel);
+            }
         }
     }
 
     private chainThunder(
         world: GameWorld,
-        thunder: ThunderBullet,
+        thunder: ThunderBullet | BallThunderBullet,
         hitEnemy: Enemy,
     ): void {
         if (thunder.remainingChains <= 0) {
@@ -293,7 +305,7 @@ export class GameCollisionSystem extends CollisionSystem {
         const offsetY = targetY - originY;
         const nextChains = thunder.remainingChains - 1;
         thunder.remainingChains = 0;
-        thunder.launcher.emitThunder(
+        const chainedThunder = thunder.launcher.emitThunder(
             originX,
             originY,
             Math.atan2(offsetY, offsetX),
@@ -301,6 +313,11 @@ export class GameCollisionSystem extends CollisionSystem {
             nextChains,
             thunder.chainTargetIds,
         );
+        const damageLabel = chainedThunder.hitOnSpawn(hitEnemy);
+
+        if (damageLabel !== undefined) {
+            world.addEntity(damageLabel);
+        }
     }
 
     private refractFireball(
@@ -332,7 +349,7 @@ export class GameCollisionSystem extends CollisionSystem {
         const targetX = target.position.x + target.size.width / 2;
         const targetY = target.position.y + target.size.height / 2;
 
-        world.addEntity(new FireballBullet({
+        const refractedFireball = new FireballBullet({
             launcher: fireball.launcher,
             x: originX - 20,
             y: originY - 16,
@@ -341,7 +358,14 @@ export class GameCollisionSystem extends CollisionSystem {
             faction: fireball.faction,
             remainingRefractions: nextRefractions,
             refractionTargetIds: fireball.refractionTargetIds,
-        }));
+        });
+
+        world.addEntity(refractedFireball);
+        const damageLabel = refractedFireball.hitOnSpawn(hitEnemy);
+
+        if (damageLabel !== undefined) {
+            world.addEntity(damageLabel);
+        }
     }
 
     private emitCounterAttacks(

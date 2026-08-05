@@ -1,3 +1,5 @@
+export { BallThunderBullet } from "./ball-thunder-bullet";
+export type { BallThunderBulletOptions } from "./ball-thunder-bullet";
 export { BasicBullet } from "./basic-bullet";
 export type { BasicBulletOptions } from "./basic-bullet";
 export { DangerBullet } from "./danger-bullet";
