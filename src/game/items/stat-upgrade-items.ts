@@ -214,6 +214,21 @@ export class ChainCounter extends PlayerStatUpgradeItem<PlayerStats> {
     }
 }
 
+export class CounterTrace extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "反击火球可追踪敌人",
+            ".",
+            Quality.RARE,
+            PLAYER_STATS_FORMATS,
+            {
+                COUNTER_TRACE: 0.25
+            },
+            ["反击"]
+        );
+    }
+}
+
 export class ThunderSplit extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
@@ -301,6 +316,7 @@ export const items = [
     CounterAttack,
     CounterCount,
     ChainCounter,
+    CounterTrace,
     ThunderSplit,
     ThunderChain,
     ThunderPower,

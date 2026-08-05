@@ -170,7 +170,11 @@ export class GameCollisionSystem extends CollisionSystem {
             );
 
             for (let index = 0; index < counterCount; index++) {
-                player.counterAttackAtAngle(Math.random() * Math.PI * 2);
+                player.counterAttackAtAngle(
+                    Math.random() * Math.PI * 2,
+                    undefined,
+                    (source) => this.findNearestFireballTarget(world, source),
+                );
             }
 
             this.emitParryEffect(world, player, parry);
@@ -535,6 +539,12 @@ export class GameCollisionSystem extends CollisionSystem {
             rotation: Math.atan2(targetY - originY, targetX - originX),
             damage: fireball.damage,
             faction: fireball.faction,
+            traceAngle: fireball.traceAngle,
+            traceTarget: target,
+            findTraceTarget: (source) => this.findNearestFireballTarget(
+                world,
+                source,
+            ),
             remainingRefractions: nextRefractions,
             refractionTargetIds: fireball.refractionTargetIds,
         });
@@ -547,12 +557,48 @@ export class GameCollisionSystem extends CollisionSystem {
         }
     }
 
+    private findNearestFireballTarget(
+        world: GameWorld,
+        source: FireballBullet,
+    ): Enemy | undefined {
+        const sourceX = source.position.x + source.size.width / 2;
+        const sourceY = source.position.y + source.size.height / 2;
+        let nearest: Enemy | undefined;
+        let nearestDistanceSquared = Number.POSITIVE_INFINITY;
+
+        for (const entity of world.entities) {
+            if (
+                !(entity instanceof Enemy)
+                || !entity.active
+                || source.refractionTargetIds.has(entity.id)
+            ) {
+                continue;
+            }
+
+            const targetX = entity.position.x + entity.size.width / 2;
+            const targetY = entity.position.y + entity.size.height / 2;
+            const offsetX = targetX - sourceX;
+            const offsetY = targetY - sourceY;
+            const distanceSquared = offsetX * offsetX + offsetY * offsetY;
+
+            if (distanceSquared < nearestDistanceSquared) {
+                nearest = entity;
+                nearestDistanceSquared = distanceSquared;
+            }
+        }
+
+        return nearest;
+    }
+
     private emitCounterAttacks(
         world: GameWorld,
         player: PlayerPlane,
         primaryTarget: BaseEntity,
     ): void {
-        player.counterAttack(primaryTarget);
+        player.counterAttack(
+            primaryTarget,
+            (source) => this.findNearestFireballTarget(world, source),
+        );
 
         const extraCount = Math.max(
             0,
@@ -577,11 +623,18 @@ export class GameCollisionSystem extends CollisionSystem {
             const selected = candidates[selectedIndex];
             candidates[selectedIndex] = candidates[index];
             candidates[index] = selected;
-            player.counterAttack(selected);
+            player.counterAttack(
+                selected,
+                (source) => this.findNearestFireballTarget(world, source),
+            );
         }
 
         for (let index = selectedCount; index < extraCount; index++) {
-            player.counterAttackAtAngle(Math.random() * Math.PI * 2);
+            player.counterAttackAtAngle(
+                Math.random() * Math.PI * 2,
+                undefined,
+                (source) => this.findNearestFireballTarget(world, source),
+            );
         }
     }
 

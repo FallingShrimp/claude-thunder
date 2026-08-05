@@ -3,7 +3,7 @@ import type { BaseEntity } from "../core/entity";
 import { DataFormat, defineStats } from "../core/stats";
 import type { Bullet } from "../entities/bullet";
 import type { DamageLabel } from "../entities/damage-label";
-import type { Enemy } from "../entities/enemy";
+import { Enemy } from "../entities/enemy";
 import { Player } from "../entities/player";
 import { radians } from "../util/math";
 import { randomFloat, rate } from "../util/random";
@@ -22,6 +22,7 @@ export type PlayerStats = {
     COUNTER_MULTIPLIER: number;
     COUNTER_COUNT: number;
     COUNTER_REFRACTION: number;
+    COUNTER_TRACE: number;
     THUNDER_SPLIT_COUNT: number;
     THUNDER_CHAIN_COUNT: number;
     THUNDER_MULTIPLIER: number;
@@ -40,6 +41,7 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     COUNTER_MULTIPLIER: DataFormat.PERCENT,
     COUNTER_COUNT: DataFormat.VALUE,
     COUNTER_REFRACTION: DataFormat.VALUE,
+    COUNTER_TRACE: DataFormat.ANGLE,
     THUNDER_SPLIT_COUNT: DataFormat.VALUE,
     THUNDER_CHAIN_COUNT: DataFormat.VALUE,
     THUNDER_MULTIPLIER: DataFormat.PERCENT,
@@ -89,6 +91,7 @@ export class PlayerPlane extends Player<PlayerStats> {
                 COUNTER_MULTIPLIER: 2,
                 COUNTER_COUNT: 3,
                 COUNTER_REFRACTION: 0,
+                COUNTER_TRACE: 0,
                 THUNDER_SPLIT_COUNT: 0,
                 THUNDER_CHAIN_COUNT: 0,
                 THUNDER_MULTIPLIER: 1,
@@ -161,19 +164,27 @@ export class PlayerPlane extends Player<PlayerStats> {
         return damageLabel;
     }
 
-    public counterAttack(target: BaseEntity): void {
+    public counterAttack(
+        target: BaseEntity,
+        findTraceTarget?: (source: FireballBullet) => Enemy | undefined,
+    ): void {
         const centerX = this.position.x + this.size.width / 2;
         const centerY = this.position.y + this.size.height / 2;
         const targetCenterX = target.position.x + target.size.width / 2;
         const targetCenterY = target.position.y + target.size.height / 2;
 
-        this.counterAttackAtAngle(Math.atan2(
-            targetCenterY - centerY,
-            targetCenterX - centerX,
-        ));
+        this.counterAttackAtAngle(
+            Math.atan2(targetCenterY - centerY, targetCenterX - centerX),
+            target instanceof Enemy ? target : undefined,
+            findTraceTarget,
+        );
     }
 
-    public counterAttackAtAngle(rotation: number): void {
+    public counterAttackAtAngle(
+        rotation: number,
+        traceTarget?: Enemy,
+        findTraceTarget?: (source: FireballBullet) => Enemy | undefined,
+    ): void {
         const bulletWidth = 40;
         const bulletHeight = 32;
         const centerX = this.position.x + this.size.width / 2;
@@ -187,6 +198,9 @@ export class PlayerPlane extends Player<PlayerStats> {
             damage: this.readStat("ATK")
                 * (1 + this.readStat("COUNTER_MULTIPLIER")),
             faction: "player",
+            traceAngle: this.readStat("COUNTER_TRACE"),
+            traceTarget,
+            findTraceTarget,
             remainingRefractions: Math.max(
                 0,
                 Math.floor(this.readStat("COUNTER_REFRACTION")),
