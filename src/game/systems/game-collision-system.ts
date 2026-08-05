@@ -274,12 +274,19 @@ export class GameCollisionSystem extends CollisionSystem {
             return;
         }
 
+        if (!(thunder.launcher instanceof PlayerPlane)) {
+            return;
+        }
+
         thunder.chainTargetIds.add(hitEnemy.id);
         const originX = hitEnemy.position.x + hitEnemy.size.width / 2;
         const originY = hitEnemy.position.y + hitEnemy.size.height / 2;
+        const thunderRange = Math.max(
+            0,
+            thunder.launcher.readStat("THUNDER_RANGE"),
+        );
         let nearest: Enemy | undefined;
-        let nearestDistanceSquared = ThunderBullet.chainRange
-            * ThunderBullet.chainRange;
+        let nearestDistanceSquared = thunderRange * thunderRange;
 
         for (const entity of world.entities) {
             if (
@@ -303,7 +310,7 @@ export class GameCollisionSystem extends CollisionSystem {
             }
         }
 
-        if (!(thunder.launcher instanceof PlayerPlane) || nearest === undefined) {
+        if (nearest === undefined) {
             return;
         }
 

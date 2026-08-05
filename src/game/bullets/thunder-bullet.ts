@@ -16,7 +16,6 @@ export interface ThunderBulletOptions {
 }
 
 export class ThunderBullet extends Bullet {
-    public static readonly chainRange: number = 320;
     public static readonly splitLength: number = 180;
     public static readonly thickness: number = 6;
     public static readonly lifetime: number = 0.12;

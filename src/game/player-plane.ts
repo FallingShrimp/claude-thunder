@@ -24,6 +24,7 @@ export type PlayerStats = {
     THUNDER_SPLIT_COUNT: number;
     THUNDER_CHAIN_COUNT: number;
     THUNDER_MULTIPLIER: number;
+    THUNDER_RANGE: number;
     MULTIPLE_SHOOT: number;
     SHOOT_OFFSET: number;
     LUCK: number;
@@ -40,6 +41,7 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     THUNDER_SPLIT_COUNT: DataFormat.VALUE,
     THUNDER_CHAIN_COUNT: DataFormat.VALUE,
     THUNDER_MULTIPLIER: DataFormat.PERCENT,
+    THUNDER_RANGE: DataFormat.VALUE,
     MULTIPLE_SHOOT: DataFormat.VALUE,
     SHOOT_OFFSET: DataFormat.ANGLE,
     LUCK: DataFormat.VALUE,
@@ -87,6 +89,7 @@ export class PlayerPlane extends Player<PlayerStats> {
                 THUNDER_SPLIT_COUNT: 0,
                 THUNDER_CHAIN_COUNT: 0,
                 THUNDER_MULTIPLIER: 1,
+                THUNDER_RANGE: 320,
                 MULTIPLE_SHOOT: 0,
                 SHOOT_OFFSET: 3,
                 LUCK: 0,

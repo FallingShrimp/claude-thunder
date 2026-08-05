@@ -243,6 +243,20 @@ export class ThunderPower extends PlayerStatUpgradeItem<PlayerStats> {
     }
 }
 
+export class ThunderRange extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "连锁雷电的距离更长",
+            ".",
+            Quality.RARE,
+            PLAYER_STATS_FORMATS,
+            {
+                THUNDER_RANGE: 30
+            }
+        );
+    }
+}
+
 export const items = [
     AttackPowerUpgradeItem,
     AttackSpeedUpgradeItem,
