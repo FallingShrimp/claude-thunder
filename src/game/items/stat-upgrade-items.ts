@@ -190,7 +190,7 @@ export class CounterCount extends PlayerStatUpgradeItem<PlayerStats> {
 export class ChainCounter extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "连锁反击",
+            "反击火球在敌人间弹射",
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
@@ -206,7 +206,7 @@ export class ThunderSplit extends PlayerStatUpgradeItem<PlayerStats> {
         super(
             "攻击产生球状闪电",
             ".",
-            Quality.RARE,
+            Quality.NORMAL,
             PLAYER_STATS_FORMATS,
             {
                 THUNDER_SPLIT_COUNT: 1
