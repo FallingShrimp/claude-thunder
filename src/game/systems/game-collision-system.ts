@@ -5,6 +5,7 @@ import { Plane } from "../../entities/plane";
 import { Player } from "../../entities/player";
 import { CollisionSystem } from "../../logic/collision-system";
 import type { GameWorld } from "../../logic/game-world";
+import { FireballBullet } from "../bullets/fireball-bullet";
 import { emitBurst } from "../particles/burst";
 import { emitRing } from "../particles/ring";
 import { PlayerPlane, type ParryResult } from "../player-plane";
@@ -80,6 +81,18 @@ export class GameCollisionSystem extends CollisionSystem {
             }
 
             const damageLabel = bulletPair.bullet.hit(bulletPair.plane);
+
+            if (
+                damageLabel !== undefined
+                && bulletPair.bullet instanceof FireballBullet
+                && bulletPair.plane instanceof Enemy
+            ) {
+                this.refractFireball(
+                    world,
+                    bulletPair.bullet,
+                    bulletPair.plane,
+                );
+            }
 
             if (damageLabel !== undefined) {
                 world.addEntity(damageLabel);
@@ -179,6 +192,47 @@ export class GameCollisionSystem extends CollisionSystem {
                 drag: 2,
             });
         }
+    }
+
+    private refractFireball(
+        world: GameWorld,
+        fireball: FireballBullet,
+        hitEnemy: Enemy,
+    ): void {
+        if (fireball.remainingRefractions <= 0) {
+            return;
+        }
+
+        fireball.refractionTargetIds.add(hitEnemy.id);
+        const candidates = world.entities.filter(
+            (entity): entity is Enemy => entity instanceof Enemy
+                && entity.active
+                && entity !== hitEnemy
+                && !fireball.refractionTargetIds.has(entity.id),
+        );
+
+        if (candidates.length === 0) {
+            return;
+        }
+
+        const nextRefractions = fireball.remainingRefractions - 1;
+        fireball.remainingRefractions = 0;
+        const target = candidates[Math.floor(Math.random() * candidates.length)];
+        const originX = hitEnemy.position.x + hitEnemy.size.width / 2;
+        const originY = hitEnemy.position.y + hitEnemy.size.height / 2;
+        const targetX = target.position.x + target.size.width / 2;
+        const targetY = target.position.y + target.size.height / 2;
+
+        world.addEntity(new FireballBullet({
+            launcher: fireball.launcher,
+            x: originX - 20,
+            y: originY - 16,
+            rotation: Math.atan2(targetY - originY, targetX - originX),
+            damage: fireball.damage * 0.85,
+            faction: fireball.faction,
+            remainingRefractions: nextRefractions,
+            refractionTargetIds: fireball.refractionTargetIds,
+        }));
     }
 
     private emitCounterAttacks(

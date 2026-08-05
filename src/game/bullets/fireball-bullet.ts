@@ -1,8 +1,15 @@
 import { BasicBullet, type BasicBulletOptions } from "./basic-bullet";
 
-export type FireballBulletOptions = Omit<BasicBulletOptions, "speed">;
+export interface FireballBulletOptions
+    extends Omit<BasicBulletOptions, "speed"> {
+    remainingRefractions?: number;
+    refractionTargetIds?: ReadonlySet<string>;
+}
 
 export class FireballBullet extends BasicBullet {
+    public remainingRefractions: number;
+    public readonly refractionTargetIds: Set<string>;
+
     private readonly travelRotation: number;
 
     public constructor(options: FireballBulletOptions) {
@@ -12,6 +19,11 @@ export class FireballBullet extends BasicBullet {
         });
 
         this.travelRotation = options.rotation;
+        this.remainingRefractions = Math.max(
+            0,
+            Math.floor(options.remainingRefractions ?? 0),
+        );
+        this.refractionTargetIds = new Set(options.refractionTargetIds);
         this.appearance = { shape: "triangle", color: "#ff6b1a" };
         this.size = { width: 40, height: 32 };
         this.collisionBounds.size = { ...this.size };

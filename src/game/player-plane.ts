@@ -18,6 +18,7 @@ export type PlayerStats = {
     CRIT_DMG: number;
     COUNTER_MULTIPLIER: number;
     COUNTER_COUNT: number;
+    COUNTER_REFRACTION: number;
     MULTIPLE_SHOOT: number;
     SHOOT_OFFSET: number;
     LUCK: number;
@@ -30,6 +31,7 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     CRIT_DMG: DataFormat.PERCENT,
     COUNTER_MULTIPLIER: DataFormat.PERCENT,
     COUNTER_COUNT: DataFormat.VALUE,
+    COUNTER_REFRACTION: DataFormat.VALUE,
     MULTIPLE_SHOOT: DataFormat.VALUE,
     SHOOT_OFFSET: DataFormat.ANGLE,
     LUCK: DataFormat.VALUE,
@@ -73,6 +75,7 @@ export class PlayerPlane extends Player<PlayerStats> {
                 CRIT_DMG: 2,
                 COUNTER_MULTIPLIER: 2,
                 COUNTER_COUNT: 3,
+                COUNTER_REFRACTION: 0,
                 MULTIPLE_SHOOT: 0,
                 SHOOT_OFFSET: 3,
                 LUCK: 0,
@@ -166,6 +169,10 @@ export class PlayerPlane extends Player<PlayerStats> {
             damage: this.readStat("ATK")
                 * (1 + this.readStat("COUNTER_MULTIPLIER")),
             faction: "player",
+            remainingRefractions: Math.max(
+                0,
+                Math.floor(this.readStat("COUNTER_REFRACTION")),
+            ),
         }));
     }
 

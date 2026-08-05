@@ -176,12 +176,26 @@ export class CounterAttack extends PlayerStatUpgradeItem<PlayerStats> {
 export class CounterCount extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "可反击更多敌人",
+            "额外反击一个敌人",
             ".",
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
             {
                 COUNTER_COUNT: 1
+            }
+        );
+    }
+}
+
+export class ChainCounter extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "连锁反击",
+            ".",
+            Quality.RARE,
+            PLAYER_STATS_FORMATS,
+            {
+                COUNTER_REFRACTION: 1
             }
         );
     }
@@ -197,5 +211,6 @@ export const items = [
     EpicShoot,
     Luck,
     CounterAttack,
-    CounterCount
+    CounterCount,
+    ChainCounter
 ];
