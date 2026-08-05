@@ -84,11 +84,11 @@ export class CriticalRateUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "暴击率 +3%",
+            "暴击率 +4%",
             "./items/critical-rate.svg",
-            Quality.RARE,
+            Quality.EPIC,
             PLAYER_STATS_FORMATS,
-            { CRIT_RATE: 0.03 },
+            { CRIT_RATE: 0.04 },
         );
     }
 }
@@ -97,11 +97,11 @@ export class CriticalDamageUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "暴击伤害 +10%",
+            "暴击伤害 +25%",
             "./items/critical-damage.svg",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
-            { CRIT_DMG: 0.1 },
+            { CRIT_DMG: 0.25 },
         );
     }
 }
@@ -135,7 +135,7 @@ export class EpicShoot extends PlayerStatUpgradeItem<PlayerStats> {
         super(
             "攻击速度 +1\n散射 +2°",
             ".",
-            Quality.EPIC,
+            Quality.LEGENDARY,
             PLAYER_STATS_FORMATS,
             {
                 ATK_SPD: 1,
