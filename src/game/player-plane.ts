@@ -8,6 +8,7 @@ import { radians } from "../util/math";
 import { randomFloat, rate } from "../util/random";
 import { GAME_AUDIO_SOURCES } from "./audio-assets";
 import { BasicBullet } from "./bullets/basic-bullet";
+import { FireballBullet } from "./bullets/fireball-bullet";
 import type { KeyboardInput } from "./keyboard-input";
 
 export type PlayerStats = {
@@ -15,6 +16,7 @@ export type PlayerStats = {
     ATK_SPD: number;
     CRIT_RATE: number;
     CRIT_DMG: number;
+    COUNTER_MULTIPLIER: number;
     MULTIPLE_SHOOT: number;
     SHOOT_OFFSET: number;
     LUCK: number;
@@ -25,6 +27,7 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     ATK_SPD: DataFormat.FREQUENCY,
     CRIT_RATE: DataFormat.PERCENT,
     CRIT_DMG: DataFormat.PERCENT,
+    COUNTER_MULTIPLIER: DataFormat.PERCENT,
     MULTIPLE_SHOOT: DataFormat.VALUE,
     SHOOT_OFFSET: DataFormat.ANGLE,
     LUCK: DataFormat.VALUE,
@@ -66,6 +69,7 @@ export class PlayerPlane extends Player<PlayerStats> {
                 ATK_SPD: 3,
                 CRIT_RATE: 0.05,
                 CRIT_DMG: 2,
+                COUNTER_MULTIPLIER: 1,
                 MULTIPLE_SHOOT: 0,
                 SHOOT_OFFSET: 3,
                 LUCK: 0,
@@ -131,6 +135,28 @@ export class PlayerPlane extends Player<PlayerStats> {
         const damageLabel = super.takeDamage(damage, isCritical, bullet);
         this.invincible(PlayerPlane.guardInvincibilityDuration);
         return damageLabel;
+    }
+
+    public counterAttack(target: BaseEntity): void {
+        const bulletWidth = 20;
+        const bulletHeight = 16;
+        const centerX = this.position.x + this.size.width / 2;
+        const centerY = this.position.y + this.size.height / 2;
+        const targetCenterX = target.position.x + target.size.width / 2;
+        const targetCenterY = target.position.y + target.size.height / 2;
+
+        this.spawnEntity(new FireballBullet({
+            launcher: this,
+            x: centerX - bulletWidth / 2,
+            y: centerY - bulletHeight / 2,
+            rotation: Math.atan2(
+                targetCenterY - centerY,
+                targetCenterX - centerX,
+            ),
+            damage: this.readStat("ATK")
+                * (1 + this.readStat("COUNTER_MULTIPLIER")),
+            faction: "player",
+        }));
     }
 
     public setControlsEnabled(enabled: boolean): void {

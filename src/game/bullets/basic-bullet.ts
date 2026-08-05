@@ -14,6 +14,8 @@ export interface BasicBulletOptions {
 }
 
 export class BasicBullet extends Bullet {
+    public static readonly defaultSpeed: number = 420;
+
     public speed: number;
 
     public constructor(options: BasicBulletOptions) {
@@ -26,7 +28,7 @@ export class BasicBullet extends Bullet {
         );
 
         this.rotation = options.rotation;
-        this.speed = options.speed ?? 420;
+        this.speed = options.speed ?? BasicBullet.defaultSpeed;
         this.damage = options.damage ?? 10;
         this.faction = options.faction ?? "player";
         this.canParry = true;

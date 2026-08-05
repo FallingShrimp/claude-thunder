@@ -54,6 +54,7 @@ export class GameCollisionSystem extends CollisionSystem {
 
                 if (parry !== "none") {
                     bulletPair.bullet.active = false;
+                    bulletPair.plane.counterAttack(bulletPair.bullet.launcher);
                     this.emitParryEffect(world, bulletPair.plane, parry);
 
                     if (parry === "perfect") {

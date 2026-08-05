@@ -159,6 +159,20 @@ export class Luck extends PlayerStatUpgradeItem<PlayerStats> {
     }
 }
 
+export class CounterAttack extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "更强大的反击",
+            ".",
+            Quality.EPIC,
+            PLAYER_STATS_FORMATS,
+            {
+                COUNTER_MULTIPLIER: 0.3
+            }
+        )
+    }
+}
+
 export const items = [
     AttackPowerUpgradeItem,
     AttackSpeedUpgradeItem,

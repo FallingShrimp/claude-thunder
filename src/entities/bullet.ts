@@ -14,6 +14,9 @@ export abstract class Bullet extends BaseEntity {
     public faction: BulletFaction = "player";
     public remainingLifetime: number = 0;
     public canParry: boolean = false;
+    public penetrate: number = 0;
+
+    private readonly hitTargets = new Set<string>();
 
     protected constructor(
         id: string,
@@ -27,20 +30,32 @@ export abstract class Bullet extends BaseEntity {
     }
 
     public canDamage(target: Plane): boolean {
-        return (this.launcher instanceof Player && target instanceof Enemy)
-            || (this.launcher instanceof Enemy && target instanceof Player);
+        return !this.hitTargets.has(target.id)
+            && (
+                (this.launcher instanceof Player && target instanceof Enemy)
+                || (this.launcher instanceof Enemy && target instanceof Player)
+            );
     }
+
     public hit(target: Plane): DamageLabel | undefined {
         if (!this.active || !target.active || !this.canDamage(target)) {
             return undefined;
         }
+
+        this.hitTargets.add(target.id);
         const [critical, dmg] = this.judgeCritical();
         const damageLabel = target.takeDamage(
             dmg,
             critical,
             this,
         );
-        this.active = false;
+
+        if (this.penetrate > 0) {
+            this.penetrate--;
+        } else {
+            this.active = false;
+        }
+
         return damageLabel;
     }
 
