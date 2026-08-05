@@ -138,6 +138,19 @@ export class MultipleShootUpgradeItem extends PlayerStatUpgradeItem<PlayerStats>
     }
 }
 
+export class MultipleShoot2 extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "更多弹道",
+            ".",
+            Quality.LEGENDARY,
+            PLAYER_STATS_FORMATS,
+            { MULTIPLE_SHOOT: 2 },
+            ["通用"]
+        );
+    }
+}
+
 export class EpicShoot extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
@@ -172,12 +185,27 @@ export class Luck extends PlayerStatUpgradeItem<PlayerStats> {
 export class CounterAttack extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "更强大的反击",
+            "小幅强化反击",
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             {
                 COUNTER_MULTIPLIER: 0.4
+            },
+            ["反击"]
+        );
+    }
+}
+
+export class CounterAttackBig extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "大幅强化反击",
+            ".",
+            Quality.LEGENDARY,
+            PLAYER_STATS_FORMATS,
+            {
+                COUNTER_MULTIPLIER: 2.5
             },
             ["反击"]
         );
@@ -311,10 +339,12 @@ export const items = [
     CriticalDamageUpgradeItem,
     ShootOffsetUpgradeItem,
     MultipleShootUpgradeItem,
+    MultipleShoot2,
     EpicShoot,
     Luck,
     CounterAttack,
     CounterCount,
+    CounterAttackBig,
     ChainCounter,
     CounterTrace,
     ThunderSplit,
