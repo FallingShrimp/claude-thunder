@@ -20,8 +20,8 @@ export class BasicBullet extends Bullet {
         super(
             options.id ?? crypto.randomUUID(),
             { x: options.x, y: options.y },
-            { width: 6, height: 16 },
-            { shape: "rectangle", color: "#ffe66d" },
+            { width: 16, height: 6 },
+            { shape: "triangle", color: "#ffe66d" },
             options.launcher,
         );
 

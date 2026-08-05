@@ -10,7 +10,8 @@ export class DangerBullet extends BasicBullet {
             damage: 5
         });
 
-        this.appearance = { shape: "rectangle", color: "#ff3030" };
+        this.appearance = { shape: "ellipse", color: "#ff3030" };
+        this.size = { width: 10, height: 10 };
     }
 
     override judgeCritical(): [boolean, number] {
