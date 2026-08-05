@@ -20,7 +20,7 @@ export class Red extends Enemy<RedStats> {
             { x, y: -40 },
             { width: 36, height: 40 },
             { shape: "triangle", color: "#ff3030" },
-            10,
+            20,
             10,
             RED_STATS_FORMATS,
             {},
