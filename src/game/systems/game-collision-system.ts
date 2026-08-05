@@ -533,7 +533,7 @@ export class GameCollisionSystem extends CollisionSystem {
             x: originX - 20,
             y: originY - 16,
             rotation: Math.atan2(targetY - originY, targetX - originX),
-            damage: fireball.damage * 0.85,
+            damage: fireball.damage,
             faction: fireball.faction,
             remainingRefractions: nextRefractions,
             refractionTargetIds: fireball.refractionTargetIds,

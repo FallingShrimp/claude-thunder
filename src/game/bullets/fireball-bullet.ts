@@ -29,7 +29,7 @@ export class FireballBullet extends BasicBullet {
         this.collisionBounds.size = { ...this.size };
         this.rotation = this.travelRotation + Math.PI;
         this.canParry = false;
-        this.penetrate = 2;
+        this.penetrate = Number.POSITIVE_INFINITY;
     }
 
     public override ai(delta: number): void {
