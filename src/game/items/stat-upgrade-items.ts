@@ -145,6 +145,20 @@ export class EpicShoot extends PlayerStatUpgradeItem<PlayerStats> {
     }
 }
 
+export class Luck extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "变得更加幸运",
+            ".",
+            Quality.RARE,
+            PLAYER_STATS_FORMATS,
+            {
+                LUCK: 2
+            }
+        );
+    }
+}
+
 export const items = [
     AttackPowerUpgradeItem,
     AttackSpeedUpgradeItem,
@@ -152,5 +166,6 @@ export const items = [
     CriticalDamageUpgradeItem,
     ShootOffsetUpgradeItem,
     MultipleShootUpgradeItem,
-    EpicShoot
+    EpicShoot,
+    Luck
 ];
