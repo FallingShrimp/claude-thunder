@@ -4,6 +4,7 @@ import type { Player } from "../../entities/player";
 import type { GameSystem } from "../../logic/game-system";
 import type { GameWorld } from "../../logic/game-world";
 import type { KeyboardInput } from "../keyboard-input";
+import { LabelWeightItem } from "../items/label-weight-item";
 
 export type ItemFactory = () => Item;
 
@@ -17,6 +18,7 @@ export class WaveRewardSystem implements GameSystem {
     private previousLeft: boolean = false;
     private previousRight: boolean = false;
     private previousConfirm: boolean = false;
+    private readonly labelWeightIncrements = new Map<string, number>();
 
     public constructor(
         private readonly player: Player,
@@ -108,6 +110,16 @@ export class WaveRewardSystem implements GameSystem {
 
         selectedItem?.apply(this.player);
 
+        if (selectedItem instanceof LabelWeightItem) {
+            const previousIncrement = this.labelWeightIncrements.get(
+                selectedItem.targetLabel,
+            ) ?? 0;
+            this.labelWeightIncrements.set(
+                selectedItem.targetLabel,
+                previousIncrement + selectedItem.weightIncrement,
+            );
+        }
+
         for (const item of this.choices) {
             item.active = false;
         }
@@ -133,7 +145,12 @@ export class WaveRewardSystem implements GameSystem {
 
         while (picked.length < this.choiceCount) {
             const weights = candidates.map((item) => {
-                const weight = this.getItemWeight(item);
+                const labelIncrement = item.labels.reduce(
+                    (total, label) => total
+                        + (this.labelWeightIncrements.get(label) ?? 0),
+                    0,
+                );
+                const weight = this.getItemWeight(item) + labelIncrement;
                 return Number.isFinite(weight) && weight > 0 ? weight : 0;
             });
             const totalWeight = weights.reduce((total, weight) => total + weight, 0);

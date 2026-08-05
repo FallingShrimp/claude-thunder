@@ -15,6 +15,7 @@ export abstract class PlayerStatUpgradeItem<T extends StatsData>
         quality: Quality,
         public readonly statsSlot: StatsFormats<T>,
         public readonly statsValue: Partial<T>,
+        labels: string[] = [],
     ) {
         super(
             crypto.randomUUID(),
@@ -24,6 +25,7 @@ export abstract class PlayerStatUpgradeItem<T extends StatsData>
             displayName,
             avatarSource,
             quality,
+            labels,
         );
 
         this.zIndex = 100;
@@ -63,6 +65,7 @@ export class AttackPowerUpgradeItem
             Quality.NORMAL,
             PLAYER_STATS_FORMATS,
             { ATK: 3 },
+            ["通用"]
         );
     }
 }
@@ -76,6 +79,7 @@ export class AttackSpeedUpgradeItem
             Quality.NORMAL,
             PLAYER_STATS_FORMATS,
             { ATK_SPD: 0.25 },
+            ["通用"]
         );
     }
 }
@@ -89,6 +93,7 @@ export class CriticalRateUpgradeItem
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
             { CRIT_RATE: 0.08 },
+            ["暴击"]
         );
     }
 }
@@ -102,6 +107,7 @@ export class CriticalDamageUpgradeItem
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             { CRIT_DMG: 0.25 },
+            ["暴击"]
         );
     }
 }
@@ -113,7 +119,8 @@ export class ShootOffsetUpgradeItem extends PlayerStatUpgradeItem<PlayerStats> {
             ".",
             Quality.WASTE,
             PLAYER_STATS_FORMATS,
-            { SHOOT_OFFSET: -0.5 }
+            { SHOOT_OFFSET: -0.5 },
+            ["通用"]
         );
     }
 }
@@ -125,7 +132,8 @@ export class MultipleShootUpgradeItem extends PlayerStatUpgradeItem<PlayerStats>
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
-            { MULTIPLE_SHOOT: 0.1 }
+            { MULTIPLE_SHOOT: 0.1 },
+            ["通用"]
         );
     }
 }
@@ -140,7 +148,8 @@ export class EpicShoot extends PlayerStatUpgradeItem<PlayerStats> {
             {
                 ATK_SPD: 1,
                 SHOOT_OFFSET: 3
-            }
+            },
+            ["通用"]
         );
     }
 }
@@ -154,7 +163,8 @@ export class Luck extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             {
                 LUCK: 2
-            }
+            },
+            ["通用"]
         );
     }
 }
@@ -168,7 +178,8 @@ export class CounterAttack extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             {
                 COUNTER_MULTIPLIER: 0.4
-            }
+            },
+            ["反击"]
         );
     }
 }
@@ -176,13 +187,14 @@ export class CounterAttack extends PlayerStatUpgradeItem<PlayerStats> {
 export class CounterCount extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "额外反击一个敌人",
+            "额外产生一个反击火球",
             ".",
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
             {
                 COUNTER_COUNT: 1
-            }
+            },
+            ["反击"]
         );
     }
 }
@@ -196,7 +208,8 @@ export class ChainCounter extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             {
                 COUNTER_REFRACTION: 1
-            }
+            },
+            ["反击"]
         );
     }
 }
@@ -210,7 +223,8 @@ export class ThunderSplit extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             {
                 THUNDER_SPLIT_COUNT: 1
-            }
+            },
+            ["雷电"]
         );
     }
 }
@@ -224,7 +238,8 @@ export class ThunderChain extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             {
                 THUNDER_CHAIN_COUNT: 1
-            }
+            },
+            ["雷电"]
         );
     }
 }
@@ -238,7 +253,8 @@ export class ThunderPower extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             {
                 THUNDER_MULTIPLIER: 0.35
-            }
+            },
+            ["雷电"]
         );
     }
 }
@@ -252,7 +268,8 @@ export class ThunderRange extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             {
                 THUNDER_RANGE: 30
-            }
+            },
+            ["雷电"]
         );
     }
 }
@@ -266,7 +283,8 @@ export class ThunderTrace extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             {
                 THUNDER_BALL_TRACE: 0.25
-            }
+            },
+            ["雷电"]
         );
     }
 }

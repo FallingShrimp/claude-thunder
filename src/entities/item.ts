@@ -15,8 +15,10 @@ export abstract class Item<TQuality = unknown> extends BaseEntity {
         public readonly displayName: string,
         public readonly avatarSource: string,
         public readonly quality: TQuality,
+        public readonly labels: string[] = [],
     ) {
         super(id, position, size, appearance);
+        this.labels = [...new Set(labels)];
     }
 
     public abstract apply(player: Player): void;
