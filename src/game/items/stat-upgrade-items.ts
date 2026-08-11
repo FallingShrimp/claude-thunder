@@ -76,7 +76,8 @@ export class CriticalDamageUpgradeItem
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             { CRIT_DMG: 0.25 },
-            ["暴击"]
+            ["暴击"],
+            (player) => player.readStat("CRIT_RATE") > 0
         );
     }
 }
@@ -251,7 +252,8 @@ export class ThunderChain extends PlayerStatUpgradeItem<PlayerStats> {
             {
                 THUNDER_CHAIN_COUNT: 1
             },
-            ["雷电"]
+            ["雷电"],
+            (player) => player.readStat("THUNDER_SPLIT_COUNT") > 0
         );
     }
 }
@@ -266,7 +268,8 @@ export class ThunderPower extends PlayerStatUpgradeItem<PlayerStats> {
             {
                 THUNDER_MULTIPLIER: 0.35
             },
-            ["雷电"]
+            ["雷电"],
+            (player) => player.readStat("THUNDER_SPLIT_COUNT") > 0
         );
     }
 }
@@ -281,7 +284,8 @@ export class ThunderRange extends PlayerStatUpgradeItem<PlayerStats> {
             {
                 THUNDER_RANGE: 30
             },
-            ["雷电"]
+            ["雷电"],
+            (player) => player.readStat("THUNDER_SPLIT_COUNT") > 0
         );
     }
 }
@@ -296,7 +300,8 @@ export class ThunderTrace extends PlayerStatUpgradeItem<PlayerStats> {
             {
                 THUNDER_BALL_TRACE: 0.25
             },
-            ["雷电"]
+            ["雷电"],
+            (player) => player.readStat("THUNDER_SPLIT_COUNT") > 0
         );
     }
 }

@@ -1,6 +1,7 @@
 import type { BaseEntity } from "../../core/entity";
 import type { Plane } from "../../entities/plane";
 import { Bullet, type BulletFaction } from "../../entities/bullet";
+import { rollCritical } from "../critical";
 
 export interface ThunderBulletOptions {
     id?: string;
@@ -129,6 +130,7 @@ export class ThunderBullet extends Bullet {
     }
 
     public override judgeCritical(): [boolean, number] {
-        return [false, this.damage];
+        // 玩家释放的雷电同样参与暴击判定。
+        return rollCritical(this.launcher, this.damage);
     }
 }

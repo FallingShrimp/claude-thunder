@@ -1,9 +1,17 @@
+import type { Player } from "../../entities/player";
 import {
     PLAYER_STATS_FORMATS,
     type PlayerStats,
 } from "../player-plane";
 import { Quality } from "./quality";
 import { PlayerStatUpgradeItem } from "./stat-upgrade-item-base";
+
+/** 是否至少拥有一台任意类型的小飞机。 */
+function hasAnySummon(player: Player): boolean {
+    return player.readStat("SUMMON_GUNNER_COUNT") > 0
+        || player.readStat("SUMMON_CANNON_COUNT") > 0
+        || player.readStat("SUMMON_ASSAULT_COUNT") > 0;
+}
 
 // ===== 流派入口（分别召唤三型小飞机）=====
 
@@ -65,6 +73,7 @@ export class SummonCountItem extends PlayerStatUpgradeItem<PlayerStats> {
                 SUMMON_ASSAULT_COUNT: 1,
             },
             ["召唤"],
+            hasAnySummon,
         );
     }
 }
@@ -83,6 +92,7 @@ export class SummonArmyItem extends PlayerStatUpgradeItem<PlayerStats> {
                 SUMMON_ASSAULT_COUNT: 2,
             },
             ["召唤"],
+            hasAnySummon,
         );
     }
 }
@@ -99,6 +109,7 @@ export class SummonDamageItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             { SUMMON_DAMAGE: 0.3 },
             ["召唤"],
+            hasAnySummon,
         );
     }
 }
@@ -113,6 +124,7 @@ export class SummonDamageBigItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             { SUMMON_DAMAGE: 0.6 },
             ["召唤"],
+            hasAnySummon,
         );
     }
 }
@@ -127,6 +139,7 @@ export class SummonHealthItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             { SUMMON_HEALTH: 30 },
             ["召唤"],
+            hasAnySummon,
         );
     }
 }
@@ -141,6 +154,7 @@ export class SummonRegenItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             { SUMMON_REGEN: 1.5 },
             ["召唤"],
+            hasAnySummon,
         );
     }
 }
@@ -155,6 +169,7 @@ export class SummonOrbitItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             { SUMMON_ORBIT_SPEED: 0.25 },
             ["召唤"],
+            hasAnySummon,
         );
     }
 }
@@ -165,12 +180,13 @@ export class SummonOrbitItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class GunnerRateItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "机枪手的射速加快",
+            "机枪手射速加快",
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
-            { SUMMON_GUNNER_RATE: 0.4 },
+            { SUMMON_GUNNER_RATE: 0.25 },
             ["召唤"],
+            (player) => player.readStat("SUMMON_GUNNER_COUNT") > 0,
         );
     }
 }
@@ -185,6 +201,7 @@ export class GunnerMultishotItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             { SUMMON_GUNNER_MULTISHOT: 1 },
             ["召唤"],
+            (player) => player.readStat("SUMMON_GUNNER_COUNT") > 0,
         );
     }
 }
@@ -199,6 +216,7 @@ export class CannonDamageItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             { SUMMON_CANNON_DAMAGE: 30 },
             ["召唤"],
+            (player) => player.readStat("SUMMON_CANNON_COUNT") > 0,
         );
     }
 }
@@ -213,6 +231,7 @@ export class CannonMultishotItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             { SUMMON_CANNON_MULTISHOT: 1 },
             ["召唤"],
+            (player) => player.readStat("SUMMON_CANNON_COUNT") > 0,
         );
     }
 }
@@ -227,6 +246,7 @@ export class AssaultDamageItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             { SUMMON_ASSAULT_DAMAGE: 40 },
             ["召唤"],
+            (player) => player.readStat("SUMMON_ASSAULT_COUNT") > 0,
         );
     }
 }
@@ -241,6 +261,7 @@ export class AssaultSpeedItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             { SUMMON_ASSAULT_SPEED: 0.3 },
             ["召唤"],
+            (player) => player.readStat("SUMMON_ASSAULT_COUNT") > 0,
         );
     }
 }
@@ -257,6 +278,7 @@ export class SummonSacrificeItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             { SUMMON_SACRIFICE: 1 },
             ["召唤"],
+            hasAnySummon,
         );
     }
 }
@@ -271,6 +293,7 @@ export class SummonOverloadItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             { SUMMON_OVERLOAD: 0.25 },
             ["召唤"],
+            hasAnySummon,
         );
     }
 }

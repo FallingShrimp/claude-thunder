@@ -16,6 +16,7 @@ export abstract class PlayerStatUpgradeItem<T extends StatsData>
         public readonly statsSlot: StatsFormats<T>,
         public readonly statsValue: Partial<T>,
         labels: string[] = [],
+        displayCondition?: (player: Player) => boolean,
     ) {
         super(
             crypto.randomUUID(),
@@ -28,6 +29,9 @@ export abstract class PlayerStatUpgradeItem<T extends StatsData>
             labels,
         );
 
+        if (displayCondition !== undefined) {
+            this.displayCondition = displayCondition;
+        }
         this.zIndex = 100;
     }
 

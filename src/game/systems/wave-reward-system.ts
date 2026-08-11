@@ -140,7 +140,14 @@ export class WaveRewardSystem implements GameSystem {
     }
 
     private pickItems(): Item[] {
-        const candidates = this.itemPool.map((factory) => factory());
+        const allCandidates = this.itemPool.map((factory) => factory());
+        const eligible = allCandidates.filter(
+            (item) => item.displayCondition(this.player),
+        );
+        // 满足条件的候选不足时，回退到全部候选，保证总能有足够选项。
+        const candidates = eligible.length >= this.choiceCount
+            ? eligible
+            : allCandidates;
         const picked: Item[] = [];
 
         while (picked.length < this.choiceCount) {

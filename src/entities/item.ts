@@ -7,6 +7,12 @@ export abstract class Item<TQuality = unknown> extends BaseEntity {
     public value: number = 0;
     public remainingLifetime: number = 0;
 
+    /**
+     * 显示条件：只有满足该条件的道具才能进入本次随机抽取的道具池。
+     * 例如尚未获得球状闪电时，不应出现强化连锁/追踪的道具。
+     */
+    public displayCondition: (player: Player) => boolean = () => true;
+
     protected constructor(
         id: string,
         position: Vector2,

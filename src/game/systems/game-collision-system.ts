@@ -6,6 +6,7 @@ import { Plane } from "../../entities/plane";
 import { Player } from "../../entities/player";
 import { CollisionSystem } from "../../logic/collision-system";
 import type { GameWorld } from "../../logic/game-world";
+import { rollCritical } from "../critical";
 import { BallThunderBullet } from "../bullets/ball-thunder-bullet";
 import { FireballBullet } from "../bullets/fireball-bullet";
 import { ThunderBullet } from "../bullets/thunder-bullet";
@@ -785,7 +786,8 @@ export class GameCollisionSystem extends CollisionSystem {
         pair: { summon: AssaultSummon; enemy: Enemy },
     ): void {
         const { summon, enemy } = pair;
-        const damageLabel = enemy.takeDamage(summon.assaultDamage, false);
+        const [critical, damage] = rollCritical(summon, summon.assaultDamage);
+        const damageLabel = enemy.takeDamage(damage, critical);
 
         if (damageLabel !== undefined) {
             world.addEntity(damageLabel);
@@ -848,7 +850,8 @@ export class GameCollisionSystem extends CollisionSystem {
                 continue;
             }
 
-            const damageLabel = entity.takeDamage(damage, false);
+            const [critical, critDamage] = rollCritical(summon, damage);
+            const damageLabel = entity.takeDamage(critDamage, critical);
 
             if (damageLabel !== undefined) {
                 world.addEntity(damageLabel);

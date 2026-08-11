@@ -1,6 +1,6 @@
 import type { BaseEntity } from "../../core/entity";
 import { Bullet, type BulletFaction } from "../../entities/bullet";
-import { Player } from "../../entities/player";
+import { rollCritical } from "../critical";
 
 export interface BasicBulletOptions {
     id?: string;
@@ -56,17 +56,7 @@ export class BasicBullet extends Bullet {
     }
 
     public override judgeCritical(): [boolean, number] {
-        if (this.launcher instanceof Player) {
-            const stats = this.launcher.statsValue as {
-                CRIT_RATE?: number;
-                CRIT_DMG?: number;
-            };
-            const criticalRate = stats.CRIT_RATE ?? 0;
-            const criticalDamage = stats.CRIT_DMG ?? 1;
-            const state = Math.random() < criticalRate;
-            return [state, this.damage * (state ? criticalDamage : 1)];
-        }
-
-        return [false, this.damage];
+        // 玩家及召唤物（通过 launcher 回溯到玩家）造成的伤害均参与暴击判定。
+        return rollCritical(this.launcher, this.damage);
     }
 }

@@ -1,6 +1,7 @@
 import type { Enemy } from "../../entities/enemy";
 import type { Plane } from "../../entities/plane";
 import { radians } from "../../util/math";
+import { rollCritical } from "../critical";
 import { BasicBullet, type BasicBulletOptions } from "./basic-bullet";
 
 export interface BallThunderBulletOptions
@@ -76,6 +77,7 @@ export class BallThunderBullet extends BasicBullet {
     }
 
     public override judgeCritical(): [boolean, number] {
-        return [false, this.damage];
+        // 球状闪电同样参与玩家暴击判定。
+        return rollCritical(this.launcher, this.damage);
     }
 }

@@ -21,8 +21,5 @@ export class CannonBullet extends BasicBullet {
         this.canParry = false;
     }
 
-    public override judgeCritical(): [boolean, number] {
-        // 特殊子弹不暴击，对齐雷电/反击规则。
-        return [false, this.damage];
-    }
+    // 继承 BasicBullet 的 judgeCritical：炮台子弹同样参与玩家暴击判定。
 }
