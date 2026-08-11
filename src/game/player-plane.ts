@@ -31,7 +31,9 @@ export type PlayerStats = {
     MULTIPLE_SHOOT: number;
     SHOOT_OFFSET: number;
     LUCK: number;
-    SUMMON_COUNT: number;
+    SUMMON_GUNNER_COUNT: number;
+    SUMMON_CANNON_COUNT: number;
+    SUMMON_ASSAULT_COUNT: number;
     SUMMON_DAMAGE: number;
     SUMMON_HEALTH: number;
     SUMMON_REGEN: number;
@@ -64,7 +66,9 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     MULTIPLE_SHOOT: DataFormat.VALUE,
     SHOOT_OFFSET: DataFormat.ANGLE,
     LUCK: DataFormat.VALUE,
-    SUMMON_COUNT: DataFormat.VALUE,
+    SUMMON_GUNNER_COUNT: DataFormat.VALUE,
+    SUMMON_CANNON_COUNT: DataFormat.VALUE,
+    SUMMON_ASSAULT_COUNT: DataFormat.VALUE,
     SUMMON_DAMAGE: DataFormat.PERCENT,
     SUMMON_HEALTH: DataFormat.VALUE,
     SUMMON_REGEN: DataFormat.VALUE,
@@ -128,7 +132,9 @@ export class PlayerPlane extends Player<PlayerStats> {
                 MULTIPLE_SHOOT: 0,
                 SHOOT_OFFSET: 3,
                 LUCK: 0,
-                SUMMON_COUNT: 0,
+                SUMMON_GUNNER_COUNT: 0,
+                SUMMON_CANNON_COUNT: 0,
+                SUMMON_ASSAULT_COUNT: 0,
                 SUMMON_DAMAGE: 1,
                 SUMMON_HEALTH: 0,
                 SUMMON_REGEN: 0,
@@ -399,6 +405,13 @@ export class PlayerPlane extends Player<PlayerStats> {
         this.guarding = false;
         this.guardElapsed = 0;
         this.guardCooldown = cooldown;
+    }
+
+    /** 播放一次音效（供召唤物等附属单位调用），失败静默忽略。 */
+    public playSound(source: string): void {
+        void this.audioSystem.playAudio(source).catch(() => {
+            // 浏览器可能在用户交互前禁止播放音频，静默忽略即可。
+        });
     }
 
     private async playParryAudio(source: string): Promise<void> {

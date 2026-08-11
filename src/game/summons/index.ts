@@ -28,11 +28,19 @@ export function createSummon(
     }
 }
 
-/** 随机三选一生成一台小飞机。 */
-export function createRandomSummon(context: CreateSummonContext): SummonPlane {
-    const types: readonly SummonType[] = ["gunner", "cannon", "assault"];
-    const type = types[Math.floor(Math.random() * types.length)];
-    return createSummon(type, context);
+/** 生成一台机枪手小飞机。 */
+export function createGunnerSummon(context: CreateSummonContext): GunnerSummon {
+    return new GunnerSummon(context);
+}
+
+/** 生成一台炮台小飞机。 */
+export function createCannonSummon(context: CreateSummonContext): CannonSummon {
+    return new CannonSummon(context);
+}
+
+/** 生成一台突击者小飞机。 */
+export function createAssaultSummon(context: CreateSummonContext): AssaultSummon {
+    return new AssaultSummon(context);
 }
 
 /** 类型守卫：判断实体是否为召唤物。 */

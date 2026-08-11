@@ -1,3 +1,4 @@
+import { GAME_AUDIO_SOURCES } from "../audio-assets";
 import { Enemy } from "../../entities/enemy";
 import { BasicBullet } from "../bullets/basic-bullet";
 import {
@@ -45,6 +46,7 @@ export class GunnerSummon extends SummonPlane {
             * GunnerSummon.baseDamageFactor
             * this.getDamageMultiplier(),
         );
+        this.player.playSound(GAME_AUDIO_SOURCES.pew);
         const bulletWidth = 6;
         const bulletHeight = 16;
         const sourceX = this.position.x + this.size.width / 2 - bulletWidth / 2;

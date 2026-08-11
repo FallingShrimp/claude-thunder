@@ -1,3 +1,4 @@
+import { GAME_AUDIO_SOURCES } from "../audio-assets";
 import { Enemy } from "../../entities/enemy";
 import { CannonBullet } from "../bullets/cannon-bullet";
 import {
@@ -48,6 +49,7 @@ export class CannonSummon extends SummonPlane {
                 + this.player.readStat("SUMMON_CANNON_DAMAGE"))
             * this.getDamageMultiplier(),
         );
+        this.player.playSound(GAME_AUDIO_SOURCES.cannon);
         const bulletWidth = 28;
         const bulletHeight = 16;
         const sourceX = this.position.x + this.size.width / 2 - bulletWidth / 2;

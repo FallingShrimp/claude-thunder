@@ -1,4 +1,5 @@
 import type { Vector2 } from "../../core/geometry";
+import { GAME_AUDIO_SOURCES } from "../audio-assets";
 import { Enemy } from "../../entities/enemy";
 import {
     SummonPlane,
@@ -91,6 +92,7 @@ export class AssaultSummon extends SummonPlane {
         );
         this.assaulting = true;
         this.assaultRemaining = AssaultSummon.assaultDuration;
+        this.player.playSound(GAME_AUDIO_SOURCES.laserShot);
         const sourceCenter: Vector2 = {
             x: this.position.x + this.size.width / 2,
             y: this.position.y + this.size.height / 2,

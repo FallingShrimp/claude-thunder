@@ -5,17 +5,45 @@ import {
 import { Quality } from "./quality";
 import { PlayerStatUpgradeItem } from "./stat-upgrade-item-base";
 
-// ===== 流派入口 =====
+// ===== 流派入口（分别召唤三型小飞机）=====
 
-/** 召唤核心：开启召唤流，SUMMON_COUNT = 1。 */
-export class SummonCoreItem extends PlayerStatUpgradeItem<PlayerStats> {
+/** 召唤机枪手：SUMMON_GUNNER_COUNT +1，召唤一台机枪手。 */
+export class SummonGunnerItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "召唤核心",
+            "召唤机枪手",
             ".",
             Quality.NORMAL,
             PLAYER_STATS_FORMATS,
-            { SUMMON_COUNT: 1 },
+            { SUMMON_GUNNER_COUNT: 1 },
+            ["召唤"],
+        );
+    }
+}
+
+/** 召唤炮台：SUMMON_CANNON_COUNT +1，召唤一台炮台。 */
+export class SummonCannonItem extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "召唤炮台",
+            ".",
+            Quality.NORMAL,
+            PLAYER_STATS_FORMATS,
+            { SUMMON_CANNON_COUNT: 1 },
+            ["召唤"],
+        );
+    }
+}
+
+/** 召唤突击者：SUMMON_ASSAULT_COUNT +1，召唤一台突击者。 */
+export class SummonAssaultItem extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "召唤突击者",
+            ".",
+            Quality.NORMAL,
+            PLAYER_STATS_FORMATS,
+            { SUMMON_ASSAULT_COUNT: 1 },
             ["召唤"],
         );
     }
@@ -23,7 +51,7 @@ export class SummonCoreItem extends PlayerStatUpgradeItem<PlayerStats> {
 
 // ===== 数量成长 =====
 
-/** 援军到来：SUMMON_COUNT +1。 */
+/** 援军到来：三型小飞机各 +1。 */
 export class SummonCountItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
@@ -31,13 +59,17 @@ export class SummonCountItem extends PlayerStatUpgradeItem<PlayerStats> {
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
-            { SUMMON_COUNT: 1 },
+            {
+                SUMMON_GUNNER_COUNT: 1,
+                SUMMON_CANNON_COUNT: 1,
+                SUMMON_ASSAULT_COUNT: 1,
+            },
             ["召唤"],
         );
     }
 }
 
-/** 召唤大军：SUMMON_COUNT +2（数量流上限）。 */
+/** 召唤大军：三型小飞机各 +2（数量流上限）。 */
 export class SummonArmyItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
@@ -45,7 +77,11 @@ export class SummonArmyItem extends PlayerStatUpgradeItem<PlayerStats> {
             ".",
             Quality.LEGENDARY,
             PLAYER_STATS_FORMATS,
-            { SUMMON_COUNT: 2 },
+            {
+                SUMMON_GUNNER_COUNT: 2,
+                SUMMON_CANNON_COUNT: 2,
+                SUMMON_ASSAULT_COUNT: 2,
+            },
             ["召唤"],
         );
     }
@@ -240,7 +276,9 @@ export class SummonOverloadItem extends PlayerStatUpgradeItem<PlayerStats> {
 }
 
 export const summonItems = [
-    SummonCoreItem,
+    SummonGunnerItem,
+    SummonCannonItem,
+    SummonAssaultItem,
     SummonCountItem,
     SummonArmyItem,
     SummonDamageItem,

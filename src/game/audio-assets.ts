@@ -1,5 +1,6 @@
 export const GAME_AUDIO_SOURCES = {
     backgroundMusic: "./assets/audio/Another%20Disaster.mp3",
+    cannon: "./assets/audio/cannon.wav",
     die: "./assets/audio/die.wav",
     hurt: "./assets/audio/hurt.wav",
     laserShot: "./assets/audio/laser-shot.wav",
