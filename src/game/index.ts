@@ -10,6 +10,7 @@ import { items } from "./items/stat-upgrade-items";
 import { ALL_GAME_AUDIO_SOURCES } from "./audio-assets";
 import { KeyboardInput } from "./keyboard-input";
 import { PlayerPlane } from "./player-plane";
+import { TouchInput } from "./touch-input";
 import { SpaceEnvironment } from "./space-environment";
 import { FireballTrailSystem } from "./systems/fireball-trail-system";
 import { GameCollisionSystem } from "./systems/game-collision-system";
@@ -43,11 +44,22 @@ export async function startGame(): Promise<GameEngine> {
     const world = new GameWorld();
     const renderer = new CanvasRenderer(canvas);
     const input = new KeyboardInput();
+    const touch = new TouchInput(canvas);
     const audioSystem = new AudioSystem();
+
+    // 依据容器尺寸与设备像素比重设画布内部分辨率，保证移动端铺满且清晰。
+    const gameContainer = canvas.parentElement;
+    const logicalWidth = Math.max(1, gameContainer?.clientWidth ?? canvas.width);
+    const logicalHeight = Math.max(1, gameContainer?.clientHeight ?? canvas.height);
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(logicalWidth * pixelRatio);
+    canvas.height = Math.round(logicalHeight * pixelRatio);
+
     const player = new PlayerPlane(
         input,
         audioSystem,
         (entity) => world.addEntity(entity),
+        touch,
     );
     const environment = new SpaceEnvironment(canvas.width, canvas.height);
     const waves = new Set<Wave>([
@@ -143,6 +155,8 @@ export async function startGame(): Promise<GameEngine> {
             () => engine.hasPendingWaveEnemies(),
             (enabled) => player.setControlsEnabled(enabled),
             canvas.width,
+            canvas.height,
+            touch,
         )
     ];
     const engine = new GameEngine(world, renderer, systems, waves);

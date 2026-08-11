@@ -4,6 +4,7 @@ import type { Player } from "../../entities/player";
 import type { GameSystem } from "../../logic/game-system";
 import type { GameWorld } from "../../logic/game-world";
 import type { KeyboardInput } from "../keyboard-input";
+import type { TouchInput } from "../touch-input";
 import { LabelWeightItem } from "../items/label-weight-item";
 
 export type ItemFactory = () => Item;
@@ -20,6 +21,13 @@ export class WaveRewardSystem implements GameSystem {
     private previousConfirm: boolean = false;
     private readonly labelWeightIncrements = new Map<string, number>();
 
+    /** 设计基准：卡片宽度对应的屏幕宽度（原 480×720 坐标系）。 */
+    private static readonly designScreenWidth: number = 480;
+    /** 设计基准：卡片基础尺寸。 */
+    private static readonly baseItemWidth: number = 96;
+    private static readonly baseItemHeight: number = 128;
+    private static readonly baseGap: number = 24;
+
     public constructor(
         private readonly player: Player,
         private readonly input: KeyboardInput,
@@ -29,7 +37,35 @@ export class WaveRewardSystem implements GameSystem {
         private readonly hasPendingWaveEnemies: () => boolean,
         private readonly setPlayerControlsEnabled: (enabled: boolean) => void,
         private readonly screenWidth: number,
-    ) { }
+        private readonly screenHeight: number = 720,
+        private readonly touch?: TouchInput,
+    ) {
+        // 移动端：点击某张道具卡即选中并确认。
+        touch?.onTap((x, y) => {
+            if (!this.selecting) {
+                return;
+            }
+
+            for (const [index, item] of this.choices.entries()) {
+                const scale = item.scale.x;
+                const halfWidth = item.size.width * scale / 2;
+                const halfHeight = item.size.height * scale / 2;
+                const centerX = item.position.x + item.size.width / 2;
+                const centerY = item.position.y + item.size.height / 2;
+
+                if (
+                    x >= centerX - halfWidth
+                    && x <= centerX + halfWidth
+                    && y >= centerY - halfHeight
+                    && y <= centerY + halfHeight
+                ) {
+                    this.selectedIndex = index;
+                    this.confirmSelection();
+                    return;
+                }
+            }
+        });
+    }
 
     public update(world: GameWorld, deltaTime: number): void {
         void deltaTime;
@@ -64,14 +100,26 @@ export class WaveRewardSystem implements GameSystem {
         this.previousConfirm = this.input.isPressed("KeyJ");
 
         const items = this.pickItems();
-        const gap = 24;
-        const itemWidth = 96;
+        // 依据屏幕宽度等比缩放卡片（含间距与高度），并居中于屏幕中下部。
+        const scale = Math.max(
+            0.7,
+            Math.min(
+                2.5,
+                this.screenWidth / WaveRewardSystem.designScreenWidth,
+            ),
+        );
+        const itemWidth = WaveRewardSystem.baseItemWidth * scale;
+        const itemHeight = WaveRewardSystem.baseItemHeight * scale;
+        const gap = WaveRewardSystem.baseGap * scale;
         const totalWidth = itemWidth * this.choiceCount
             + gap * (this.choiceCount - 1);
         const startX = (this.screenWidth - totalWidth) / 2;
+        const startY = this.screenHeight * 0.32 - itemHeight / 2;
 
         for (const [index, item] of items.entries()) {
+            item.size = { width: itemWidth, height: itemHeight };
             item.position.x = startX + index * (itemWidth + gap);
+            item.position.y = startY;
             this.choices.push(item);
             world.addEntity(item);
         }

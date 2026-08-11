@@ -13,6 +13,7 @@ import { BasicBullet } from "./bullets/basic-bullet";
 import { FireballBullet } from "./bullets/fireball-bullet";
 import { ThunderBullet } from "./bullets/thunder-bullet";
 import type { KeyboardInput } from "./keyboard-input";
+import type { TouchInput } from "./touch-input";
 
 export type PlayerStats = {
     ATK: number;
@@ -101,15 +102,20 @@ export class PlayerPlane extends Player<PlayerStats> {
 
     private controlsEnabled: boolean = true;
     private previousGuardKey: boolean = false;
+    private touchActivated: boolean = false;
 
     public constructor(
         private readonly input: KeyboardInput,
         private readonly audioSystem: AudioSystem,
         private readonly spawnEntity: (entity: BaseEntity) => void,
+        private readonly touch?: TouchInput,
     ) {
         super(
             "player",
-            { x: 216, y: 640 },
+            {
+                x: (touch?.canvas.width ?? 480) / 2 - 24,
+                y: (touch?.canvas.height ?? 720) - 80,
+            },
             { width: 48, height: 56 },
             { shape: "rectangle", color: "#4da6ff" },
             100,
@@ -167,6 +173,20 @@ export class PlayerPlane extends Player<PlayerStats> {
             return;
         }
 
+        // 键盘操控优先：只要有任何方向/攻击/格挡键活跃，就用键盘分支，
+        // 从而保证桌面端不受触摸输入影响（TouchInput 始终存在）。
+        const keyboardActive = this.input.isPressed("KeyW")
+            || this.input.isPressed("KeyA")
+            || this.input.isPressed("KeyS")
+            || this.input.isPressed("KeyD")
+            || this.input.isPressed("KeyJ")
+            || this.input.isPressed("KeyK");
+
+        if (this.touch !== undefined && !keyboardActive) {
+            this.updateTouchControl(delta);
+            return;
+        }
+
         const horizontal = Number(this.input.isPressed("KeyD"))
             - Number(this.input.isPressed("KeyA"));
         const vertical = Number(this.input.isPressed("KeyS"))
@@ -176,12 +196,79 @@ export class PlayerPlane extends Player<PlayerStats> {
         this.velocity.y = vertical * this.speed;
         this.position.x += this.velocity.x * delta;
         this.position.y += this.velocity.y * delta;
+        this.clampToCanvas();
 
         if (this.input.isPressed("KeyJ")) {
             this.attack();
         }
 
         this.updateGuard(delta);
+    }
+
+    /** 将玩家限制在画布范围内，避免移动到屏幕外。 */
+    private clampToCanvas(): void {
+        const canvasWidth = this.touch?.canvas.width
+            ?? document.querySelector<HTMLCanvasElement>("#game-canvas")?.width
+            ?? 480;
+        const canvasHeight = this.touch?.canvas.height
+            ?? document.querySelector<HTMLCanvasElement>("#game-canvas")?.height
+            ?? 720;
+
+        this.position.x = Math.max(
+            0,
+            Math.min(canvasWidth - this.size.width, this.position.x),
+        );
+        this.position.y = Math.max(
+            0,
+            Math.min(canvasHeight - this.size.height, this.position.y),
+        );
+    }
+
+    /**
+     * 移动端触控：按住屏幕时飞机平滑移向手指位置并持续攻击；
+     * 松开屏幕时保持格挡。首次触碰后才进入「松开即格挡」状态。
+     */
+    private updateTouchControl(delta: number): void {
+        const touch = this.touch as TouchInput;
+
+        if (touch.isDown) {
+            this.touchActivated = true;
+            const centerX = this.position.x + this.size.width / 2;
+            const centerY = this.position.y + this.size.height / 2;
+            const dx = touch.targetX - centerX;
+            const dy = touch.targetY - centerY;
+            const distance = Math.hypot(dx, dy);
+
+            if (distance > 1) {
+                const step = Math.min(distance, this.speed * delta);
+                this.position.x += (dx / distance) * step;
+                this.position.y += (dy / distance) * step;
+                this.clampToCanvas();
+            }
+
+            if (this.guarding) {
+                this.endGuard(0);
+            }
+
+            this.attack();
+            return;
+        }
+
+        if (!this.touchActivated) {
+            return;
+        }
+
+        // 松开屏幕：保持格挡。
+        if (!this.guarding) {
+            this.guarding = true;
+            this.guardElapsed = 0;
+        } else {
+            this.guardElapsed += delta;
+
+            if (this.guardElapsed >= PlayerPlane.guardDuration) {
+                this.endGuard(PlayerPlane.guardCooldownBase);
+            }
+        }
     }
 
     public override upgrade(): void {

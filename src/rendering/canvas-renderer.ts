@@ -308,7 +308,8 @@ export class CanvasRenderer implements Renderer {
         const centerY = item.position.y + item.size.height / 2;
         const avatarSize = Math.min(72, item.size.width - 16);
         const avatarX = -avatarSize / 2;
-        const avatarY = -item.size.height / 2 + 10;
+        const avatarY = -item.size.height / 2 + item.size.height * 0.08;
+        const titleFontSize = Math.max(11, Math.round(item.size.width * 0.125));
 
         context.save();
         context.globalAlpha = item.opacity;
@@ -344,13 +345,13 @@ export class CanvasRenderer implements Renderer {
         }
 
         context.fillStyle = "#ffffff";
-        context.font = "12px sans-serif";
+        context.font = `${titleFontSize}px sans-serif`;
         context.textAlign = "center";
         context.textBaseline = "middle";
         context.fillText(
             item.displayName,
             0,
-            avatarY + avatarSize + 20,
+            avatarY + avatarSize + titleFontSize * 1.6,
             item.size.width - 8,
         );
         context.restore();
