@@ -57,11 +57,11 @@ export class CriticalRateUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "有机会产生暴击",
+            "暴击率提高",
             "./items/critical-rate.svg",
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
-            { CRIT_RATE: 0.08 },
+            { CRIT_RATE: 0.1 },
             ["暴击"]
         );
     }
