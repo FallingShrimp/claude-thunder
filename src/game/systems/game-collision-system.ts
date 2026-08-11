@@ -13,6 +13,8 @@ import { GAME_AUDIO_SOURCES } from "../audio-assets";
 import { emitBurst } from "../particles/burst";
 import { emitRing } from "../particles/ring";
 import { PlayerPlane, type ParryResult } from "../player-plane";
+import { AssaultSummon } from "../summons/assault-summon";
+import { SummonPlane } from "../summons/summon-plane";
 
 export class GameCollisionSystem extends CollisionSystem {
     public constructor(
@@ -32,7 +34,8 @@ export class GameCollisionSystem extends CollisionSystem {
         right: BaseEntity,
     ): boolean {
         return this.getBulletAndPlane(left, right) !== undefined
-            || this.getOpposingPlanes(left, right) !== undefined;
+            || this.getOpposingPlanes(left, right) !== undefined
+            || this.getAssaultPair(left, right) !== undefined;
     }
 
     protected override intersects(left: BaseEntity, right: BaseEntity): boolean {
@@ -146,8 +149,19 @@ export class GameCollisionSystem extends CollisionSystem {
                     accelerationY: 35,
                     drag: 1.8,
                 });
+
+                if (!target.active && target instanceof SummonPlane) {
+                    this.triggerSacrifice(world, target);
+                }
             }
 
+            return;
+        }
+
+        const assaultPair = this.getAssaultPair(left, right);
+
+        if (assaultPair !== undefined) {
+            this.applyAssaultHit(world, assaultPair);
             return;
         }
 
@@ -730,5 +744,118 @@ export class GameCollisionSystem extends CollisionSystem {
         }
 
         return undefined;
+    }
+
+    private getAssaultPair(
+        left: BaseEntity,
+        right: BaseEntity,
+    ): { summon: AssaultSummon; enemy: Enemy } | undefined {
+        if (
+            left instanceof AssaultSummon
+            && right instanceof Enemy
+            && left.assaulting
+            && left.player.active
+        ) {
+            return { summon: left, enemy: right };
+        }
+
+        if (
+            right instanceof AssaultSummon
+            && left instanceof Enemy
+            && right.assaulting
+            && right.player.active
+        ) {
+            return { summon: right, enemy: left };
+        }
+
+        return undefined;
+    }
+
+    private applyAssaultHit(
+        world: GameWorld,
+        pair: { summon: AssaultSummon; enemy: Enemy },
+    ): void {
+        const { summon, enemy } = pair;
+        const damageLabel = enemy.takeDamage(summon.assaultDamage, false);
+
+        if (damageLabel !== undefined) {
+            world.addEntity(damageLabel);
+            summon.assaulting = false;
+            this.emitAssaultImpact(world, summon, enemy);
+        }
+    }
+
+    private emitAssaultImpact(
+        world: GameWorld,
+        summon: AssaultSummon,
+        enemy: Enemy,
+    ): void {
+        const centerX = (summon.position.x + summon.size.width / 2
+            + enemy.position.x + enemy.size.width / 2) / 2;
+        const centerY = (summon.position.y + summon.size.height / 2
+            + enemy.position.y + enemy.size.height / 2) / 2;
+        emitBurst(world.particles, {
+            x: centerX,
+            y: centerY,
+            count: 14,
+            color: "#ff9f5a",
+            speedMin: 90,
+            speedMax: 260,
+            lifetimeMin: 0.2,
+            lifetimeMax: 0.55,
+            sizeMin: 3,
+            sizeMax: 7,
+            accelerationY: 40,
+            drag: 2,
+        });
+    }
+
+    /** 殉爆：召唤物被击毁时对周围敌人造成范围伤害（需持有殉爆道具）。 */
+    private triggerSacrifice(world: GameWorld, summon: SummonPlane): void {
+        const player = summon.player;
+        const sacrifice = Math.max(0, player.readStat("SUMMON_SACRIFICE"));
+
+        if (sacrifice <= 0) {
+            return;
+        }
+
+        const damage = Math.max(0, player.readStat("SUMMON_DAMAGE")) * 50;
+        const radius = 140;
+        const centerX = summon.position.x + summon.size.width / 2;
+        const centerY = summon.position.y + summon.size.height / 2;
+
+        for (const entity of world.entities) {
+            if (!(entity instanceof Enemy) || !entity.active) {
+                continue;
+            }
+
+            const targetX = entity.position.x + entity.size.width / 2;
+            const targetY = entity.position.y + entity.size.height / 2;
+            const offsetX = targetX - centerX;
+            const offsetY = targetY - centerY;
+            const distanceSquared = offsetX * offsetX + offsetY * offsetY;
+
+            if (distanceSquared > radius * radius) {
+                continue;
+            }
+
+            const damageLabel = entity.takeDamage(damage, false);
+
+            if (damageLabel !== undefined) {
+                world.addEntity(damageLabel);
+            }
+        }
+
+        emitRing(world.particles, {
+            x: centerX,
+            y: centerY,
+            count: 48,
+            color: "#ffb13b",
+            speed: 320,
+            lifetime: 0.5,
+            size: 7,
+            endSize: 0,
+            drag: 1.2,
+        });
     }
 }

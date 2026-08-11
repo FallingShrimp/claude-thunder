@@ -6,6 +6,24 @@ import {
     type PlayerStats,
 } from "../player-plane";
 import { getQualityColor, Quality } from "./quality";
+import {
+    AssaultDamageItem,
+    AssaultSpeedItem,
+    CannonDamageItem,
+    CannonMultishotItem,
+    GunnerMultishotItem,
+    GunnerRateItem,
+    SummonArmyItem,
+    SummonCoreItem,
+    SummonCountItem,
+    SummonDamageBigItem,
+    SummonDamageItem,
+    SummonHealthItem,
+    SummonOrbitItem,
+    SummonOverloadItem,
+    SummonRegenItem,
+    SummonSacrificeItem,
+} from "./summon-upgrade-items";
 
 export abstract class PlayerStatUpgradeItem<T extends StatsData>
     extends Item<Quality> {
@@ -351,5 +369,21 @@ export const items = [
     ThunderChain,
     ThunderPower,
     ThunderRange,
-    ThunderTrace
+    ThunderTrace,
+    SummonCoreItem,
+    SummonCountItem,
+    SummonArmyItem,
+    SummonDamageItem,
+    SummonDamageBigItem,
+    SummonHealthItem,
+    SummonRegenItem,
+    SummonOrbitItem,
+    GunnerRateItem,
+    GunnerMultishotItem,
+    CannonDamageItem,
+    CannonMultishotItem,
+    AssaultDamageItem,
+    AssaultSpeedItem,
+    SummonSacrificeItem,
+    SummonOverloadItem
 ];

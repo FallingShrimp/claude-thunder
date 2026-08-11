@@ -13,6 +13,7 @@ import { PlayerPlane } from "./player-plane";
 import { SpaceEnvironment } from "./space-environment";
 import { FireballTrailSystem } from "./systems/fireball-trail-system";
 import { GameCollisionSystem } from "./systems/game-collision-system";
+import { SummonControllerSystem } from "./systems/summon-controller-system";
 import {
     type ItemFactory,
     WaveRewardSystem,
@@ -105,6 +106,7 @@ export async function startGame(): Promise<GameEngine> {
         ["暴击倾向", "暴击"],
         ["反击倾向", "反击"],
         ["雷电倾向", "雷电"],
+        ["召唤倾向", "召唤"],
     ].map(([displayName, targetLabel]) => () => new LabelWeightItem({
         displayName,
         avatarSource: ".",
@@ -119,6 +121,10 @@ export async function startGame(): Promise<GameEngine> {
     const systems: GameSystem[] = [
         world.particles,
         new FireballTrailSystem(),
+        new SummonControllerSystem({
+            player,
+            spawnEntity: (entity) => world.addEntity(entity as never),
+        }),
         new GameCollisionSystem(
             audioSystem,
             (amplitude, duration, frequency, decay) => {

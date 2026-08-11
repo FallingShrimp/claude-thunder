@@ -6,6 +6,8 @@ import { Item } from "../entities/item";
 import { BallThunderBullet } from "../game/bullets/ball-thunder-bullet";
 import { ThunderBullet } from "../game/bullets/thunder-bullet";
 import { PlayerPlane } from "../game/player-plane";
+import { AssaultSummon } from "../game/summons/assault-summon";
+import { SummonPlane } from "../game/summons/summon-plane";
 import { ParticleSystem } from "../logic/systems/particle-system";
 import { CameraShakeController } from "./camera-shake-controller";
 import type { Renderer } from "./renderer";
@@ -87,6 +89,11 @@ export class CanvasRenderer implements Renderer {
             return;
         }
 
+        if (target instanceof SummonPlane) {
+            this.renderSummon(target);
+            return;
+        }
+
         const centerX = target.position.x + target.size.width / 2;
         const centerY = target.position.y + target.size.height / 2;
 
@@ -132,6 +139,68 @@ export class CanvasRenderer implements Renderer {
         if (target instanceof PlayerPlane && target.guarding) {
             this.renderPlayerShield(target);
         }
+    }
+
+    private renderSummon(summon: SummonPlane): void {
+        const { context } = this;
+        const centerX = summon.position.x + summon.size.width / 2;
+        const centerY = summon.position.y + summon.size.height / 2;
+        const halfWidth = summon.size.width / 2;
+        const halfHeight = summon.size.height / 2;
+
+        context.save();
+        context.globalAlpha = summon.opacity;
+        context.translate(centerX, centerY);
+        context.rotate(summon.rotation);
+        context.scale(summon.scale.x, summon.scale.y);
+
+        if (summon.summonType === "gunner") {
+            // 机枪手：细长三角 + 枪口亮点
+            context.fillStyle = summon.appearance.color;
+            context.beginPath();
+            context.moveTo(halfWidth, 0);
+            context.lineTo(-halfWidth, -halfHeight);
+            context.lineTo(-halfWidth, halfHeight);
+            context.closePath();
+            context.fill();
+            context.fillStyle = "#ffffff";
+            context.beginPath();
+            context.arc(halfWidth * 0.5, 0, 2.5, 0, Math.PI * 2);
+            context.fill();
+        } else if (summon.summonType === "cannon") {
+            // 炮台：方块机身 + 炮管
+            context.fillStyle = summon.appearance.color;
+            context.fillRect(-halfWidth, -halfHeight, summon.size.width, summon.size.height);
+            context.fillStyle = "#8a5a1a";
+            context.fillRect(halfWidth * 0.2, -3, halfWidth * 0.9, 6);
+            context.fillStyle = "#fff3d6";
+            context.beginPath();
+            context.arc(0, 0, 4, 0, Math.PI * 2);
+            context.fill();
+        } else {
+            // 突击者：楔形箭头 + 冲刺尾焰
+            const assaulting = summon instanceof AssaultSummon && summon.assaulting;
+            context.fillStyle = summon.appearance.color;
+            context.beginPath();
+            context.moveTo(halfWidth, 0);
+            context.lineTo(-halfWidth * 0.5, -halfHeight);
+            context.lineTo(0, 0);
+            context.lineTo(-halfWidth * 0.5, halfHeight);
+            context.closePath();
+            context.fill();
+
+            if (assaulting) {
+                context.fillStyle = "#ffd84d";
+                context.beginPath();
+                context.moveTo(-halfWidth * 0.5, 0);
+                context.lineTo(-halfWidth - 6, -4);
+                context.lineTo(-halfWidth - 6, 4);
+                context.closePath();
+                context.fill();
+            }
+        }
+
+        context.restore();
     }
 
     private renderBallThunder(ball: BallThunderBullet): void {

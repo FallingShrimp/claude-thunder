@@ -31,6 +31,20 @@ export type PlayerStats = {
     MULTIPLE_SHOOT: number;
     SHOOT_OFFSET: number;
     LUCK: number;
+    SUMMON_COUNT: number;
+    SUMMON_DAMAGE: number;
+    SUMMON_HEALTH: number;
+    SUMMON_REGEN: number;
+    SUMMON_ORBIT_SPEED: number;
+    SUMMON_RANGE: number;
+    SUMMON_GUNNER_RATE: number;
+    SUMMON_GUNNER_MULTISHOT: number;
+    SUMMON_CANNON_DAMAGE: number;
+    SUMMON_CANNON_MULTISHOT: number;
+    SUMMON_ASSAULT_DAMAGE: number;
+    SUMMON_ASSAULT_SPEED: number;
+    SUMMON_OVERLOAD: number;
+    SUMMON_SACRIFICE: number;
 };
 
 export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
@@ -50,6 +64,20 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     MULTIPLE_SHOOT: DataFormat.VALUE,
     SHOOT_OFFSET: DataFormat.ANGLE,
     LUCK: DataFormat.VALUE,
+    SUMMON_COUNT: DataFormat.VALUE,
+    SUMMON_DAMAGE: DataFormat.PERCENT,
+    SUMMON_HEALTH: DataFormat.VALUE,
+    SUMMON_REGEN: DataFormat.VALUE,
+    SUMMON_ORBIT_SPEED: DataFormat.PERCENT,
+    SUMMON_RANGE: DataFormat.PERCENT,
+    SUMMON_GUNNER_RATE: DataFormat.PERCENT,
+    SUMMON_GUNNER_MULTISHOT: DataFormat.VALUE,
+    SUMMON_CANNON_DAMAGE: DataFormat.VALUE,
+    SUMMON_CANNON_MULTISHOT: DataFormat.VALUE,
+    SUMMON_ASSAULT_DAMAGE: DataFormat.VALUE,
+    SUMMON_ASSAULT_SPEED: DataFormat.PERCENT,
+    SUMMON_OVERLOAD: DataFormat.PERCENT,
+    SUMMON_SACRIFICE: DataFormat.VALUE,
 });
 
 export type ParryResult = "none" | "guard" | "perfect";
@@ -100,6 +128,20 @@ export class PlayerPlane extends Player<PlayerStats> {
                 MULTIPLE_SHOOT: 0,
                 SHOOT_OFFSET: 3,
                 LUCK: 0,
+                SUMMON_COUNT: 0,
+                SUMMON_DAMAGE: 1,
+                SUMMON_HEALTH: 0,
+                SUMMON_REGEN: 0,
+                SUMMON_ORBIT_SPEED: 1,
+                SUMMON_RANGE: 1,
+                SUMMON_GUNNER_RATE: 0,
+                SUMMON_GUNNER_MULTISHOT: 0,
+                SUMMON_CANNON_DAMAGE: 0,
+                SUMMON_CANNON_MULTISHOT: 0,
+                SUMMON_ASSAULT_DAMAGE: 0,
+                SUMMON_ASSAULT_SPEED: 0,
+                SUMMON_OVERLOAD: 0,
+                SUMMON_SACRIFICE: 0,
             },
         );
 
