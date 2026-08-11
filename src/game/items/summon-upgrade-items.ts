@@ -55,7 +55,7 @@ export class SummonAssaultItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class SummonCountItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "援军到来",
+            "召唤三种飞机",
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
@@ -73,7 +73,7 @@ export class SummonCountItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class SummonArmyItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "召唤大军",
+            "援军到来",
             ".",
             Quality.LEGENDARY,
             PLAYER_STATS_FORMATS,
@@ -93,7 +93,7 @@ export class SummonArmyItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class SummonDamageItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "召唤强化",
+            "召唤物伤害小幅提高",
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
@@ -107,7 +107,7 @@ export class SummonDamageItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class SummonDamageBigItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "召唤再强化",
+            "召唤物伤害大幅提高",
             ".",
             Quality.LEGENDARY,
             PLAYER_STATS_FORMATS,
@@ -121,7 +121,7 @@ export class SummonDamageBigItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class SummonHealthItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "合金机身",
+            "强化召唤物机体",
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
@@ -135,7 +135,7 @@ export class SummonHealthItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class SummonRegenItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "纳米修复",
+            "召唤物随时间逐渐修复",
             ".",
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
@@ -149,11 +149,11 @@ export class SummonRegenItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class SummonOrbitItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "环形编队",
+            "召唤物的旋转速度提高",
             ".",
             Quality.NORMAL,
             PLAYER_STATS_FORMATS,
-            { SUMMON_ORBIT_SPEED: 0.4 },
+            { SUMMON_ORBIT_SPEED: 0.25 },
             ["召唤"],
         );
     }
@@ -165,7 +165,7 @@ export class SummonOrbitItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class GunnerRateItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "速射核心",
+            "机枪手的射速加快",
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
@@ -179,7 +179,7 @@ export class GunnerRateItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class GunnerMultishotItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "双管机枪",
+            "机枪手弹道增加",
             ".",
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
@@ -193,7 +193,7 @@ export class GunnerMultishotItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class CannonDamageItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "重炮核心",
+            "炮台伤害提高",
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
@@ -207,7 +207,7 @@ export class CannonDamageItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class CannonMultishotItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "三发齐射",
+            "炮台弹道增加",
             ".",
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
@@ -221,7 +221,7 @@ export class CannonMultishotItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class AssaultDamageItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "突进核心",
+            "突进者伤害提高",
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
@@ -235,7 +235,7 @@ export class AssaultDamageItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class AssaultSpeedItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "连续突进",
+            "突进者攻击速度加快",
             ".",
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
@@ -251,7 +251,7 @@ export class AssaultSpeedItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class SummonSacrificeItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "殉爆",
+            "召唤物被摧毁时发生爆炸",
             ".",
             Quality.LEGENDARY,
             PLAYER_STATS_FORMATS,
@@ -265,7 +265,7 @@ export class SummonSacrificeItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class SummonOverloadItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "共振过载",
+            "大幅强化召唤物",
             ".",
             Quality.LEGENDARY,
             PLAYER_STATS_FORMATS,
