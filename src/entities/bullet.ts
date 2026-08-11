@@ -61,12 +61,14 @@ export abstract class Bullet extends BaseEntity {
     }
 
     private isOpposingTarget(target: Plane): boolean {
-        const isSummon = target.getEntityType() === "summon";
+        const launcherIsSummon = this.launcher.getEntityType() === "summon";
+        const targetIsSummon = target.getEntityType() === "summon";
 
         return (this.launcher instanceof Player && target instanceof Enemy)
+            || (launcherIsSummon && target instanceof Enemy)
             || (
                 this.launcher instanceof Enemy
-                && (target instanceof Player || isSummon)
+                && (target instanceof Player || targetIsSummon)
             );
     }
 

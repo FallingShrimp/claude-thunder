@@ -3,7 +3,7 @@ import {
     type PlayerStats,
 } from "../player-plane";
 import { Quality } from "./quality";
-import { PlayerStatUpgradeItem } from "./stat-upgrade-items";
+import { PlayerStatUpgradeItem } from "./stat-upgrade-item-base";
 
 // ===== 流派入口 =====
 

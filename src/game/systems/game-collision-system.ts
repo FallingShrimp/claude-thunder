@@ -121,12 +121,21 @@ export class GameCollisionSystem extends CollisionSystem {
                         bulletPair.bullet,
                         bulletPair.plane,
                     );
-                } else if (bulletPair.bullet.launcher instanceof PlayerPlane) {
-                    this.splitThunder(
-                        world,
-                        bulletPair.bullet.launcher,
-                        bulletPair.plane,
-                    );
+                } else {
+                    const launcher = bulletPair.bullet.launcher;
+                    const thunderSource = launcher instanceof PlayerPlane
+                        ? launcher
+                        : launcher instanceof SummonPlane
+                            ? launcher.player
+                            : undefined;
+
+                    if (thunderSource !== undefined) {
+                        this.splitThunder(
+                            world,
+                            thunderSource,
+                            bulletPair.plane,
+                        );
+                    }
                 }
             }
 

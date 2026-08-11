@@ -26,7 +26,7 @@ export interface SummonPlaneOptions {
  * attack() 实现。
  */
 export abstract class SummonPlane extends Plane<SummonStats> {
-    public static readonly baseMaxHealth: number = 50;
+    public static readonly baseMaxHealth: number = 20;
     public static readonly baseOrbitRadius: number = 90;
     public static readonly baseOrbitSpeed: number = 2.2;
 
@@ -86,8 +86,8 @@ export abstract class SummonPlane extends Plane<SummonStats> {
         }
 
         this.regenerate(delta);
-        this.updateOrbit(delta);
         this.currentTarget = this.findNearestEnemy();
+        this.updateOrbit(delta);
         this.attack(delta, this.currentTarget);
     }
 
@@ -118,6 +118,19 @@ export abstract class SummonPlane extends Plane<SummonStats> {
         return Math.max(0, this.player.readStat("SUMMON_DAMAGE")) * (1 + overload);
     }
 
+    /**
+     * 环绕中心，默认围绕玩家旋转。子类可覆盖以改变环绕参照物
+     * （例如突击者围绕索敌目标旋转）。
+     */
+    protected getOrbitCenter(): Vector2 {
+        return this.getPlayerCenter();
+    }
+
+    /** 是否执行环绕位移。默认 true，子类可在特殊状态（如冲刺）时暂停。 */
+    protected shouldOrbit(): boolean {
+        return true;
+    }
+
     private regenerate(delta: number): void {
         const regen = Math.max(0, this.player.readStat("SUMMON_REGEN"));
 
@@ -127,13 +140,17 @@ export abstract class SummonPlane extends Plane<SummonStats> {
     }
 
     private updateOrbit(delta: number): void {
+        if (!this.shouldOrbit()) {
+            return;
+        }
+
         const speed = SummonPlane.baseOrbitSpeed * Math.max(
             0.1,
             this.player.readStat("SUMMON_ORBIT_SPEED"),
         );
         this.orbitAngle += speed * delta;
 
-        const center = this.getPlayerCenter();
+        const center = this.getOrbitCenter();
         const centerX = center.x + Math.cos(this.orbitAngle) * this.baseRadius;
         const centerY = center.y + Math.sin(this.orbitAngle) * this.baseRadius;
         this.position.x = centerX - this.size.width / 2;

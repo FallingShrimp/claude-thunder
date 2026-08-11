@@ -7,13 +7,14 @@ import {
 
 /**
  * 炮台召唤物：每 1 秒向当前目标齐射 2 颗大体积 CannonBullet。
- * 每颗基础 60 伤害，受 SUMMON_DAMAGE 与 SUMMON_CANNON_DAMAGE 加成；
+ * 每颗伤害 = 玩家 ATK × 600%，受 SUMMON_DAMAGE 与 SUMMON_CANNON_DAMAGE 加成；
  * SUMMON_CANNON_MULTISHOT 增加每轮齐射数。
  */
 export class CannonSummon extends SummonPlane {
     public static readonly baseFireInterval: number = 1;
     public static readonly baseShotCount: number = 2;
-    public static readonly baseDamage: number = 60;
+    /** 单颗伤害系数：玩家攻击力的 600%（×6）。 */
+    public static readonly baseDamageFactor: number = 6;
 
     private shotCooldown: number = 0;
 
@@ -43,7 +44,8 @@ export class CannonSummon extends SummonPlane {
         );
         const damage = Math.max(
             0,
-            (CannonSummon.baseDamage + this.player.readStat("SUMMON_CANNON_DAMAGE"))
+            (this.player.readStat("ATK") * CannonSummon.baseDamageFactor
+                + this.player.readStat("SUMMON_CANNON_DAMAGE"))
             * this.getDamageMultiplier(),
         );
         const bulletWidth = 28;
