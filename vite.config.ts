@@ -1,9 +1,9 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
-    base: "./",
+    base: "/claude-thunder/",
     build: {
-        outDir: "../../dist/claude-thunder",
+        outDir: "dist",
         emptyOutDir: true
     },
 });
