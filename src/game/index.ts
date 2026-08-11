@@ -47,13 +47,10 @@ export async function startGame(): Promise<GameEngine> {
     const touch = new TouchInput(canvas);
     const audioSystem = new AudioSystem();
 
-    // 依据容器尺寸与设备像素比重设画布内部分辨率，保证移动端铺满且清晰。
-    const gameContainer = canvas.parentElement;
-    const logicalWidth = Math.max(1, gameContainer?.clientWidth ?? canvas.width);
-    const logicalHeight = Math.max(1, gameContainer?.clientHeight ?? canvas.height);
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(logicalWidth * pixelRatio);
-    canvas.height = Math.round(logicalHeight * pixelRatio);
+    // 逻辑分辨率固定为设计基准 480×720，世界/实体尺寸不随屏幕放大；
+    // 铺满屏幕由 CSS 的 object-fit: contain 等比缩放完成，桌面端画面保持合适大小。
+    canvas.width = 480;
+    canvas.height = 720;
 
     const player = new PlayerPlane(
         input,

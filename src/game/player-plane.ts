@@ -157,7 +157,7 @@ export class PlayerPlane extends Player<PlayerStats> {
             },
         );
 
-        this.speed = 240;
+        this.speed = 360;
         this.lives = 3;
         this.fireCooldown = 0;
     }

@@ -70,12 +70,27 @@ export class TouchInput {
         y: number;
     } {
         const rect = this.canvas.getBoundingClientRect();
-        const scaleX = this.canvas.width / rect.width;
-        const scaleY = this.canvas.height / rect.height;
+        const viewportAspect = rect.width / rect.height;
+        const canvasAspect = this.canvas.width / this.canvas.height;
+
+        // 游戏画面始终等比缩放（object-fit: contain），画布元素内可能有留白。
+        // 这里计算实际绘制区域，把屏幕坐标正确映射回 480×720 逻辑坐标系。
+        let drawWidth = rect.width;
+        let drawHeight = rect.height;
+        let offsetX = 0;
+        let offsetY = 0;
+
+        if (viewportAspect > canvasAspect) {
+            drawWidth = rect.height * canvasAspect;
+            offsetX = (rect.width - drawWidth) / 2;
+        } else {
+            drawHeight = rect.width / canvasAspect;
+            offsetY = (rect.height - drawHeight) / 2;
+        }
 
         return {
-            x: (clientX - rect.left) * scaleX,
-            y: (clientY - rect.top) * scaleY,
+            x: (clientX - rect.left - offsetX) * (this.canvas.width / drawWidth),
+            y: (clientY - rect.top - offsetY) * (this.canvas.height / drawHeight),
         };
     }
 
