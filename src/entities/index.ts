@@ -1,3 +1,4 @@
+export { Afterimage } from "./afterimage";
 export { Bullet } from "./bullet";
 export type { BulletFaction } from "./bullet";
 export { DamageLabel } from "./damage-label";

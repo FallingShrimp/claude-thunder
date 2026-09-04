@@ -1,6 +1,8 @@
 import type { AudioSystem } from "../audio/audio-system";
 import type { BaseEntity } from "../core/entity";
+import type { Vector2 } from "../core/geometry";
 import { DataFormat, defineStats } from "../core/stats";
+import { Afterimage } from "../entities/afterimage";
 import type { Bullet } from "../entities/bullet";
 import type { DamageLabel } from "../entities/damage-label";
 import { Enemy } from "../entities/enemy";
@@ -95,6 +97,13 @@ export class PlayerPlane extends Player<PlayerStats> {
     public static readonly damageInvincibilityDuration: number = 1;
     public static readonly perfectParryInvincibilityDuration: number = 2;
     public static readonly guardInvincibilityDuration: number = 0.5;
+    public static readonly dodgeDuration: number = 0.18;
+    public static readonly dodgeSpeed: number = 960;
+    public static readonly dodgeCooldown: number = 0.8;
+    public static readonly dodgeAfterimageInterval: number = 0.03;
+    public static readonly dodgeAfterimageLifetime: number = 0.28;
+    /** 三角形机头在局部 +X 方向，旋转 -90° 后朝上。 */
+    private static readonly baseRotation: number = -Math.PI / 2;
 
     public guardElapsed: number = 0;
     public guardCooldown: number = 0;
@@ -103,6 +112,12 @@ export class PlayerPlane extends Player<PlayerStats> {
     private controlsEnabled: boolean = true;
     private previousGuardKey: boolean = false;
     private touchActivated: boolean = false;
+    private dodging: boolean = false;
+    private dodgeElapsed: number = 0;
+    private dodgeCooldown: number = 0;
+    private dodgeDirection: Vector2 = { x: 0, y: 1 };
+    private dodgeAfterimageTimer: number = 0;
+    private previousDodgeKey: boolean = false;
 
     public constructor(
         private readonly input: KeyboardInput,
@@ -117,7 +132,7 @@ export class PlayerPlane extends Player<PlayerStats> {
                 y: (touch?.canvas.height ?? 720) - 80,
             },
             { width: 48, height: 56 },
-            { shape: "rectangle", color: "#4da6ff" },
+            { shape: "triangle", color: "#4da6ff" },
             100,
             10,
             PLAYER_STATS_FORMATS,
@@ -160,18 +175,26 @@ export class PlayerPlane extends Player<PlayerStats> {
         this.speed = 360;
         this.lives = 3;
         this.fireCooldown = 0;
+        this.rotation = PlayerPlane.baseRotation;
     }
 
     public override ai(delta: number): void {
         this.fireCooldown = Math.max(0, this.fireCooldown - delta);
         this.guardCooldown = Math.max(0, this.guardCooldown - delta);
+        this.dodgeCooldown = Math.max(0, this.dodgeCooldown - delta);
 
         if (!this.controlsEnabled) {
             this.velocity = { x: 0, y: 0 };
+            this.dodging = false;
             this.endGuard(PlayerPlane.guardCooldownBase);
             this.previousGuardKey = this.input.isPressed("KeyK");
+            this.previousDodgeKey = this.input.isPressed("Space");
             return;
         }
+
+        const dodgeKey = this.input.isPressed("Space");
+        const dodgePressed = dodgeKey && !this.previousDodgeKey;
+        this.previousDodgeKey = dodgeKey;
 
         // 键盘操控优先：只要有任何方向/攻击/格挡键活跃，就用键盘分支，
         // 从而保证桌面端不受触摸输入影响（TouchInput 始终存在）。
@@ -183,7 +206,7 @@ export class PlayerPlane extends Player<PlayerStats> {
             || this.input.isPressed("KeyK");
 
         if (this.touch !== undefined && !keyboardActive) {
-            this.updateTouchControl(delta);
+            this.updateTouchControl(delta, dodgePressed);
             return;
         }
 
@@ -191,6 +214,24 @@ export class PlayerPlane extends Player<PlayerStats> {
             - Number(this.input.isPressed("KeyA"));
         const vertical = Number(this.input.isPressed("KeyS"))
             - Number(this.input.isPressed("KeyW"));
+
+        // 移动中按空格：朝当前移动方向闪避。
+        if (dodgePressed && (horizontal !== 0 || vertical !== 0)) {
+            this.startDodge(horizontal, vertical);
+        }
+
+        if (this.dodging) {
+            this.updateDodge(delta);
+
+            if (this.input.isPressed("KeyJ")) {
+                this.attack();
+            }
+
+            this.updateGuard(delta);
+            return;
+        }
+
+        this.restorePose(delta);
 
         this.velocity.x = horizontal * this.speed;
         this.velocity.y = vertical * this.speed;
@@ -227,8 +268,9 @@ export class PlayerPlane extends Player<PlayerStats> {
     /**
      * 移动端触控：按住屏幕时飞机平滑移向手指位置并持续攻击；
      * 松开屏幕时保持格挡。首次触碰后才进入「松开即格挡」状态。
+     * 按住且正在移动时触发闪避，冲刺方向为手指相对飞机的方向。
      */
-    private updateTouchControl(delta: number): void {
+    private updateTouchControl(delta: number, dodgePressed: boolean): void {
         const touch = this.touch as TouchInput;
 
         if (touch.isDown) {
@@ -238,6 +280,16 @@ export class PlayerPlane extends Player<PlayerStats> {
             const dx = touch.targetX - centerX;
             const dy = touch.targetY - centerY;
             const distance = Math.hypot(dx, dy);
+
+            if (distance > 1 && dodgePressed) {
+                this.startDodge(dx, dy);
+            }
+
+            if (this.dodging) {
+                this.updateDodge(delta);
+                this.attack();
+                return;
+            }
 
             if (distance > 1) {
                 const step = Math.min(distance, this.speed * delta);
@@ -269,6 +321,75 @@ export class PlayerPlane extends Player<PlayerStats> {
                 this.endGuard(PlayerPlane.guardCooldownBase);
             }
         }
+    }
+
+    /** 触发闪避：朝给定方向冲刺，冲刺期间无敌。 */
+    private startDodge(directionX: number, directionY: number): void {
+        if (this.dodging || this.dodgeCooldown > 0) {
+            return;
+        }
+
+        const length = Math.hypot(directionX, directionY);
+
+        if (length === 0) {
+            return;
+        }
+
+        this.dodging = true;
+        this.dodgeElapsed = 0;
+        this.dodgeAfterimageTimer = 0;
+        this.dodgeDirection = { x: directionX / length, y: directionY / length };
+        this.invincible(PlayerPlane.dodgeDuration);
+        this.playSound(GAME_AUDIO_SOURCES.dash);
+    }
+
+    /** 冲刺位移 + 冲刺拉伸形变 + 残影拖尾。 */
+    private updateDodge(delta: number): void {
+        this.dodgeElapsed += delta;
+        this.position.x += this.dodgeDirection.x * PlayerPlane.dodgeSpeed * delta;
+        this.position.y += this.dodgeDirection.y * PlayerPlane.dodgeSpeed * delta;
+        this.clampToCanvas();
+
+        // 冲刺姿态：机头转向冲刺方向，沿机身轴拉长、横向压扁。
+        this.rotation = Math.atan2(this.dodgeDirection.y, this.dodgeDirection.x);
+        this.scale = { x: 1.35, y: 0.8 };
+
+        this.dodgeAfterimageTimer -= delta;
+
+        if (this.dodgeAfterimageTimer <= 0) {
+            this.dodgeAfterimageTimer = PlayerPlane.dodgeAfterimageInterval;
+            this.spawnEntity(new Afterimage(
+                { ...this.position },
+                { ...this.size },
+                { shape: "rectangle", color: "#8fd8ff" },
+                this.rotation,
+                this.scale,
+                PlayerPlane.dodgeAfterimageLifetime,
+            ));
+        }
+
+        if (this.dodgeElapsed >= PlayerPlane.dodgeDuration) {
+            this.dodging = false;
+            this.dodgeCooldown = PlayerPlane.dodgeCooldown;
+        }
+    }
+
+    /** 非冲刺时将冲刺姿态（机头朝向与形变）平滑恢复为默认状态。 */
+    private restorePose(delta: number): void {
+        const t = Math.min(1, delta * 12);
+        this.scale.x += (1 - this.scale.x) * t;
+        this.scale.y += (1 - this.scale.y) * t;
+
+        // 按最短弧插值回默认朝向，避免 180° 附近绕远路。
+        let rotationDiff = PlayerPlane.baseRotation - this.rotation;
+
+        if (rotationDiff > Math.PI) {
+            rotationDiff -= Math.PI * 2;
+        } else if (rotationDiff < -Math.PI) {
+            rotationDiff += Math.PI * 2;
+        }
+
+        this.rotation += rotationDiff * t;
     }
 
     public override upgrade(): void {
