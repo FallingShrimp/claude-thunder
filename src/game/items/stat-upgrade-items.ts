@@ -29,11 +29,11 @@ export class AttackPowerUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "攻击力提高",
+            "攻击力小幅提高",
             "./items/attack-power.svg",
             Quality.NORMAL,
             PLAYER_STATS_FORMATS,
-            { ATK: 3 },
+            { ATK: 5 },
             ["通用"]
         );
     }
@@ -47,7 +47,7 @@ export class AttackSpeedUpgradeItem
             "./items/attack-speed.svg",
             Quality.NORMAL,
             PLAYER_STATS_FORMATS,
-            { ATK_SPD: 0.25 },
+            { ATK_SPD: 0.5 },
             ["通用"]
         );
     }
@@ -75,7 +75,7 @@ export class CriticalDamageUpgradeItem
             "./items/critical-damage.svg",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
-            { CRIT_DMG: 0.25 },
+            { CRIT_DMG: 0.3 },
             ["暴击"],
             (player) => player.readStat("CRIT_RATE") > 0
         );
@@ -102,7 +102,7 @@ export class MultipleShootUpgradeItem extends PlayerStatUpgradeItem<PlayerStats>
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
-            { MULTIPLE_SHOOT: 0.1 },
+            { MULTIPLE_SHOOT: 0.4 },
             ["通用"]
         );
     }

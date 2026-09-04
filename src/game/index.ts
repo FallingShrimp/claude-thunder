@@ -111,18 +111,20 @@ export async function startGame(): Promise<GameEngine> {
         },
     ]);
     const labelWeightItemFactories: ItemFactory[] = [
-        ["通用倾向", "通用"],
-        ["暴击倾向", "暴击"],
-        ["反击倾向", "反击"],
-        ["雷电倾向", "雷电"],
-        ["召唤倾向", "召唤"],
-    ].map(([displayName, targetLabel]) => () => new LabelWeightItem({
-        displayName,
-        avatarSource: ".",
-        quality: Quality.EPIC,
-        targetLabel,
-        weightIncrement: 20,
-    }));
+        "通用",
+        "暴击",
+        "反击",
+        "雷电",
+        "召唤",
+    ]
+        .map(e => [`[${e}] 出现概率提高`, e])
+        .map(([displayName, targetLabel]) => () => new LabelWeightItem({
+            displayName,
+            avatarSource: ".",
+            quality: Quality.EPIC,
+            targetLabel,
+            weightIncrement: 40,
+        }));
     const itemPool: ItemFactory[] = [
         ...items.map((ItemType) => () => new ItemType()),
         ...labelWeightItemFactories,
