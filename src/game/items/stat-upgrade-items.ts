@@ -47,6 +47,36 @@ export class DodgeChargeItem extends PlayerStatUpgradeItem<PlayerStats> {
     }
 }
 
+/** 能量倍率提高：ENERGY_DMG_MULTIPLIER +0.25（通用标签）。 */
+export class EnergyMultiplierItem
+    extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "能量倍率提高",
+            ".",
+            Quality.EPIC,
+            PLAYER_STATS_FORMATS,
+            { ENERGY_DMG_MULTIPLIER: 0.25 },
+            ["通用"]
+        );
+    }
+}
+
+/** 能量弹穿透增加：ENERGY_PIERCE +1（通用标签）。 */
+export class EnergyPierceItem
+    extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "能量弹穿透增加",
+            ".",
+            Quality.RARE,
+            PLAYER_STATS_FORMATS,
+            { ENERGY_PIERCE: 1 },
+            ["通用"]
+        );
+    }
+}
+
 export class AttackPowerUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
@@ -372,5 +402,7 @@ export const items = [
     LaserRefractionCountItem,
     LaserRefractionPowerItem,
     LaserDamageItem,
-    DodgeChargeItem
+    DodgeChargeItem,
+    EnergyMultiplierItem,
+    EnergyPierceItem
 ];

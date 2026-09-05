@@ -13,6 +13,7 @@ import { randomFloat, rate } from "../util/random";
 import { GAME_AUDIO_SOURCES } from "./audio-assets";
 import { BallThunderBullet } from "./bullets/ball-thunder-bullet";
 import { BasicBullet } from "./bullets/basic-bullet";
+import { EnergyStarBullet } from "./bullets/energy-star-bullet";
 import { FireballBullet } from "./bullets/fireball-bullet";
 import { LaserBullet } from "./bullets/laser-bullet";
 import { ThunderBullet } from "./bullets/thunder-bullet";
@@ -60,6 +61,9 @@ export type PlayerStats = {
     LASER_AIM_ANGLE: number;
     LASER_DAMAGE: number;
     DODGE_CHARGE: number;
+    ENERGY_CAP: number;
+    ENERGY_DMG_MULTIPLIER: number;
+    ENERGY_PIERCE: number;
 };
 
 export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
@@ -101,8 +105,11 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     LASER_REFRACTION_COUNT: DataFormat.VALUE,
     LASER_REFRACTION_DECAY: DataFormat.PERCENT,
     LASER_AIM_ANGLE: DataFormat.ANGLE,
-    LASER_DAMAGE: DataFormat.PERCENT,
+    LASER_DAMAGE: DataFormat.VALUE,
     DODGE_CHARGE: DataFormat.PERCENT,
+    ENERGY_CAP: DataFormat.VALUE,
+    ENERGY_DMG_MULTIPLIER: DataFormat.PERCENT,
+    ENERGY_PIERCE: DataFormat.VALUE,
 });
 
 export type ParryResult = "none" | "guard" | "perfect";
@@ -138,6 +145,12 @@ export class PlayerPlane extends Player<PlayerStats> {
     private dodgeDirection: Vector2 = { x: 0, y: 1 };
     private dodgeAfterimageTimer: number = 0;
     private laserCooldown: number = 0;
+    /** 当前能量值（上限 ENERGY_CAP）。 */
+    public energy: number = 0;
+    /** 是否正在蓄力（按住 I）。 */
+    public charging: boolean = false;
+    private chargeConsumed: number = 0;
+    private previousChargeKey: boolean = false;
 
     public constructor(
         private readonly input: KeyboardInput,
@@ -199,6 +212,9 @@ export class PlayerPlane extends Player<PlayerStats> {
                 LASER_AIM_ANGLE: 0,
                 LASER_DAMAGE: 5,
                 DODGE_CHARGE: 1,
+                ENERGY_CAP: 100,
+                ENERGY_DMG_MULTIPLIER: 0.5,
+                ENERGY_PIERCE: 1,
             },
         );
 
@@ -276,6 +292,8 @@ export class PlayerPlane extends Player<PlayerStats> {
         this.position.x += this.velocity.x * delta;
         this.position.y += this.velocity.y * delta;
         this.clampToCanvas();
+
+        this.updateCharging(delta);
 
         if (this.input.isPressed("KeyJ")) {
             this.attack();
@@ -394,6 +412,71 @@ export class PlayerPlane extends Player<PlayerStats> {
         this.dodgeDirection = { x: directionX / length, y: directionY / length };
         this.invincible(PlayerPlane.dodgeDuration);
         this.playSound(GAME_AUDIO_SOURCES.dash);
+    }
+
+    /** 获取能量：所有能量获取都会乘以攻击速度加成。 */
+    public gainEnergy(base: number): void {
+        this.energy = Math.min(
+            Math.max(0, this.readStat("ENERGY_CAP")),
+            this.energy + base * this.readStat("ATK_SPD"),
+        );
+    }
+
+    /**
+     * 蓄力状态机（按住 I）：
+     * - 开始：能量大于 0 时按下 I；
+     * - 期间：按 delta 平滑消耗能量（每 0.5 秒消耗 50 点），攻击被封锁；
+     * - 结束：松开 I 或能量耗尽时发射金色四角星炮弹。
+     */
+    private updateCharging(delta: number): void {
+        const chargeKey = this.input.isPressed("KeyI");
+        const chargePressed = chargeKey && !this.previousChargeKey;
+        const chargeReleased = !chargeKey && this.previousChargeKey;
+
+        this.previousChargeKey = chargeKey;
+
+        if (this.charging) {
+            const consumed = Math.min(this.energy, 100 * delta);
+
+            this.energy -= consumed;
+            this.chargeConsumed += consumed;
+
+            if (this.energy <= 0 || chargeReleased) {
+                this.fireEnergyStar();
+            }
+
+            return;
+        }
+
+        if (chargePressed && this.energy > 0) {
+            this.charging = true;
+            this.chargeConsumed = 0;
+        }
+    }
+
+    /** 发射金色旋转四角星炮弹：伤害 = 攻击力 × 本次消耗能量 × 伤害倍率。 */
+    private fireEnergyStar(): void {
+        this.charging = false;
+
+        const consumed = this.chargeConsumed;
+
+        this.chargeConsumed = 0;
+
+        if (consumed <= 0) {
+            return;
+        }
+
+        this.spawnEntity(new EnergyStarBullet({
+            launcher: this,
+            x: this.position.x + this.size.width / 2 - 10,
+            y: this.position.y + this.size.height / 2 - 10,
+            rotation: -Math.PI / 2,
+            damage: this.readStat("ATK")
+                * consumed
+                * Math.max(0, this.readStat("ENERGY_DMG_MULTIPLIER")),
+            penetrate: Math.max(0, this.readStat("ENERGY_PIERCE")),
+            findTarget: this.findTargets ?? (() => []),
+        }));
     }
 
     /** 攻击时发射激光（需持有冲刺激光道具）：始终向上，并朝预期偏转角最小的敌人修正。 */
@@ -721,7 +804,12 @@ export class PlayerPlane extends Player<PlayerStats> {
         return "player";
     }
 
+    /** 蓄力期间禁止普通攻击与激光。 */
     private attack(): void {
+        if (this.charging) {
+            return;
+        }
+
         if (this.fireCooldown > 0) {
             return;
         }

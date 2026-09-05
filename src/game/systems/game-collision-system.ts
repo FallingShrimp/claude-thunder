@@ -86,6 +86,8 @@ export class GameCollisionSystem extends CollisionSystem {
                     this.emitParryEffect(world, bulletPair.plane, parry);
 
                     if (parry === "perfect") {
+                        bulletPair.plane.gainEnergy(5);
+
                         return;
                     }
 

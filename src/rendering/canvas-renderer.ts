@@ -5,6 +5,7 @@ import { CooldownBar } from "../entities/cooldown-bar";
 import { Healthbar } from "../entities/healthbar";
 import { Item } from "../entities/item";
 import { BallThunderBullet } from "../game/bullets/ball-thunder-bullet";
+import { EnergyStarBullet } from "../game/bullets/energy-star-bullet";
 import { LaserBullet } from "../game/bullets/laser-bullet";
 import { ThunderBullet } from "../game/bullets/thunder-bullet";
 import { PlayerPlane } from "../game/player-plane";
@@ -91,6 +92,11 @@ export class CanvasRenderer implements Renderer {
             return;
         }
 
+        if (target instanceof EnergyStarBullet) {
+            this.renderEnergyStar(target);
+            return;
+        }
+
         if (target instanceof DamageLabel) {
             this.renderDamageLabel(target);
             return;
@@ -172,8 +178,12 @@ export class CanvasRenderer implements Renderer {
 
         context.restore();
 
-        if (target instanceof PlayerPlane && target.guarding) {
-            this.renderPlayerShield(target);
+        if (target instanceof PlayerPlane) {
+            if (target.guarding) {
+                this.renderPlayerShield(target);
+            }
+
+            this.renderEnergyArc(target);
         }
     }
 
@@ -367,6 +377,42 @@ export class CanvasRenderer implements Renderer {
         context.restore();
     }
 
+    /** 金色旋转四角星炮弹。 */
+    private renderEnergyStar(star: EnergyStarBullet): void {
+        const { context } = this;
+        const centerX = star.position.x + star.size.width / 2;
+        const centerY = star.position.y + star.size.height / 2;
+        const outerRadius = star.size.width / 2;
+        const innerRadius = outerRadius * 0.38;
+
+        context.save();
+        context.globalAlpha = star.opacity;
+        context.translate(centerX, centerY);
+        context.rotate(star.rotation);
+        context.fillStyle = star.appearance.color;
+        context.shadowColor = "#ffd700";
+        context.shadowBlur = 10;
+
+        context.beginPath();
+
+        for (let index = 0; index < 8; index++) {
+            const radius = index % 2 === 0 ? outerRadius : innerRadius;
+            const angle = (index / 8) * Math.PI * 2 - Math.PI / 2;
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+
+            if (index === 0) {
+                context.moveTo(x, y);
+            } else {
+                context.lineTo(x, y);
+            }
+        }
+
+        context.closePath();
+        context.fill();
+        context.restore();
+    }
+
     private renderDamageLabel(label: DamageLabel): void {
         const { context } = this;
 
@@ -498,6 +544,38 @@ export class CanvasRenderer implements Renderer {
         context.beginPath();
         context.arc(0, 0, radius, 0, Math.PI * 2);
         context.stroke();
+        context.restore();
+    }
+
+    /**
+     * 能量扇环：圆心角 = 360° ×（当前能量 / 能量上限），
+     * 自正上方顺时针展开，用于直观展示当前能量。
+     */
+    private renderEnergyArc(player: PlayerPlane): void {
+        const cap = Math.max(1, player.readStat("ENERGY_CAP"));
+        const ratio = Math.min(1, Math.max(0, player.energy / cap));
+
+        if (ratio <= 0) {
+            return;
+        }
+
+        const { context } = this;
+        const centerX = player.position.x + player.size.width / 2;
+        const centerY = player.position.y + player.size.height / 2;
+        const outerRadius = Math.max(player.size.width, player.size.height)
+            * 0.62;
+        const innerRadius = outerRadius - 6;
+        const span = Math.PI * 2 * ratio;
+        const start = -Math.PI / 2;
+
+        context.save();
+        context.fillStyle = "#ffd700";
+        context.globalAlpha = 0.55 * player.opacity;
+        context.beginPath();
+        context.arc(centerX, centerY, outerRadius, start, start + span);
+        context.arc(centerX, centerY, innerRadius, start + span, start, true);
+        context.closePath();
+        context.fill();
         context.restore();
     }
 

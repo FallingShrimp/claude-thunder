@@ -15,6 +15,8 @@ export abstract class Bullet extends BaseEntity {
     public remainingLifetime: number = 0;
     public canParry: boolean = false;
     public penetrate: number = 0;
+    /** 能量机制用：该子弹是否已为玩家提供过接近能量。 */
+    public energyGranted: boolean = false;
 
     private readonly hitTargets = new Set<string>();
 
