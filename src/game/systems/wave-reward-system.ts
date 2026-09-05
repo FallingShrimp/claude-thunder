@@ -16,6 +16,7 @@ export class WaveRewardSystem implements GameSystem {
     private selectedIndex: number = 0;
     private waveHadEnemies: boolean = false;
     private selecting: boolean = false;
+    private initialSelection: boolean = false;
     private previousLeft: boolean = false;
     private previousRight: boolean = false;
     private previousConfirm: boolean = false;
@@ -99,29 +100,80 @@ export class WaveRewardSystem implements GameSystem {
         this.previousRight = this.input.isPressed("KeyD");
         this.previousConfirm = this.input.isPressed("KeyJ");
 
-        const items = this.pickItems();
-        // 依据屏幕宽度等比缩放卡片（含间距与高度），并居中于屏幕中下部。
+        this.layoutChoices(world, this.pickItems());
+    }
+
+    /**
+     * 开局选择：展示全部候选标签权重道具，玩家选一个作为开局倾向；
+     * 确认后才由 confirmSelection 开启第一波。
+     */
+    public beginInitialSelection(
+        world: GameWorld,
+        initialChoices: readonly ItemFactory[],
+    ): void {
+        this.selecting = true;
+        this.initialSelection = true;
+        this.setPlayerControlsEnabled(false);
+        this.selectedIndex = 0;
+        this.previousLeft = this.input.isPressed("KeyA");
+        this.previousRight = this.input.isPressed("KeyD");
+        this.previousConfirm = this.input.isPressed("KeyJ");
+
+        this.layoutChoices(world, initialChoices.map((factory) => factory()));
+    }
+
+    /** 按屏幕宽度等比缩放卡片并居中排布；单排放不下时折成多排。 */
+    private layoutChoices(world: GameWorld, items: Item[]): void {
+        // 优先单排展示；设计宽度超出屏幕时折成多排，每排数量尽量均匀。
+        const totalDesignWidth = items.length * WaveRewardSystem.baseItemWidth
+            + (items.length - 1) * WaveRewardSystem.baseGap;
+        const rowCount = Math.max(
+            1,
+            Math.ceil(totalDesignWidth / WaveRewardSystem.designScreenWidth),
+        );
+        const basePerRow = Math.floor(items.length / rowCount);
+        const extraRows = items.length % rowCount;
+        const rowCounts = Array.from(
+            { length: rowCount },
+            (_, row) => basePerRow + (row < extraRows ? 1 : 0),
+        );
+        const columns = Math.max(...rowCounts);
+        const columnsDesignWidth = columns * WaveRewardSystem.baseItemWidth
+            + (columns - 1) * WaveRewardSystem.baseGap;
         const scale = Math.max(
-            0.7,
+            0.5,
             Math.min(
                 2.5,
-                this.screenWidth / WaveRewardSystem.designScreenWidth,
+                this.screenWidth
+                / Math.max(WaveRewardSystem.designScreenWidth, columnsDesignWidth),
             ),
         );
         const itemWidth = WaveRewardSystem.baseItemWidth * scale;
         const itemHeight = WaveRewardSystem.baseItemHeight * scale;
         const gap = WaveRewardSystem.baseGap * scale;
-        const totalWidth = itemWidth * this.choiceCount
-            + gap * (this.choiceCount - 1);
-        const startX = (this.screenWidth - totalWidth) / 2;
-        const startY = this.screenHeight * 0.32 - itemHeight / 2;
+        const totalHeight = itemHeight * rowCount + gap * (rowCount - 1);
+        const startY = this.screenHeight * 0.32 - totalHeight / 2;
 
-        for (const [index, item] of items.entries()) {
-            item.size = { width: itemWidth, height: itemHeight };
-            item.position.x = startX + index * (itemWidth + gap);
-            item.position.y = startY;
-            this.choices.push(item);
-            world.addEntity(item);
+        let itemIndex = 0;
+
+        for (const [row, count] of rowCounts.entries()) {
+            const rowWidth = count * itemWidth + (count - 1) * gap;
+            const startX = (this.screenWidth - rowWidth) / 2;
+
+            for (let column = 0; column < count; column += 1) {
+                const item = items[itemIndex];
+                itemIndex += 1;
+
+                if (item === undefined) {
+                    continue;
+                }
+
+                item.size = { width: itemWidth, height: itemHeight };
+                item.position.x = startX + column * (itemWidth + gap);
+                item.position.y = startY + row * (itemHeight + gap);
+                this.choices.push(item);
+                world.addEntity(item);
+            }
         }
 
         this.updateChoiceAppearance();
@@ -175,8 +227,15 @@ export class WaveRewardSystem implements GameSystem {
         this.choices.length = 0;
         this.selecting = false;
         this.setPlayerControlsEnabled(true);
-        this.currentWaveIndex += 1;
-        this.switchWave(this.currentWaveIndex);
+
+        if (this.initialSelection) {
+            // 开局倾向选完才开启第一波。
+            this.initialSelection = false;
+            this.switchWave(0);
+        } else {
+            this.currentWaveIndex += 1;
+            this.switchWave(this.currentWaveIndex);
+        }
     }
 
     /**

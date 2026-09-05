@@ -25,7 +25,6 @@ import {
     SummonSacrificeItem,
 } from "./summon-upgrade-items";
 import {
-    DodgeChargeItem,
     DodgeLaserItem,
     LaserAimItem,
     LaserDamageItem,
@@ -33,6 +32,20 @@ import {
     LaserRefractionItem,
     LaserRefractionPowerItem,
 } from "./laser-upgrade-items";
+
+/** 闪避充能加快：DODGE_CHARGE +1（通用标签）。 */
+export class DodgeChargeItem extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "闪避充能加快",
+            ".",
+            Quality.RARE,
+            PLAYER_STATS_FORMATS,
+            { DODGE_CHARGE: 1 },
+            ["通用"]
+        );
+    }
+}
 
 export class AttackPowerUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {

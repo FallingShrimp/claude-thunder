@@ -145,7 +145,7 @@ export async function startGame(): Promise<GameEngine> {
         "反击",
         "雷电",
         "召唤",
-        "闪避"
+        "激光"
     ]
         .map(e => [`[${e}] 出现概率提高`, e])
         .map(([displayName, targetLabel]) => () => new LabelWeightItem({
@@ -192,7 +192,7 @@ export async function startGame(): Promise<GameEngine> {
     const engine = new GameEngine(world, renderer, systems, waves);
 
     // 调试工具：在浏览器控制台手动调整道具标签的抽取权重，
-    // 例如 gameDebug.addLabelWeight("闪避", 200)、gameDebug.getLabelWeights()。
+    // 例如 gameDebug.addLabelWeight("激光", 200)、gameDebug.getLabelWeights()。
     Object.defineProperty(globalThis, "gameDebug", {
         value: {
             addLabelWeight: (label: string, increment: number) => {
@@ -245,7 +245,8 @@ export async function startGame(): Promise<GameEngine> {
         alignment: "right",
         foregroundColor: "#8fd8ff",
     }));
-    engine.switchWave(0);
+    // 开局先让玩家从标签倾向道具中选一个，选完才开启第一波。
+    waveRewardSystem.beginInitialSelection(world, labelWeightItemFactories);
     engine.start();
     return engine;
 }

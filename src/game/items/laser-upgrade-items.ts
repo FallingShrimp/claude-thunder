@@ -8,12 +8,12 @@ import { PlayerStatUpgradeItem } from "./stat-upgrade-item-base";
 export class DodgeLaserItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "冲刺时向前发射激光",
+            "可发射激光",
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             { LASER_COUNT: 1 },
-            ["闪避"]
+            ["激光"]
         );
     }
 }
@@ -26,7 +26,7 @@ export class LaserRefractionItem extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
             { LASER_REFRACTION_TARGETS: 1 },
-            ["闪避"],
+            ["激光"],
             (player) => player.readStat("LASER_COUNT") > 0
         );
     }
@@ -41,7 +41,7 @@ export class LaserRefractionCountItem
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             { LASER_REFRACTION_COUNT: 1 },
-            ["闪避"],
+            ["激光"],
             (player) => player.readStat("LASER_COUNT") > 0
         );
     }
@@ -55,7 +55,7 @@ export class LaserAimItem extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             { LASER_AIM_ANGLE: 3 },
-            ["闪避"],
+            ["激光"],
             (player) => player.readStat("LASER_COUNT") > 0
         );
     }
@@ -70,7 +70,7 @@ export class LaserRefractionPowerItem
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             { LASER_REFRACTION_DECAY: 0.05 },
-            ["闪避"],
+            ["激光"],
             (player) => player.readStat("LASER_COUNT") > 0
         );
     }
@@ -84,21 +84,9 @@ export class LaserDamageItem extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             { LASER_DAMAGE: 0.4 },
-            ["闪避"],
+            ["激光"],
             (player) => player.readStat("LASER_COUNT") > 0
         );
     }
 }
 
-export class DodgeChargeItem extends PlayerStatUpgradeItem<PlayerStats> {
-    public constructor() {
-        super(
-            "闪避充能加快",
-            ".",
-            Quality.RARE,
-            PLAYER_STATS_FORMATS,
-            { DODGE_CHARGE: 1 },
-            ["闪避"]
-        );
-    }
-}

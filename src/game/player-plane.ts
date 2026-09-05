@@ -137,7 +137,7 @@ export class PlayerPlane extends Player<PlayerStats> {
     private dodgeCooldown: number = 0;
     private dodgeDirection: Vector2 = { x: 0, y: 1 };
     private dodgeAfterimageTimer: number = 0;
-    private previousDodgeKey: boolean = false;
+    private laserCooldown: number = 0;
 
     public constructor(
         private readonly input: KeyboardInput,
@@ -210,6 +210,7 @@ export class PlayerPlane extends Player<PlayerStats> {
 
     public override ai(delta: number): void {
         this.fireCooldown = Math.max(0, this.fireCooldown - delta);
+        this.laserCooldown = Math.max(0, this.laserCooldown - delta);
         this.guardCooldown = Math.max(0, this.guardCooldown - delta);
         this.dodgeCooldown = Math.max(0, this.dodgeCooldown - delta);
 
@@ -218,13 +219,11 @@ export class PlayerPlane extends Player<PlayerStats> {
             this.dodging = false;
             this.endGuard(PlayerPlane.guardCooldownBase);
             this.previousGuardKey = this.input.isPressed("KeyK");
-            this.previousDodgeKey = this.input.isPressed("Space");
             return;
         }
 
-        const dodgeKey = this.input.isPressed("Space");
-        const dodgePressed = dodgeKey && !this.previousDodgeKey;
-        this.previousDodgeKey = dodgeKey;
+        // 按住空格即可持续冲刺：冷却结束自动再次触发，无需重新按下。
+        const dodgeHeld = this.input.isPressed("Space");
 
         // 键盘操控优先：只要有任何方向/攻击/格挡键活跃，就用键盘分支，
         // 从而保证桌面端不受触摸输入影响（TouchInput 始终存在）。
@@ -240,9 +239,11 @@ export class PlayerPlane extends Player<PlayerStats> {
         const vertical = Number(this.input.isPressed("KeyS"))
             - Number(this.input.isPressed("KeyW"));
 
-        // 移动中按空格：朝当前移动方向闪避。
-        if (dodgePressed && (horizontal !== 0 || vertical !== 0)) {
+        // 按空格闪避：移动中朝移动方向；无触摸拖动时向下冲刺。
+        if (dodgeHeld && (horizontal !== 0 || vertical !== 0)) {
             this.startDodge(horizontal, vertical);
+        } else if (dodgeHeld && !this.isTouchDragging()) {
+            this.startDodge(0, 1);
         }
 
         // 冲刺期间：位移完全由冲刺接管，忽略移动输入，仅保留攻击/格挡。
@@ -264,7 +265,7 @@ export class PlayerPlane extends Player<PlayerStats> {
         }
 
         if (this.touch !== undefined && !keyboardActive) {
-            this.updateTouchControl(delta, dodgePressed);
+            this.updateTouchControl(delta, dodgeHeld);
             return;
         }
 
@@ -307,7 +308,7 @@ export class PlayerPlane extends Player<PlayerStats> {
      * 松开屏幕时保持格挡。首次触碰后才进入「松开即格挡」状态。
      * 按住且正在移动时触发闪避，冲刺方向为手指相对飞机的方向。
      */
-    private updateTouchControl(delta: number, dodgePressed: boolean): void {
+    private updateTouchControl(delta: number, dodgeHeld: boolean): void {
         const touch = this.touch as TouchInput;
 
         if (touch.isDown) {
@@ -318,7 +319,7 @@ export class PlayerPlane extends Player<PlayerStats> {
             const dy = touch.targetY - centerY;
             const distance = Math.hypot(dx, dy);
 
-            if (distance > 1 && dodgePressed) {
+            if (distance > 1 && dodgeHeld) {
                 this.startDodge(dx, dy);
             }
 
@@ -360,6 +361,21 @@ export class PlayerPlane extends Player<PlayerStats> {
         }
     }
 
+    /** 是否正处于触摸拖动状态（手指按下且偏离机体中心）。 */
+    private isTouchDragging(): boolean {
+        if (this.touch === undefined || !this.touch.isDown) {
+            return false;
+        }
+
+        const centerX = this.position.x + this.size.width / 2;
+        const centerY = this.position.y + this.size.height / 2;
+
+        return Math.hypot(
+            this.touch.targetX - centerX,
+            this.touch.targetY - centerY,
+        ) > 1;
+    }
+
     /** 触发闪避：朝给定方向冲刺，冲刺期间无敌。 */
     private startDodge(directionX: number, directionY: number): void {
         if (this.dodging || this.dodgeCooldown > 0) {
@@ -378,11 +394,10 @@ export class PlayerPlane extends Player<PlayerStats> {
         this.dodgeDirection = { x: directionX / length, y: directionY / length };
         this.invincible(PlayerPlane.dodgeDuration);
         this.playSound(GAME_AUDIO_SOURCES.dash);
-        this.fireDodgeLasers();
     }
 
-    /** 冲刺时沿机头方向发射激光（需持有冲刺激光道具）。 */
-    private fireDodgeLasers(): void {
+    /** 攻击时发射激光（需持有冲刺激光道具）：始终向上，并可向最近敌人修正。 */
+    private fireLasers(): void {
         const laserCount = Math.max(
             0,
             Math.floor(this.readStat("LASER_COUNT")),
@@ -392,11 +407,9 @@ export class PlayerPlane extends Player<PlayerStats> {
             return;
         }
 
-        const baseRotation = Math.atan2(
-            this.dodgeDirection.y,
-            this.dodgeDirection.x,
-        );
-        // 激光角度修正：冲刺方向不变，发射角度朝最近敌人偏转，
+        // 激光始终向上发射（画布 y 轴向下，上方为 -90°）。
+        const baseRotation = -Math.PI / 2;
+        // 激光角度修正：发射角度朝最近敌人偏转，
         // 最大偏转角由 LASER_AIM_ANGLE 限制（度）。
         const maxCorrection = radians(
             Math.max(0, this.readStat("LASER_AIM_ANGLE")),
@@ -726,6 +739,13 @@ export class PlayerPlane extends Player<PlayerStats> {
             // 浏览器可能在用户交互前禁止播放音频，静默忽略即可。
         });
         this.fireCooldown = 1 / this.readStat("ATK_SPD");
+
+        // 按住攻击时发射激光：冷却基值为子弹冷却的 500%，
+        // 攻击速度加成同样加速激光。
+        if (this.laserCooldown === 0 && this.readStat("LASER_COUNT") > 0) {
+            this.fireLasers();
+            this.laserCooldown = 5 / this.readStat("ATK_SPD");
+        }
     }
 
     private updateGuard(delta: number): void {
