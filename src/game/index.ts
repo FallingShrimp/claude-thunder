@@ -59,32 +59,18 @@ export async function startGame(): Promise<GameEngine> {
         audioSystem,
         (entity) => world.addEntity(entity),
         touch,
-        // 激光角度修正用：返回场上距离玩家最近的敌人。
+        // 激光角度修正用：返回场上全部存活敌人，
+        // 由玩家从中选取预期偏转角最小者。
         () => {
-            let nearest: Enemy | undefined;
+            const enemies: Enemy[] = [];
 
             for (const entity of world.entities) {
-                if (!(entity instanceof Enemy) || !entity.active) {
-                    continue;
-                }
-
-                const distance = Math.hypot(
-                    entity.position.x - player.position.x,
-                    entity.position.y - player.position.y,
-                );
-
-                if (
-                    nearest === undefined
-                    || distance < Math.hypot(
-                        nearest.position.x - player.position.x,
-                        nearest.position.y - player.position.y,
-                    )
-                ) {
-                    nearest = entity;
+                if (entity instanceof Enemy && entity.active) {
+                    enemies.push(entity);
                 }
             }
 
-            return nearest;
+            return enemies;
         },
     );
     const environment = new SpaceEnvironment(canvas.width, canvas.height);

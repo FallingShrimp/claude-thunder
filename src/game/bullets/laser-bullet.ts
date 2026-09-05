@@ -17,7 +17,7 @@ export interface LaserBulletOptions {
 
 /** 激光：瞬时射线束，穿透路径上的所有敌人；命中后可向最近敌人折射。 */
 export class LaserBullet extends Bullet {
-    public static readonly defaultLength: number = 520;
+    public static readonly defaultLength: number = 3000;
     public static readonly thickness: number = 5;
     public static readonly lifetime: number = 0.15;
     /** 多道激光齐射时的扇形角度间隔（弧度）。 */

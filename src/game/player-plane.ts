@@ -144,8 +144,8 @@ export class PlayerPlane extends Player<PlayerStats> {
         private readonly audioSystem: AudioSystem,
         private readonly spawnEntity: (entity: BaseEntity) => void,
         private readonly touch?: TouchInput,
-        /** 调试/瞄准用：获取场上最近敌人的回调（供激光角度修正）。 */
-        private readonly findTarget?: () => Plane | undefined,
+        /** 瞄准用：返回场上全部敌人（供激光选取偏转角最小者）。 */
+        private readonly findTargets?: () => readonly Plane[],
     ) {
         super(
             "player",
@@ -156,7 +156,7 @@ export class PlayerPlane extends Player<PlayerStats> {
             { width: 48, height: 56 },
             { shape: "sprite", color: "#4da6ff", spriteSource: PlayerPlane.textureSource },
             100,
-            10,
+            Infinity,
             PLAYER_STATS_FORMATS,
             {
                 ATK: 10,
@@ -396,7 +396,7 @@ export class PlayerPlane extends Player<PlayerStats> {
         this.playSound(GAME_AUDIO_SOURCES.dash);
     }
 
-    /** 攻击时发射激光（需持有冲刺激光道具）：始终向上，并可向最近敌人修正。 */
+    /** 攻击时发射激光（需持有冲刺激光道具）：始终向上，并朝预期偏转角最小的敌人修正。 */
     private fireLasers(): void {
         const laserCount = Math.max(
             0,
@@ -409,15 +409,18 @@ export class PlayerPlane extends Player<PlayerStats> {
 
         // 激光始终向上发射（画布 y 轴向下，上方为 -90°）。
         const baseRotation = -Math.PI / 2;
-        // 激光角度修正：发射角度朝最近敌人偏转，
-        // 最大偏转角由 LASER_AIM_ANGLE 限制（度）。
+        // 激光角度修正：从所有敌人中选取与正上方夹角最小者，
+        // 修正量钳制在 LASER_AIM_ANGLE（度）内。
         const maxCorrection = radians(
             Math.max(0, this.readStat("LASER_AIM_ANGLE")),
         );
-        const target = maxCorrection > 0 ? this.findTarget?.() : undefined;
+        const candidates = maxCorrection > 0
+            ? this.findTargets?.() ?? []
+            : [];
         let aimRotation = baseRotation;
+        let bestDiff = Number.POSITIVE_INFINITY;
 
-        if (target !== undefined) {
+        for (const target of candidates) {
             const targetAngle = Math.atan2(
                 target.position.y + target.size.height / 2 - (this.position.y
                     + this.size.height / 2),
@@ -432,9 +435,15 @@ export class PlayerPlane extends Player<PlayerStats> {
                 diff += Math.PI * 2;
             }
 
+            if (Math.abs(diff) < Math.abs(bestDiff)) {
+                bestDiff = diff;
+            }
+        }
+
+        if (Number.isFinite(bestDiff)) {
             const clamped = Math.max(
                 -maxCorrection,
-                Math.min(maxCorrection, diff),
+                Math.min(maxCorrection, bestDiff),
             );
 
             aimRotation = baseRotation + clamped;
@@ -442,18 +451,16 @@ export class PlayerPlane extends Player<PlayerStats> {
 
         const originX = this.position.x + this.size.width / 2;
         const originY = this.position.y + this.size.height / 2;
-        const spread = LaserBullet.spreadAngle;
 
+        // 多条激光平行排布：水平方向每 10px 一条，走向相同。
         for (let index = 0; index < laserCount; index++) {
-            const offset = laserCount === 1
-                ? 0
-                : (index - (laserCount - 1) / 2) * spread;
+            const offset = (index - (laserCount - 1) / 2) * 10;
 
             this.spawnEntity(new LaserBullet({
                 launcher: this,
-                originX,
+                originX: originX + offset,
                 originY,
-                rotation: aimRotation + offset,
+                rotation: aimRotation,
                 damage: this.readStat("ATK")
                     * this.readStat("LASER_DAMAGE"),
                 faction: "player",

@@ -54,7 +54,7 @@ export class LaserAimItem extends PlayerStatUpgradeItem<PlayerStats> {
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
-            { LASER_AIM_ANGLE: 3 },
+            { LASER_AIM_ANGLE: 10 },
             ["激光"],
             (player) => player.readStat("LASER_COUNT") > 0
         );
