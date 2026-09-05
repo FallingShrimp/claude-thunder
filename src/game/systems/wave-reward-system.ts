@@ -222,20 +222,77 @@ export class WaveRewardSystem implements GameSystem {
         const eligible = allCandidates.filter(
             (item) => item.displayCondition(this.player),
         );
-        // 满足条件的候选不足时，回退到全部候选，保证总能有足够选项。
-        const candidates = eligible.length >= this.choiceCount
-            ? eligible
-            : allCandidates;
+
+        if (eligible.length < this.choiceCount) {
+            // 满足条件的候选不足时，回退到全部候选，保证总能有足够选项。
+            return this.drawItems(allCandidates, new Map());
+        }
+
+        return this.drawItems(
+            eligible,
+            this.distributeHiddenWeights(allCandidates, eligible),
+        );
+    }
+
+    /**
+     * 把不可显示道具的权重（品质基准 + 标签增量）平均分配给
+     * 与其共享标签的可显示道具，避免前置道具隐藏导致流派绝迹。
+     */
+    private distributeHiddenWeights(
+        allCandidates: Item[],
+        eligible: Item[],
+    ): Map<Item, number> {
+        const bonus = new Map<Item, number>();
+
+        for (const hidden of allCandidates) {
+            if (hidden.displayCondition(this.player)) {
+                continue;
+            }
+
+            const hiddenWeight = this.getItemWeight(hidden)
+                + this.getLabelWeightIncrement(hidden);
+
+            if (hiddenWeight <= 0) {
+                continue;
+            }
+
+            const shared = eligible.filter((item) =>
+                item.labels.some((label) => hidden.labels.includes(label)),
+            );
+
+            if (shared.length === 0) {
+                continue;
+            }
+
+            const share = hiddenWeight / shared.length;
+
+            for (const item of shared) {
+                bonus.set(item, (bonus.get(item) ?? 0) + share);
+            }
+        }
+
+        return bonus;
+    }
+
+    private getLabelWeightIncrement(item: Item): number {
+        return item.labels.reduce(
+            (total, label) => total
+                + (this.labelWeightIncrements.get(label) ?? 0),
+            0,
+        );
+    }
+
+    private drawItems(
+        candidates: Item[],
+        weightBonus: Map<Item, number>,
+    ): Item[] {
         const picked: Item[] = [];
 
         while (picked.length < this.choiceCount) {
             const weights = candidates.map((item) => {
-                const labelIncrement = item.labels.reduce(
-                    (total, label) => total
-                        + (this.labelWeightIncrements.get(label) ?? 0),
-                    0,
-                );
-                const weight = this.getItemWeight(item) + labelIncrement;
+                const weight = this.getItemWeight(item)
+                    + this.getLabelWeightIncrement(item)
+                    + (weightBonus.get(item) ?? 0);
                 return Number.isFinite(weight) && weight > 0 ? weight : 0;
             });
             const totalWeight = weights.reduce((total, weight) => total + weight, 0);
