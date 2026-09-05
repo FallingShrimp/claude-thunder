@@ -13,6 +13,15 @@ function hasAnySummon(player: Player): boolean {
         || player.readStat("SUMMON_ASSAULT_COUNT") > 0;
 }
 
+/** 当前持有的召唤物总和加上新增数量是否仍在召唤上限之内。 */
+function hasSummonRoom(player: Player, grantCount: number): boolean {
+    const total = player.readStat("SUMMON_GUNNER_COUNT")
+        + player.readStat("SUMMON_CANNON_COUNT")
+        + player.readStat("SUMMON_ASSAULT_COUNT");
+
+    return total + grantCount <= player.readStat("SUMMON_CAP");
+}
+
 // ===== 流派入口（分别召唤三型小飞机）=====
 
 /** 召唤机枪手：SUMMON_GUNNER_COUNT +1，召唤一台机枪手。 */
@@ -25,6 +34,7 @@ export class SummonGunnerItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             { SUMMON_GUNNER_COUNT: 1 },
             ["召唤"],
+            (player) => hasSummonRoom(player, 1),
         );
     }
 }
@@ -39,6 +49,7 @@ export class SummonCannonItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             { SUMMON_CANNON_COUNT: 1 },
             ["召唤"],
+            (player) => hasSummonRoom(player, 1),
         );
     }
 }
@@ -53,11 +64,27 @@ export class SummonAssaultItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             { SUMMON_ASSAULT_COUNT: 1 },
             ["召唤"],
+            (player) => hasSummonRoom(player, 1),
         );
     }
 }
 
 // ===== 数量成长 =====
+
+/** 召唤上限增加：SUMMON_CAP +1。 */
+export class SummonCapItem extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "召唤上限增加",
+            ".",
+            Quality.RARE,
+            PLAYER_STATS_FORMATS,
+            { SUMMON_CAP: 1 },
+            ["召唤"],
+            hasAnySummon,
+        );
+    }
+}
 
 /** 援军到来：三型小飞机各 +1。 */
 export class SummonCountItem extends PlayerStatUpgradeItem<PlayerStats> {
@@ -73,7 +100,7 @@ export class SummonCountItem extends PlayerStatUpgradeItem<PlayerStats> {
                 SUMMON_ASSAULT_COUNT: 1,
             },
             ["召唤"],
-            hasAnySummon,
+            (player) => hasAnySummon(player) && hasSummonRoom(player, 3),
         );
     }
 }
@@ -92,7 +119,7 @@ export class SummonArmyItem extends PlayerStatUpgradeItem<PlayerStats> {
                 SUMMON_ASSAULT_COUNT: 2,
             },
             ["召唤"],
-            hasAnySummon,
+            (player) => hasAnySummon(player) && hasSummonRoom(player, 6),
         );
     }
 }

@@ -52,6 +52,7 @@ export type PlayerStats = {
     SUMMON_ASSAULT_SPEED: number;
     SUMMON_OVERLOAD: number;
     SUMMON_SACRIFICE: number;
+    SUMMON_CAP: number;
     LASER_COUNT: number;
     LASER_REFRACTION_TARGETS: number;
     LASER_REFRACTION_COUNT: number;
@@ -94,6 +95,7 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     SUMMON_ASSAULT_SPEED: DataFormat.PERCENT,
     SUMMON_OVERLOAD: DataFormat.PERCENT,
     SUMMON_SACRIFICE: DataFormat.VALUE,
+    SUMMON_CAP: DataFormat.VALUE,
     LASER_COUNT: DataFormat.VALUE,
     LASER_REFRACTION_TARGETS: DataFormat.VALUE,
     LASER_REFRACTION_COUNT: DataFormat.VALUE,
@@ -187,6 +189,7 @@ export class PlayerPlane extends Player<PlayerStats> {
                 SUMMON_ASSAULT_SPEED: 0,
                 SUMMON_OVERLOAD: 0,
                 SUMMON_SACRIFICE: 0,
+                SUMMON_CAP: 1,
                 LASER_COUNT: 0,
                 LASER_REFRACTION_TARGETS: 0,
                 LASER_REFRACTION_COUNT: 0,
