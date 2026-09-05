@@ -179,6 +179,36 @@ export class WaveRewardSystem implements GameSystem {
         this.switchWave(this.currentWaveIndex);
     }
 
+    /**
+     * 调试工具：手动增加某标签的抽取权重增量（对所有拥有该标签的道具生效，
+     * 可传负数减少权重；增量归零后自动移除该标签的记录）。
+     */
+    public addLabelWeight(targetLabel: string, increment: number): void {
+        if (targetLabel.length === 0) {
+            throw new RangeError("The target item label must not be empty.");
+        }
+
+        if (!Number.isFinite(increment) || increment === 0) {
+            throw new RangeError(
+                "The label weight increment must be a non-zero finite number.",
+            );
+        }
+
+        const next = (this.labelWeightIncrements.get(targetLabel) ?? 0)
+            + increment;
+
+        if (next > 0) {
+            this.labelWeightIncrements.set(targetLabel, next);
+        } else {
+            this.labelWeightIncrements.delete(targetLabel);
+        }
+    }
+
+    /** 调试工具：查看当前各标签的手动权重增量。 */
+    public getLabelWeights(): Record<string, number> {
+        return Object.fromEntries(this.labelWeightIncrements);
+    }
+
     private updateChoiceAppearance(): void {
         for (const [index, item] of this.choices.entries()) {
             const selected = index === this.selectedIndex;

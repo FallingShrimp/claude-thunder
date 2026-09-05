@@ -130,6 +130,21 @@ export async function startGame(): Promise<GameEngine> {
         ...items.map((ItemType) => () => new ItemType()),
         ...labelWeightItemFactories,
     ];
+    const waveRewardSystem = new WaveRewardSystem(
+        player,
+        input,
+        itemPool,
+        (item) => getQualityWeight(
+            item.quality as Quality,
+            player.readStat("LUCK"),
+        ),
+        (index) => engine.switchWave(index),
+        () => engine.hasPendingWaveEnemies(),
+        (enabled) => player.setControlsEnabled(enabled),
+        canvas.width,
+        canvas.height,
+        touch,
+    );
     const systems: GameSystem[] = [
         world.particles,
         new FireballTrailSystem(),
@@ -143,23 +158,21 @@ export async function startGame(): Promise<GameEngine> {
                 renderer.camera.shake({ amplitude, duration, frequency, decay });
             },
         ),
-        new WaveRewardSystem(
-            player,
-            input,
-            itemPool,
-            (item) => getQualityWeight(
-                item.quality as Quality,
-                player.readStat("LUCK"),
-            ),
-            (index) => engine.switchWave(index),
-            () => engine.hasPendingWaveEnemies(),
-            (enabled) => player.setControlsEnabled(enabled),
-            canvas.width,
-            canvas.height,
-            touch,
-        )
+        waveRewardSystem
     ];
     const engine = new GameEngine(world, renderer, systems, waves);
+
+    // 调试工具：在浏览器控制台手动调整道具标签的抽取权重，
+    // 例如 gameDebug.addLabelWeight("闪避", 200)、gameDebug.getLabelWeights()。
+    Object.defineProperty(globalThis, "gameDebug", {
+        value: {
+            addLabelWeight: (label: string, increment: number) => {
+                waveRewardSystem.addLabelWeight(label, increment);
+            },
+            getLabelWeights: () => waveRewardSystem.getLabelWeights(),
+        },
+        configurable: true,
+    });
 
     const audioCount = ALL_GAME_AUDIO_SOURCES.length;
     let processedAudioCount = 0;

@@ -54,6 +54,7 @@ export type PlayerStats = {
     LASER_COUNT: number;
     LASER_REFRACTION_TARGETS: number;
     LASER_REFRACTION_COUNT: number;
+    LASER_REFRACTION_DECAY: number;
     LASER_DAMAGE: number;
     DODGE_CHARGE: number;
 };
@@ -94,6 +95,7 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     LASER_COUNT: DataFormat.VALUE,
     LASER_REFRACTION_TARGETS: DataFormat.VALUE,
     LASER_REFRACTION_COUNT: DataFormat.VALUE,
+    LASER_REFRACTION_DECAY: DataFormat.PERCENT,
     LASER_DAMAGE: DataFormat.PERCENT,
     DODGE_CHARGE: DataFormat.PERCENT,
 });
@@ -183,6 +185,7 @@ export class PlayerPlane extends Player<PlayerStats> {
                 LASER_COUNT: 0,
                 LASER_REFRACTION_TARGETS: 0,
                 LASER_REFRACTION_COUNT: 0,
+                LASER_REFRACTION_DECAY: 0.5,
                 LASER_DAMAGE: 5,
                 DODGE_CHARGE: 1,
             },

@@ -47,6 +47,21 @@ export class LaserRefractionCountItem
     }
 }
 
+export class LaserRefractionPowerItem
+    extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "激光折射后伤害提高",
+            ".",
+            Quality.RARE,
+            PLAYER_STATS_FORMATS,
+            { LASER_REFRACTION_DECAY: 0.05 },
+            ["闪避"],
+            (player) => player.readStat("LASER_COUNT") > 0
+        );
+    }
+}
+
 export class LaserDamageItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
@@ -64,7 +79,7 @@ export class LaserDamageItem extends PlayerStatUpgradeItem<PlayerStats> {
 export class DodgeChargeItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "闪避充能提高，闪避冷却缩短",
+            "闪避充能加快",
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,

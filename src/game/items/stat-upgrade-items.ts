@@ -30,6 +30,7 @@ import {
     LaserDamageItem,
     LaserRefractionCountItem,
     LaserRefractionItem,
+    LaserRefractionPowerItem,
 } from "./laser-upgrade-items";
 
 export class AttackPowerUpgradeItem
@@ -354,6 +355,7 @@ export const items = [
     DodgeLaserItem,
     LaserRefractionItem,
     LaserRefractionCountItem,
+    LaserRefractionPowerItem,
     LaserDamageItem,
     DodgeChargeItem
 ];

@@ -539,6 +539,9 @@ export class GameCollisionSystem extends CollisionSystem {
     /**
      * 激光折射：命中敌人后向命中点周围最近的 N 个敌人发射折射光束
      * （N = LASER_REFRACTION_TARGETS），折射光束可继续折射。
+     * 优先向未折射过的敌人折射；所有敌人都折射过时允许循环折射；
+     * 场上仅剩单个敌人时，将剩余折射伤害逐段衰减结算到该敌人。
+     * 每次折射的下一段伤害 = 当前伤害 × LASER_REFRACTION_DECAY（基础 75%）。
      */
     private refractLaser(
         world: GameWorld,
@@ -563,24 +566,47 @@ export class GameCollisionSystem extends CollisionSystem {
         laser.refractionTargetIds.add(hitPlane.id);
         const originX = hitPlane.position.x + hitPlane.size.width / 2;
         const originY = hitPlane.position.y + hitPlane.size.height / 2;
-        const candidates = world.entities
-            .filter((entity): entity is Enemy => entity instanceof Enemy
-                && entity.active
-                && !laser.refractionTargetIds.has(entity.id))
-            .sort((left, right) => {
-                const leftX = left.position.x + left.size.width / 2 - originX;
-                const leftY = left.position.y + left.size.height / 2 - originY;
-                const rightX = right.position.x + right.size.width / 2
-                    - originX;
-                const rightY = right.position.y + right.size.height / 2
-                    - originY;
+        const decay = Math.max(0, player.readStat("LASER_REFRACTION_DECAY"));
+        const refractedDamage = laser.damage * decay;
 
-                return (leftX * leftX + leftY * leftY)
-                    - (rightX * rightX + rightY * rightY);
-            })
-            .slice(0, targetCount);
+        if (refractedDamage <= 0) {
+            return;
+        }
+
+        const enemies = world.entities.filter(
+            (entity): entity is Enemy => entity instanceof Enemy && entity.active,
+        );
+        const byDistance = (left: Enemy, right: Enemy): number => {
+            const leftX = left.position.x + left.size.width / 2 - originX;
+            const leftY = left.position.y + left.size.height / 2 - originY;
+            const rightX = right.position.x + right.size.width / 2 - originX;
+            const rightY = right.position.y + right.size.height / 2 - originY;
+
+            return (leftX * leftX + leftY * leftY)
+                - (rightX * rightX + rightY * rightY);
+        };
+        // 优先未折射过的敌人；不足时允许向已折射过的敌人循环折射。
+        const freshTargets = enemies.filter(
+            (enemy) => !laser.refractionTargetIds.has(enemy.id),
+        );
+        const recycledTargets = enemies.filter(
+            (enemy) => enemy !== hitPlane,
+        );
+        const candidates = (freshTargets.length > 0
+            ? freshTargets
+            : recycledTargets
+        ).sort(byDistance).slice(0, targetCount);
 
         if (candidates.length === 0) {
+            // 场上只剩这一个敌人：剩余折射伤害全部结算到它身上。
+            this.settleRefractions(
+                world,
+                player,
+                laser,
+                hitPlane,
+                refractedDamage,
+                decay,
+            );
             return;
         }
 
@@ -601,7 +627,7 @@ export class GameCollisionSystem extends CollisionSystem {
                 originY,
                 rotation: Math.atan2(targetY - originY, targetX - originX),
                 length,
-                damage: laser.damage,
+                damage: refractedDamage,
                 faction: laser.faction,
                 remainingRefractions: laser.remainingRefractions,
                 refractionTargetIds: laser.refractionTargetIds,
@@ -614,6 +640,42 @@ export class GameCollisionSystem extends CollisionSystem {
                 world.addEntity(damageLabel);
                 this.refractLaser(world, refracted, target);
             }
+        }
+    }
+
+    /** 场上仅剩单一敌人时，把剩余折射次数的伤害逐段衰减结算到该敌人。 */
+    private settleRefractions(
+        world: GameWorld,
+        player: PlayerPlane,
+        laser: LaserBullet,
+        target: Enemy,
+        initialDamage: number,
+        decay: number,
+    ): void {
+        let damage = initialDamage;
+        let remaining = laser.remainingRefractions;
+
+        laser.remainingRefractions = 0;
+
+        while (remaining > 0) {
+            remaining -= 1;
+            // 借用一次独立的命中结算（不生成可见光束）。
+            const settle = new LaserBullet({
+                launcher: player,
+                originX: 0,
+                originY: 0,
+                rotation: 0,
+                length: 0,
+                damage,
+                faction: laser.faction,
+            });
+            const damageLabel = settle.hitOnSpawn(target);
+
+            if (damageLabel !== undefined) {
+                world.addEntity(damageLabel);
+            }
+
+            damage *= decay;
         }
     }
 
