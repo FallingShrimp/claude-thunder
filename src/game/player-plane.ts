@@ -120,8 +120,10 @@ export class PlayerPlane extends Player<PlayerStats> {
     public static readonly dodgeCooldown: number = 0.8;
     public static readonly dodgeAfterimageInterval: number = 0.03;
     public static readonly dodgeAfterimageLifetime: number = 0.28;
-    /** 三角形机头在局部 +X 方向，旋转 -90° 后朝上。 */
-    private static readonly baseRotation: number = -Math.PI / 2;
+    /** 贴图没有固有朝向，静止时机身保持零旋转。 */
+    private static readonly baseRotation: number = 0;
+    /** 玩家贴图资源路径，供加载界面预加载使用。 */
+    public static readonly textureSource: string = "./assets/texture/claude.ico";
 
     public guardElapsed: number = 0;
     public guardCooldown: number = 0;
@@ -152,7 +154,7 @@ export class PlayerPlane extends Player<PlayerStats> {
                 y: (touch?.canvas.height ?? 720) - 80,
             },
             { width: 48, height: 56 },
-            { shape: "triangle", color: "#4da6ff" },
+            { shape: "sprite", color: "#4da6ff", spriteSource: PlayerPlane.textureSource },
             100,
             10,
             PLAYER_STATS_FORMATS,

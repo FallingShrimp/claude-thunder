@@ -203,23 +203,33 @@ export async function startGame(): Promise<GameEngine> {
         configurable: true,
     });
 
-    const audioCount = ALL_GAME_AUDIO_SOURCES.length;
-    let processedAudioCount = 0;
+    // 音频与贴图统一计数，在加载界面全部就绪后再进入游戏。
+    const spriteSources = [PlayerPlane.textureSource];
+    const totalCount = ALL_GAME_AUDIO_SOURCES.length + spriteSources.length;
+    let processedCount = 0;
 
-    loadingProgress.max = audioCount;
+    const refreshLoadingProgress = (): void => {
+        loadingProgress.value = processedCount;
+        loadingStatus.textContent = `正在加载资源……${processedCount} / ${totalCount}`;
+    };
+
+    loadingProgress.max = totalCount;
     loadingProgress.value = 0;
-    loadingStatus.textContent = `正在加载音频……0 / ${audioCount}`;
+    refreshLoadingProgress();
 
-    await Promise.allSettled(ALL_GAME_AUDIO_SOURCES.map(async (source) => {
+    const trackLoading = async (load: () => Promise<void>): Promise<void> => {
         try {
-            await audioSystem.loadAudio(source);
+            await load();
         } finally {
-            processedAudioCount += 1;
-            loadingProgress.value = processedAudioCount;
-            loadingStatus.textContent = "正在加载音频……"
-                + `${processedAudioCount} / ${audioCount}`;
+            processedCount += 1;
+            refreshLoadingProgress();
         }
-    }));
+    };
+
+    await Promise.allSettled([
+        ...ALL_GAME_AUDIO_SOURCES.map((source) => trackLoading(() => audioSystem.loadAudio(source))),
+        ...spriteSources.map((source) => trackLoading(() => renderer.preloadImage(source))),
+    ]);
 
     loadingScreen.hidden = true;
     world.setEnvironment(environment);

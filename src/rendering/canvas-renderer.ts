@@ -116,7 +116,31 @@ export class CanvasRenderer implements Renderer {
         context.rotate(target.rotation);
         context.scale(target.scale.x, target.scale.y);
 
-        if (target.appearance.shape === "ellipse") {
+        if (target.appearance.shape === "sprite") {
+            const image = target.appearance.spriteSource
+                ? this.getItemAvatar(target.appearance.spriteSource)
+                : undefined;
+
+            if (image && image.complete && image.naturalWidth > 0) {
+                // 贴图等比缩放居中绘制（contain），保留旋转与形变。
+                const ratio = Math.min(
+                    target.size.width / image.naturalWidth,
+                    target.size.height / image.naturalHeight,
+                );
+                const width = image.naturalWidth * ratio;
+                const height = image.naturalHeight * ratio;
+
+                context.drawImage(image, -width / 2, -height / 2, width, height);
+            } else {
+                // 贴图尚未加载完成时退回矩形占位。
+                context.fillRect(
+                    -target.size.width / 2,
+                    -target.size.height / 2,
+                    target.size.width,
+                    target.size.height,
+                );
+            }
+        } else if (target.appearance.shape === "ellipse") {
             context.beginPath();
             context.ellipse(
                 0,
@@ -413,6 +437,20 @@ export class CanvasRenderer implements Renderer {
             item.size.width - 8,
         );
         context.restore();
+    }
+
+    /** 预加载贴图资源，供加载界面在游戏启动前等待贴图就绪。 */
+    public preloadImage(source: string): Promise<void> {
+        const image = this.getItemAvatar(source);
+
+        if (image === undefined || image.complete) {
+            return Promise.resolve();
+        }
+
+        return new Promise((resolve) => {
+            image.addEventListener("load", () => resolve(undefined), { once: true });
+            image.addEventListener("error", () => resolve(undefined), { once: true });
+        });
     }
 
     private getItemAvatar(source: string): HTMLImageElement | undefined {
