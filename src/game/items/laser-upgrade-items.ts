@@ -47,6 +47,20 @@ export class LaserRefractionCountItem
     }
 }
 
+export class LaserAimItem extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "激光自动瞄准",
+            ".",
+            Quality.RARE,
+            PLAYER_STATS_FORMATS,
+            { LASER_AIM_ANGLE: 3 },
+            ["闪避"],
+            (player) => player.readStat("LASER_COUNT") > 0
+        );
+    }
+}
+
 export class LaserRefractionPowerItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {

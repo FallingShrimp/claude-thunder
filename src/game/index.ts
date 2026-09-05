@@ -1,4 +1,5 @@
 import { AudioSystem } from "../audio/audio-system";
+import { Enemy } from "../entities/enemy";
 import { GameEngine } from "../logic/game-engine";
 import type { GameSystem } from "../logic/game-system";
 import { GameWorld } from "../logic/game-world";
@@ -57,6 +58,33 @@ export async function startGame(): Promise<GameEngine> {
         audioSystem,
         (entity) => world.addEntity(entity),
         touch,
+        // 激光角度修正用：返回场上距离玩家最近的敌人。
+        () => {
+            let nearest: Enemy | undefined;
+
+            for (const entity of world.entities) {
+                if (!(entity instanceof Enemy) || !entity.active) {
+                    continue;
+                }
+
+                const distance = Math.hypot(
+                    entity.position.x - player.position.x,
+                    entity.position.y - player.position.y,
+                );
+
+                if (
+                    nearest === undefined
+                    || distance < Math.hypot(
+                        nearest.position.x - player.position.x,
+                        nearest.position.y - player.position.y,
+                    )
+                ) {
+                    nearest = entity;
+                }
+            }
+
+            return nearest;
+        },
     );
     const environment = new SpaceEnvironment(canvas.width, canvas.height);
     const waves = new Set<Wave>([

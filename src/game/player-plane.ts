@@ -6,6 +6,7 @@ import { Afterimage } from "../entities/afterimage";
 import type { Bullet } from "../entities/bullet";
 import type { DamageLabel } from "../entities/damage-label";
 import { Enemy } from "../entities/enemy";
+import type { Plane } from "../entities/plane";
 import { Player } from "../entities/player";
 import { radians } from "../util/math";
 import { randomFloat, rate } from "../util/random";
@@ -55,6 +56,7 @@ export type PlayerStats = {
     LASER_REFRACTION_TARGETS: number;
     LASER_REFRACTION_COUNT: number;
     LASER_REFRACTION_DECAY: number;
+    LASER_AIM_ANGLE: number;
     LASER_DAMAGE: number;
     DODGE_CHARGE: number;
 };
@@ -96,6 +98,7 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     LASER_REFRACTION_TARGETS: DataFormat.VALUE,
     LASER_REFRACTION_COUNT: DataFormat.VALUE,
     LASER_REFRACTION_DECAY: DataFormat.PERCENT,
+    LASER_AIM_ANGLE: DataFormat.ANGLE,
     LASER_DAMAGE: DataFormat.PERCENT,
     DODGE_CHARGE: DataFormat.PERCENT,
 });
@@ -137,6 +140,8 @@ export class PlayerPlane extends Player<PlayerStats> {
         private readonly audioSystem: AudioSystem,
         private readonly spawnEntity: (entity: BaseEntity) => void,
         private readonly touch?: TouchInput,
+        /** 调试/瞄准用：获取场上最近敌人的回调（供激光角度修正）。 */
+        private readonly findTarget?: () => Plane | undefined,
     ) {
         super(
             "player",
@@ -185,7 +190,8 @@ export class PlayerPlane extends Player<PlayerStats> {
                 LASER_COUNT: 0,
                 LASER_REFRACTION_TARGETS: 0,
                 LASER_REFRACTION_COUNT: 0,
-                LASER_REFRACTION_DECAY: 0.5,
+                LASER_REFRACTION_DECAY: 0.75,
+                LASER_AIM_ANGLE: 0,
                 LASER_DAMAGE: 5,
                 DODGE_CHARGE: 1,
             },
@@ -378,6 +384,37 @@ export class PlayerPlane extends Player<PlayerStats> {
             this.dodgeDirection.y,
             this.dodgeDirection.x,
         );
+        // 激光角度修正：冲刺方向不变，发射角度朝最近敌人偏转，
+        // 最大偏转角由 LASER_AIM_ANGLE 限制（度）。
+        const maxCorrection = radians(
+            Math.max(0, this.readStat("LASER_AIM_ANGLE")),
+        );
+        const target = maxCorrection > 0 ? this.findTarget?.() : undefined;
+        let aimRotation = baseRotation;
+
+        if (target !== undefined) {
+            const targetAngle = Math.atan2(
+                target.position.y + target.size.height / 2 - (this.position.y
+                    + this.size.height / 2),
+                target.position.x + target.size.width / 2 - (this.position.x
+                    + this.size.width / 2),
+            );
+            let diff = targetAngle - baseRotation;
+
+            if (diff > Math.PI) {
+                diff -= Math.PI * 2;
+            } else if (diff < -Math.PI) {
+                diff += Math.PI * 2;
+            }
+
+            const clamped = Math.max(
+                -maxCorrection,
+                Math.min(maxCorrection, diff),
+            );
+
+            aimRotation = baseRotation + clamped;
+        }
+
         const originX = this.position.x + this.size.width / 2;
         const originY = this.position.y + this.size.height / 2;
         const spread = LaserBullet.spreadAngle;
@@ -391,7 +428,7 @@ export class PlayerPlane extends Player<PlayerStats> {
                 launcher: this,
                 originX,
                 originY,
-                rotation: baseRotation + offset,
+                rotation: aimRotation + offset,
                 damage: this.readStat("ATK")
                     * this.readStat("LASER_DAMAGE"),
                 faction: "player",

@@ -27,6 +27,7 @@ import {
 import {
     DodgeChargeItem,
     DodgeLaserItem,
+    LaserAimItem,
     LaserDamageItem,
     LaserRefractionCountItem,
     LaserRefractionItem,
@@ -353,6 +354,7 @@ export const items = [
     SummonSacrificeItem,
     SummonOverloadItem,
     DodgeLaserItem,
+    LaserAimItem,
     LaserRefractionItem,
     LaserRefractionCountItem,
     LaserRefractionPowerItem,
