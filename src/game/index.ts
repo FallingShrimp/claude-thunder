@@ -1,4 +1,5 @@
 import { AudioSystem } from "../audio/audio-system";
+import { CooldownBar } from "../entities/cooldown-bar";
 import { Enemy } from "../entities/enemy";
 import { GameEngine } from "../logic/game-engine";
 import type { GameSystem } from "../logic/game-system";
@@ -223,6 +224,17 @@ export async function startGame(): Promise<GameEngine> {
     loadingScreen.hidden = true;
     world.setEnvironment(environment);
     world.addEntity(player);
+    // 机身两侧的冷却进度条：左侧格挡冷却、右侧冲刺冷却（受闪避充能影响）。
+    world.addEntity(new CooldownBar(player, {
+        getProgress: () => player.getGuardCooldownProgress(),
+        alignment: "left",
+        foregroundColor: "#f0e68c",
+    }));
+    world.addEntity(new CooldownBar(player, {
+        getProgress: () => player.getDodgeCooldownProgress(),
+        alignment: "right",
+        foregroundColor: "#8fd8ff",
+    }));
     engine.switchWave(0);
     engine.start();
     return engine;

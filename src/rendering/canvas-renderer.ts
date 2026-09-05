@@ -1,6 +1,7 @@
 import { BaseEnvironment } from "../core/environment";
 import type { RenderableTarget } from "../core/renderable-target";
 import { DamageLabel } from "../entities/damage-label";
+import { CooldownBar } from "../entities/cooldown-bar";
 import { Healthbar } from "../entities/healthbar";
 import { Item } from "../entities/item";
 import { BallThunderBullet } from "../game/bullets/ball-thunder-bullet";
@@ -67,6 +68,11 @@ export class CanvasRenderer implements Renderer {
 
         if (target instanceof Healthbar) {
             this.renderHealthbar(target);
+            return;
+        }
+
+        if (target instanceof CooldownBar) {
+            this.renderCooldownBar(target);
             return;
         }
 
@@ -309,6 +315,31 @@ export class CanvasRenderer implements Renderer {
         context.strokeStyle = "#fff0fb";
         context.lineWidth = 1.6;
         context.stroke();
+        context.restore();
+    }
+
+    /** 竖向冷却进度条：自下而上填充，满格表示冷却就绪。 */
+    private renderCooldownBar(bar: CooldownBar): void {
+        const { context } = this;
+        const progress = Math.max(0, Math.min(1, bar.getProgress()));
+        const filledHeight = bar.size.height * progress;
+
+        context.save();
+        context.globalAlpha = bar.opacity;
+        context.fillStyle = bar.backgroundColor;
+        context.fillRect(
+            bar.position.x,
+            bar.position.y,
+            bar.size.width,
+            bar.size.height,
+        );
+        context.fillStyle = bar.foregroundColor;
+        context.fillRect(
+            bar.position.x,
+            bar.position.y + bar.size.height - filledHeight,
+            bar.size.width,
+            filledHeight,
+        );
         context.restore();
     }
 

@@ -83,7 +83,7 @@ export class LaserDamageItem extends PlayerStatUpgradeItem<PlayerStats> {
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
-            { LASER_DAMAGE: 0.2 },
+            { LASER_DAMAGE: 0.4 },
             ["闪避"],
             (player) => player.readStat("LASER_COUNT") > 0
         );
@@ -97,7 +97,7 @@ export class DodgeChargeItem extends PlayerStatUpgradeItem<PlayerStats> {
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
-            { DODGE_CHARGE: 0.2 },
+            { DODGE_CHARGE: 1 },
             ["闪避"]
         );
     }

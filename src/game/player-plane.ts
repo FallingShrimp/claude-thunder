@@ -230,11 +230,6 @@ export class PlayerPlane extends Player<PlayerStats> {
             || this.input.isPressed("KeyJ")
             || this.input.isPressed("KeyK");
 
-        if (this.touch !== undefined && !keyboardActive) {
-            this.updateTouchControl(delta, dodgePressed);
-            return;
-        }
-
         const horizontal = Number(this.input.isPressed("KeyD"))
             - Number(this.input.isPressed("KeyA"));
         const vertical = Number(this.input.isPressed("KeyS"))
@@ -245,14 +240,26 @@ export class PlayerPlane extends Player<PlayerStats> {
             this.startDodge(horizontal, vertical);
         }
 
+        // 冲刺期间：位移完全由冲刺接管，忽略移动输入，仅保留攻击/格挡。
+        // 必须在键盘/触摸分支切换之前处理，否则松开按键会导致冲刺冻结。
         if (this.dodging) {
             this.updateDodge(delta);
 
-            if (this.input.isPressed("KeyJ")) {
+            if (this.touch !== undefined && !keyboardActive) {
                 this.attack();
+            } else {
+                if (this.input.isPressed("KeyJ")) {
+                    this.attack();
+                }
+
+                this.updateGuard(delta);
             }
 
-            this.updateGuard(delta);
+            return;
+        }
+
+        if (this.touch !== undefined && !keyboardActive) {
+            this.updateTouchControl(delta, dodgePressed);
             return;
         }
 
@@ -494,6 +501,41 @@ export class PlayerPlane extends Player<PlayerStats> {
         }
 
         this.rotation += rotationDiff * t;
+    }
+
+    /** 格挡条进度：格挡中显示剩余格挡时间（满格递减至 0），否则显示冷却恢复。 */
+    public getGuardCooldownProgress(): number {
+        if (this.guarding) {
+            if (PlayerPlane.guardDuration <= 0) {
+                return 0;
+            }
+
+            return 1 - Math.min(
+                1,
+                this.guardElapsed / PlayerPlane.guardDuration,
+            );
+        }
+
+        if (PlayerPlane.guardCooldownBase <= 0) {
+            return 1;
+        }
+
+        return 1 - Math.min(
+            1,
+            this.guardCooldown / PlayerPlane.guardCooldownBase,
+        );
+    }
+
+    /** 冲刺冷却恢复进度（0 = 刚触发，1 = 就绪），冷却总时长受闪避充能影响。 */
+    public getDodgeCooldownProgress(): number {
+        const charge = Math.max(0.1, this.readStat("DODGE_CHARGE"));
+        const totalCooldown = PlayerPlane.dodgeCooldown / charge;
+
+        if (totalCooldown <= 0) {
+            return 1;
+        }
+
+        return 1 - Math.min(1, this.dodgeCooldown / totalCooldown);
     }
 
     public override upgrade(): void {
