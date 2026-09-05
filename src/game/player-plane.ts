@@ -206,7 +206,7 @@ export class PlayerPlane extends Player<PlayerStats> {
                 SUMMON_SACRIFICE: 0,
                 SUMMON_CAP: 1,
                 LASER_COUNT: 0,
-                LASER_REFRACTION_TARGETS: 1,
+                LASER_REFRACTION_TARGETS: 0,
                 LASER_REFRACTION_COUNT: 0,
                 LASER_REFRACTION_DECAY: 0.75,
                 LASER_AIM_ANGLE: 0,

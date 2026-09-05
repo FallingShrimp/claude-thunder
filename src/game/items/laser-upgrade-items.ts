@@ -42,7 +42,7 @@ export class LaserRefractionCountItem
             PLAYER_STATS_FORMATS,
             { LASER_REFRACTION_COUNT: 1 },
             ["激光"],
-            (player) => player.readStat("LASER_COUNT") > 0
+            (player) => player.readStat("LASER_REFRACTION_TARGETS") > 0
         );
     }
 }
