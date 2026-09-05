@@ -10,5 +10,7 @@ export { GreatDangerBullet } from "./great-danger-bullet";
 export type { GreatDangerBulletOptions } from "./great-danger-bullet";
 export { FireballBullet } from "./fireball-bullet";
 export type { FireballBulletOptions } from "./fireball-bullet";
+export { LaserBullet } from "./laser-bullet";
+export type { LaserBulletOptions } from "./laser-bullet";
 export { ThunderBullet } from "./thunder-bullet";
 export type { ThunderBulletOptions } from "./thunder-bullet";

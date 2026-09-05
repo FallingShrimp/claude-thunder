@@ -116,6 +116,7 @@ export async function startGame(): Promise<GameEngine> {
         "反击",
         "雷电",
         "召唤",
+        "闪避"
     ]
         .map(e => [`[${e}] 出现概率提高`, e])
         .map(([displayName, targetLabel]) => () => new LabelWeightItem({

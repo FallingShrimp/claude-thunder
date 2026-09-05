@@ -13,6 +13,7 @@ import { GAME_AUDIO_SOURCES } from "./audio-assets";
 import { BallThunderBullet } from "./bullets/ball-thunder-bullet";
 import { BasicBullet } from "./bullets/basic-bullet";
 import { FireballBullet } from "./bullets/fireball-bullet";
+import { LaserBullet } from "./bullets/laser-bullet";
 import { ThunderBullet } from "./bullets/thunder-bullet";
 import type { KeyboardInput } from "./keyboard-input";
 import type { TouchInput } from "./touch-input";
@@ -50,6 +51,11 @@ export type PlayerStats = {
     SUMMON_ASSAULT_SPEED: number;
     SUMMON_OVERLOAD: number;
     SUMMON_SACRIFICE: number;
+    LASER_COUNT: number;
+    LASER_REFRACTION_TARGETS: number;
+    LASER_REFRACTION_COUNT: number;
+    LASER_DAMAGE: number;
+    DODGE_CHARGE: number;
 };
 
 export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
@@ -85,6 +91,11 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     SUMMON_ASSAULT_SPEED: DataFormat.PERCENT,
     SUMMON_OVERLOAD: DataFormat.PERCENT,
     SUMMON_SACRIFICE: DataFormat.VALUE,
+    LASER_COUNT: DataFormat.VALUE,
+    LASER_REFRACTION_TARGETS: DataFormat.VALUE,
+    LASER_REFRACTION_COUNT: DataFormat.VALUE,
+    LASER_DAMAGE: DataFormat.PERCENT,
+    DODGE_CHARGE: DataFormat.PERCENT,
 });
 
 export type ParryResult = "none" | "guard" | "perfect";
@@ -169,6 +180,11 @@ export class PlayerPlane extends Player<PlayerStats> {
                 SUMMON_ASSAULT_SPEED: 0,
                 SUMMON_OVERLOAD: 0,
                 SUMMON_SACRIFICE: 0,
+                LASER_COUNT: 0,
+                LASER_REFRACTION_TARGETS: 0,
+                LASER_REFRACTION_COUNT: 0,
+                LASER_DAMAGE: 5,
+                DODGE_CHARGE: 1,
             },
         );
 
@@ -341,6 +357,49 @@ export class PlayerPlane extends Player<PlayerStats> {
         this.dodgeDirection = { x: directionX / length, y: directionY / length };
         this.invincible(PlayerPlane.dodgeDuration);
         this.playSound(GAME_AUDIO_SOURCES.dash);
+        this.fireDodgeLasers();
+    }
+
+    /** 冲刺时沿机头方向发射激光（需持有冲刺激光道具）。 */
+    private fireDodgeLasers(): void {
+        const laserCount = Math.max(
+            0,
+            Math.floor(this.readStat("LASER_COUNT")),
+        );
+
+        if (laserCount === 0) {
+            return;
+        }
+
+        const baseRotation = Math.atan2(
+            this.dodgeDirection.y,
+            this.dodgeDirection.x,
+        );
+        const originX = this.position.x + this.size.width / 2;
+        const originY = this.position.y + this.size.height / 2;
+        const spread = LaserBullet.spreadAngle;
+
+        for (let index = 0; index < laserCount; index++) {
+            const offset = laserCount === 1
+                ? 0
+                : (index - (laserCount - 1) / 2) * spread;
+
+            this.spawnEntity(new LaserBullet({
+                launcher: this,
+                originX,
+                originY,
+                rotation: baseRotation + offset,
+                damage: this.readStat("ATK")
+                    * this.readStat("LASER_DAMAGE"),
+                faction: "player",
+                remainingRefractions: 1 + Math.max(
+                    0,
+                    Math.floor(this.readStat("LASER_REFRACTION_COUNT")),
+                ),
+            }));
+        }
+
+        this.playSound(GAME_AUDIO_SOURCES.laserShot);
     }
 
     /** 冲刺位移 + 冲刺拉伸形变 + 残影拖尾。 */
@@ -370,7 +429,12 @@ export class PlayerPlane extends Player<PlayerStats> {
 
         if (this.dodgeElapsed >= PlayerPlane.dodgeDuration) {
             this.dodging = false;
-            this.dodgeCooldown = PlayerPlane.dodgeCooldown;
+            // 实际冷却 = 基值 / 闪避充能，充能越高闪避越频繁。
+            const charge = Math.max(
+                0.1,
+                this.readStat("DODGE_CHARGE"),
+            );
+            this.dodgeCooldown = PlayerPlane.dodgeCooldown / charge;
         }
     }
 

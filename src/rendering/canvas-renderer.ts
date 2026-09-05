@@ -4,6 +4,7 @@ import { DamageLabel } from "../entities/damage-label";
 import { Healthbar } from "../entities/healthbar";
 import { Item } from "../entities/item";
 import { BallThunderBullet } from "../game/bullets/ball-thunder-bullet";
+import { LaserBullet } from "../game/bullets/laser-bullet";
 import { ThunderBullet } from "../game/bullets/thunder-bullet";
 import { PlayerPlane } from "../game/player-plane";
 import { AssaultSummon } from "../game/summons/assault-summon";
@@ -71,6 +72,11 @@ export class CanvasRenderer implements Renderer {
 
         if (target instanceof ThunderBullet) {
             this.renderThunder(target);
+            return;
+        }
+
+        if (target instanceof LaserBullet) {
+            this.renderLaser(target);
             return;
         }
 
@@ -281,6 +287,27 @@ export class CanvasRenderer implements Renderer {
         context.shadowBlur = 5;
         context.strokeStyle = "#f4ffff";
         context.lineWidth = 2;
+        context.stroke();
+        context.restore();
+    }
+
+    private renderLaser(laser: LaserBullet): void {
+        const { context } = this;
+
+        context.save();
+        context.globalAlpha = laser.opacity;
+        context.lineCap = "round";
+        context.shadowColor = "#ff7ae0";
+        context.shadowBlur = 14;
+        context.strokeStyle = "#ff9ae8";
+        context.lineWidth = 5;
+        context.beginPath();
+        context.moveTo(laser.originX, laser.originY);
+        context.lineTo(laser.endX, laser.endY);
+        context.stroke();
+        context.shadowBlur = 4;
+        context.strokeStyle = "#fff0fb";
+        context.lineWidth = 1.6;
         context.stroke();
         context.restore();
     }

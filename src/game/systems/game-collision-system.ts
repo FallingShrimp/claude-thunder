@@ -9,6 +9,7 @@ import type { GameWorld } from "../../logic/game-world";
 import { rollCritical } from "../critical";
 import { BallThunderBullet } from "../bullets/ball-thunder-bullet";
 import { FireballBullet } from "../bullets/fireball-bullet";
+import { LaserBullet } from "../bullets/laser-bullet";
 import { ThunderBullet } from "../bullets/thunder-bullet";
 import { GAME_AUDIO_SOURCES } from "../audio-assets";
 import { emitBurst } from "../particles/burst";
@@ -42,7 +43,10 @@ export class GameCollisionSystem extends CollisionSystem {
     protected override intersects(left: BaseEntity, right: BaseEntity): boolean {
         const bulletPair = this.getBulletAndPlane(left, right);
 
-        if (bulletPair?.bullet instanceof ThunderBullet) {
+        if (
+            bulletPair?.bullet instanceof ThunderBullet
+            || bulletPair?.bullet instanceof LaserBullet
+        ) {
             return bulletPair.bullet.intersects(bulletPair.plane);
         }
 
@@ -118,6 +122,12 @@ export class GameCollisionSystem extends CollisionSystem {
                     || bulletPair.bullet instanceof BallThunderBullet
                 ) {
                     this.chainThunder(
+                        world,
+                        bulletPair.bullet,
+                        bulletPair.plane,
+                    );
+                } else if (bulletPair.bullet instanceof LaserBullet) {
+                    this.refractLaser(
                         world,
                         bulletPair.bullet,
                         bulletPair.plane,
@@ -524,6 +534,87 @@ export class GameCollisionSystem extends CollisionSystem {
         }
 
         this.chainThunder(world, chainedThunder, hitEnemy);
+    }
+
+    /**
+     * 激光折射：命中敌人后向命中点周围最近的 N 个敌人发射折射光束
+     * （N = LASER_REFRACTION_TARGETS），折射光束可继续折射。
+     */
+    private refractLaser(
+        world: GameWorld,
+        laser: LaserBullet,
+        hitPlane: Plane,
+    ): void {
+        if (!(laser.launcher instanceof PlayerPlane) || !(hitPlane instanceof Enemy)) {
+            return;
+        }
+
+        const player = laser.launcher;
+        const targetCount = Math.max(
+            0,
+            Math.floor(player.readStat("LASER_REFRACTION_TARGETS")),
+        );
+
+        if (targetCount === 0 || laser.remainingRefractions <= 0) {
+            return;
+        }
+
+        laser.remainingRefractions -= 1;
+        laser.refractionTargetIds.add(hitPlane.id);
+        const originX = hitPlane.position.x + hitPlane.size.width / 2;
+        const originY = hitPlane.position.y + hitPlane.size.height / 2;
+        const candidates = world.entities
+            .filter((entity): entity is Enemy => entity instanceof Enemy
+                && entity.active
+                && !laser.refractionTargetIds.has(entity.id))
+            .sort((left, right) => {
+                const leftX = left.position.x + left.size.width / 2 - originX;
+                const leftY = left.position.y + left.size.height / 2 - originY;
+                const rightX = right.position.x + right.size.width / 2
+                    - originX;
+                const rightY = right.position.y + right.size.height / 2
+                    - originY;
+
+                return (leftX * leftX + leftY * leftY)
+                    - (rightX * rightX + rightY * rightY);
+            })
+            .slice(0, targetCount);
+
+        if (candidates.length === 0) {
+            return;
+        }
+
+        for (const target of candidates) {
+            laser.refractionTargetIds.add(target.id);
+            const targetX = target.position.x + target.size.width / 2;
+            const targetY = target.position.y + target.size.height / 2;
+            const length = Math.hypot(targetX - originX, targetY - originY);
+
+            if (length === 0) {
+                continue;
+            }
+
+            void this.playAudio(GAME_AUDIO_SOURCES.laserShot);
+            const refracted = new LaserBullet({
+                launcher: player,
+                originX,
+                originY,
+                rotation: Math.atan2(targetY - originY, targetX - originX),
+                length,
+                damage: laser.damage,
+                faction: laser.faction,
+                remainingRefractions: laser.remainingRefractions,
+                refractionTargetIds: laser.refractionTargetIds,
+            });
+            world.addEntity(refracted);
+
+            const damageLabel = refracted.hitOnSpawn(target);
+
+            if (damageLabel !== undefined) {
+                world.addEntity(damageLabel);
+                this.refractLaser(world, refracted, target);
+            }
+        }
     }
 
     private refractFireball(

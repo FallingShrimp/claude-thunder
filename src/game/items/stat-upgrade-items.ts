@@ -24,6 +24,13 @@ import {
     SummonRegenItem,
     SummonSacrificeItem,
 } from "./summon-upgrade-items";
+import {
+    DodgeChargeItem,
+    DodgeLaserItem,
+    LaserDamageItem,
+    LaserRefractionCountItem,
+    LaserRefractionItem,
+} from "./laser-upgrade-items";
 
 export class AttackPowerUpgradeItem
     extends PlayerStatUpgradeItem<PlayerStats> {
@@ -343,5 +350,10 @@ export const items = [
     AssaultDamageItem,
     AssaultSpeedItem,
     SummonSacrificeItem,
-    SummonOverloadItem
+    SummonOverloadItem,
+    DodgeLaserItem,
+    LaserRefractionItem,
+    LaserRefractionCountItem,
+    LaserDamageItem,
+    DodgeChargeItem
 ];
