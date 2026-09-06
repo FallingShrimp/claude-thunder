@@ -64,6 +64,7 @@ export type PlayerStats = {
     ENERGY_CAP: number;
     ENERGY_DMG_MULTIPLIER: number;
     ENERGY_PIERCE: number;
+    ENERGY_SAVING: number;
 };
 
 export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
@@ -110,6 +111,7 @@ export const PLAYER_STATS_FORMATS = defineStats<PlayerStats>({
     ENERGY_CAP: DataFormat.VALUE,
     ENERGY_DMG_MULTIPLIER: DataFormat.PERCENT,
     ENERGY_PIERCE: DataFormat.VALUE,
+    ENERGY_SAVING: DataFormat.PERCENT,
 });
 
 export type ParryResult = "none" | "guard" | "perfect";
@@ -215,6 +217,7 @@ export class PlayerPlane extends Player<PlayerStats> {
                 ENERGY_CAP: 100,
                 ENERGY_DMG_MULTIPLIER: 0.5,
                 ENERGY_PIERCE: 1,
+                ENERGY_SAVING: 0,
             },
         );
 
@@ -449,7 +452,10 @@ export class PlayerPlane extends Player<PlayerStats> {
             const consumed = Math.min(this.energy, 100 * delta);
 
             this.energy -= consumed;
-            this.chargeConsumed += consumed;
+            // 节能：本次蓄力按 (1 + 节能) 放大结算值，
+            // 逐帧累加保证总效果等价于总消耗 × (1 + 节能) 且不产生复利。
+            this.chargeConsumed
+                += consumed * (1 + Math.max(0, this.readStat("ENERGY_SAVING")));
 
             if (chargeReleased) {
                 this.fireEnergyStar();

@@ -52,12 +52,27 @@ export class EnergyMultiplierItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "能量倍率提高",
+            "充能速度更快",
             ".",
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
             { ENERGY_DMG_MULTIPLIER: 0.25 },
-            ["通用"]
+            ["充能"]
+        );
+    }
+}
+
+
+export class EnergyCapItem
+    extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "可储存更多能量",
+            ".",
+            Quality.NORMAL,
+            PLAYER_STATS_FORMATS,
+            { ENERGY_CAP: 20 },
+            ["充能"]
         );
     }
 }
@@ -67,12 +82,26 @@ export class EnergyPierceItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "能量弹穿透增加",
+            "电磁陨星可穿透敌人",
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             { ENERGY_PIERCE: 1 },
-            ["通用"]
+            ["充能"]
+        );
+    }
+}
+
+export class EnergySavingItem
+    extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "能量利用效率更高",
+            ".",
+            Quality.LEGENDARY,
+            PLAYER_STATS_FORMATS,
+            { ENERGY_SAVING: 0.5 },
+            ["充能"]
         );
     }
 }
@@ -404,5 +433,7 @@ export const items = [
     LaserDamageItem,
     DodgeChargeItem,
     EnergyMultiplierItem,
-    EnergyPierceItem
+    EnergyPierceItem,
+    EnergyCapItem,
+    EnergySavingItem
 ];

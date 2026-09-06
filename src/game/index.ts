@@ -131,9 +131,10 @@ export async function startGame(): Promise<GameEngine> {
         "反击",
         "雷电",
         "召唤",
-        "激光"
+        "激光",
+        "充能"
     ]
-        .map(e => [`[${e}] 出现概率提高`, e])
+        .map(e => [`更多[${e}]道具`, e])
         .map(([displayName, targetLabel]) => () => new LabelWeightItem({
             displayName,
             avatarSource: ".",
