@@ -12,6 +12,7 @@ export const GAME_AUDIO_SOURCES = {
     unexactParry: "./assets/audio/unexact-parry.wav",
     chargeStart: "./assets/audio/flash.ogg",
     energyStar: "./assets/audio/heavy-shot.mp3",
+    graze: "./assets/audio/granted.mp3",
 } as const;
 
 export const ALL_GAME_AUDIO_SOURCES: readonly string[] = Object.values(

@@ -19,6 +19,9 @@ import { AssaultSummon } from "../summons/assault-summon";
 import { SummonPlane } from "../summons/summon-plane";
 
 export class GameCollisionSystem extends CollisionSystem {
+    /** 擦弹半径：玩家圆心周围判定擦弹的距离（像素）。 */
+    public static readonly grazeRadius: number = 75;
+
     public constructor(
         private readonly audioSystem: AudioSystem,
         private readonly shakeCamera: (
@@ -29,6 +32,87 @@ export class GameCollisionSystem extends CollisionSystem {
         ) => void = () => undefined,
     ) {
         super();
+    }
+
+    public override update(world: GameWorld, deltaTime: number): void {
+        super.update(world, deltaTime);
+        this.processGraze(world);
+    }
+
+    /**
+     * 擦弹：敌弹进入玩家圆心周围 grazeRadius 范围且尚未结算过时，
+     * 获得能量（数值 = 该子弹的伤害值），并在玩家圆心播放向内收束的冲击波特效。
+     */
+    private processGraze(world: GameWorld): void {
+        let player: PlayerPlane | undefined;
+
+        for (const entity of world.entities) {
+            if (entity instanceof PlayerPlane && entity.active) {
+                player = entity;
+                break;
+            }
+        }
+
+        if (player === undefined) {
+            return;
+        }
+
+        const centerX = player.position.x + player.size.width / 2;
+        const centerY = player.position.y + player.size.height / 2;
+        const radius = GameCollisionSystem.grazeRadius;
+        const radiusSquared = radius * radius;
+
+        for (const entity of world.entities) {
+            if (
+                !(entity instanceof Bullet)
+                || !entity.active
+                || entity.energyGranted
+                || !entity.canDamage(player)
+            ) {
+                continue;
+            }
+
+            const bulletX = entity.position.x + entity.size.width / 2;
+            const bulletY = entity.position.y + entity.size.height / 2;
+            const offsetX = bulletX - centerX;
+            const offsetY = bulletY - centerY;
+
+            if (offsetX * offsetX + offsetY * offsetY > radiusSquared) {
+                continue;
+            }
+
+            entity.energyGranted = true;
+            player.gainEnergy(entity.damage);
+            this.emitGrazeEffect(world, centerX, centerY);
+            void this.playAudio(GAME_AUDIO_SOURCES.graze);
+        }
+    }
+
+    /** 擦弹特效：在擦弹半径圆周生成一圈朝玩家圆心收束的冲击波粒子。 */
+    private emitGrazeEffect(
+        world: GameWorld,
+        centerX: number,
+        centerY: number,
+    ): void {
+        const radius = GameCollisionSystem.grazeRadius;
+        const count = 28;
+        const speed = 440;
+
+        for (let index = 0; index < count; index += 1) {
+            const angle = (index / count) * Math.PI * 2;
+
+            world.particles.emit({
+                x: centerX + Math.cos(angle) * radius,
+                y: centerY + Math.sin(angle) * radius,
+                velocityX: -Math.cos(angle) * speed,
+                velocityY: -Math.sin(angle) * speed,
+                drag: 2.2,
+                size: 4,
+                endSize: 1,
+                lifetime: 0.24,
+                color: "#7fe0ff",
+            });
+        }
     }
 
     protected override shouldTest(
