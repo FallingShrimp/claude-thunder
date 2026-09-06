@@ -4,11 +4,12 @@ import type { GameWorld } from "../../logic/game-world";
 import type { ParticleSystem } from "../../logic/systems/particle-system";
 import { CannonBullet } from "../bullets/cannon-bullet";
 import { FireballBullet } from "../bullets/fireball-bullet";
+import { MissileBullet } from "../bullets/missile-bullet";
 
 const EMISSION_RATE = 90;
 const FLAME_COLORS = ["#fff3a3", "#ffb21a", "#ff5a0a", "#c92b08"] as const;
 
-/** 拖尾缩放配置：火球与炮台火球均满规模。 */
+/** 拖尾缩放配置：火球与炮台火球均满规模，导弹略小。 */
 interface TrailConfig {
     /** 每秒发射粒子数。 */
     emissionRate: number;
@@ -52,6 +53,12 @@ export class FireballTrailSystem implements GameSystem {
 
         if (entity instanceof CannonBullet) {
             const config = { emissionRate: EMISSION_RATE, scale: 1 };
+            TRAIL_CONFIGS.set(entity, config);
+            return config;
+        }
+
+        if (entity instanceof MissileBullet) {
+            const config = { emissionRate: EMISSION_RATE, scale: 0.55 };
             TRAIL_CONFIGS.set(entity, config);
             return config;
         }

@@ -21,7 +21,7 @@ import {
     type ItemFactory,
     WaveRewardSystem,
 } from "./systems/wave-reward-system";
-import { Cyan, Orange, Purple, Red } from "./enemies";
+import { Brown, Cyan, Orange, Purple, Red } from "./enemies";
 
 export async function startGame(): Promise<GameEngine> {
     const canvas = document.querySelector<HTMLCanvasElement>("#game-canvas");
@@ -89,7 +89,7 @@ export async function startGame(): Promise<GameEngine> {
             },
         },
         {
-            startIndex: 2,
+            startIndex: 1,
             endIndex: Number.POSITIVE_INFINITY,
             spawnValue: 371,
             spawnProgress: 0,
@@ -120,6 +120,20 @@ export async function startGame(): Promise<GameEngine> {
                 return new Purple(
                     Math.random() * (canvas.width - 44),
                     canvas.height,
+                    (entity) => world.addEntity(entity),
+                );
+            },
+        },
+        {
+            startIndex: 4,
+            endIndex: Number.POSITIVE_INFINITY,
+            spawnValue: 30,
+            spawnProgress: 0,
+            spawnEnemy() {
+                return new Brown(
+                    Math.random() * (canvas.width - 42),
+                    canvas.height,
+                    player,
                     (entity) => world.addEntity(entity),
                 );
             },

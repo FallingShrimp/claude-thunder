@@ -221,7 +221,7 @@ export class PlayerPlane extends Player<PlayerStats> {
             },
         );
 
-        this.speed = 360;
+        this.speed = 200;
         this.lives = 3;
         this.fireCooldown = 0;
         this.rotation = PlayerPlane.baseRotation;
@@ -490,8 +490,8 @@ export class PlayerPlane extends Player<PlayerStats> {
 
         this.spawnEntity(new EnergyStarBullet({
             launcher: this,
-            x: this.position.x + this.size.width / 2 - 10,
-            y: this.position.y + this.size.height / 2 - 10,
+            x: this.position.x + this.size.width / 2 - 80,
+            y: this.position.y + this.size.height / 2 - 80,
             rotation: -Math.PI / 2,
             damage: this.readStat("ATK")
                 * consumed

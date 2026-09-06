@@ -12,5 +12,7 @@ export { FireballBullet } from "./fireball-bullet";
 export type { FireballBulletOptions } from "./fireball-bullet";
 export { LaserBullet } from "./laser-bullet";
 export type { LaserBulletOptions } from "./laser-bullet";
+export { MissileBullet } from "./missile-bullet";
+export type { MissileBulletOptions } from "./missile-bullet";
 export { ThunderBullet } from "./thunder-bullet";
 export type { ThunderBulletOptions } from "./thunder-bullet";
