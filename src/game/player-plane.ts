@@ -424,18 +424,19 @@ export class PlayerPlane extends Player<PlayerStats> {
         this.playSound(GAME_AUDIO_SOURCES.dash);
     }
 
-    /** 获取能量：所有能量获取都会乘以攻击速度加成。 */
+    /** 获取能量：直接按基础值获取，不吃攻速加成。 */
     public gainEnergy(base: number): void {
         this.energy = Math.min(
             Math.max(0, this.readStat("ENERGY_CAP")),
-            this.energy + base * this.readStat("ATK_SPD"),
+            this.energy + base,
         );
     }
 
     /**
      * 蓄力状态机（按住 I）：
      * - 开始：能量大于 0 时按下 I；
-     * - 期间：按 delta 平滑消耗能量（每 0.5 秒消耗 50 点），攻击被封锁；
+     * - 期间：按 delta 平滑消耗能量（基础每秒 50 点，消耗速度吃攻速加成），
+     *   攻击被封锁；
      * - 能量耗尽：不自动发射，保持蓄力等待（无能量可消耗）；
      * - 结束：松开 I 时发射金色四角星炮弹。
      */
@@ -447,9 +448,11 @@ export class PlayerPlane extends Player<PlayerStats> {
         this.previousChargeKey = chargeKey;
 
         if (this.charging) {
+            // 每秒消耗 50 点基础能量，消耗速度吃攻速加成；
             // 能量耗尽时不自动退出蓄力：保持等待直到松开 I，
             // 此时 consumed 恒为 0，不会继续消耗（期间若重新获得能量则继续消耗）。
-            const consumed = Math.min(this.energy, 100 * delta);
+            const drainRate = 50 * Math.max(0, this.readStat("ATK_SPD"));
+            const consumed = Math.min(this.energy, drainRate * delta);
 
             this.energy -= consumed;
             // 节能：本次蓄力按 (1 + 节能) 放大结算值，
