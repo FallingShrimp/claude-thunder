@@ -69,7 +69,7 @@ export class LaserRefractionPowerItem
             ".",
             Quality.RARE,
             PLAYER_STATS_FORMATS,
-            { LASER_REFRACTION_DECAY: 0.05 },
+            { LASER_REFRACTION_DECAY: 0.15 },
             ["激光"],
             (player) => player.readStat("LASER_COUNT") > 0
         );
