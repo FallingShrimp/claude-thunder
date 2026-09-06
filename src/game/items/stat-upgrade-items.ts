@@ -56,7 +56,7 @@ export class EnergyMultiplierItem
             ".",
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
-            { ENERGY_DMG_MULTIPLIER: 0.25 },
+            { ENERGY_DMG_MULTIPLIER: 0.4 },
             ["充能"]
         );
     }

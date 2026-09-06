@@ -115,6 +115,24 @@ export class GameCollisionSystem extends CollisionSystem {
         }
     }
 
+    /**
+     * 玩家命中奖励：玩家（直接或通过召唤物、折射/连锁等衍生攻击）
+     * 每次对敌人造成伤害时获得 1 能量。
+     */
+    private grantHitEnergy(launcher: BaseEntity, hitPlane: Plane): void {
+        if (!(hitPlane instanceof Enemy)) {
+            return;
+        }
+
+        const player = launcher instanceof PlayerPlane
+            ? launcher
+            : launcher instanceof SummonPlane
+                ? launcher.player
+                : undefined;
+
+        player?.gainEnergy(1);
+    }
+
     protected override shouldTest(
         left: BaseEntity,
         right: BaseEntity,
@@ -195,6 +213,11 @@ export class GameCollisionSystem extends CollisionSystem {
                 damageLabel !== undefined
                 && bulletPair.plane instanceof Enemy
             ) {
+                this.grantHitEnergy(
+                    bulletPair.bullet.launcher,
+                    bulletPair.plane,
+                );
+
                 if (bulletPair.bullet instanceof FireballBullet) {
                     this.refractFireball(
                         world,
@@ -325,6 +348,21 @@ export class GameCollisionSystem extends CollisionSystem {
             world.addEntity(secondDamageLabel);
         }
 
+        // 玩家撞击敌人也算命中：敌人一侧受到伤害时奖励能量。
+        if (player !== undefined) {
+            const enemyIsFirst = planePair.first !== player;
+            const enemyDamageLabel = enemyIsFirst
+                ? firstDamageLabel
+                : secondDamageLabel;
+
+            if (enemyDamageLabel !== undefined) {
+                this.grantHitEnergy(
+                    player,
+                    enemyIsFirst ? planePair.first : planePair.second,
+                );
+            }
+        }
+
         if (firstDamageLabel !== undefined || secondDamageLabel !== undefined) {
             const collisionX = (
                 planePair.first.position.x + planePair.first.size.width / 2
@@ -381,6 +419,7 @@ export class GameCollisionSystem extends CollisionSystem {
             const damageLabel = thunder.hitOnSpawn(hitEnemy);
 
             if (damageLabel !== undefined) {
+                this.grantHitEnergy(player, hitEnemy);
                 world.addEntity(damageLabel);
                 this.chainThunder(world, thunder, hitEnemy);
             }
@@ -501,6 +540,7 @@ export class GameCollisionSystem extends CollisionSystem {
         const damageLabel = chainedThunder.hitOnSpawn(hitEnemy);
 
         if (damageLabel !== undefined) {
+            this.grantHitEnergy(thunder.launcher, hitEnemy);
             world.addEntity(damageLabel);
         }
 
@@ -616,6 +656,7 @@ export class GameCollisionSystem extends CollisionSystem {
         const damageLabel = chainedThunder.hitOnSpawn(hitEnemy);
 
         if (damageLabel !== undefined) {
+            this.grantHitEnergy(ballThunder.launcher, hitEnemy);
             world.addEntity(damageLabel);
         }
 
@@ -723,6 +764,7 @@ export class GameCollisionSystem extends CollisionSystem {
             const damageLabel = refracted.hitOnSpawn(target);
 
             if (damageLabel !== undefined) {
+                this.grantHitEnergy(player, target);
                 world.addEntity(damageLabel);
                 this.refractLaser(world, refracted, target);
             }
@@ -758,6 +800,7 @@ export class GameCollisionSystem extends CollisionSystem {
             const damageLabel = settle.hitOnSpawn(target);
 
             if (damageLabel !== undefined) {
+                this.grantHitEnergy(player, target);
                 world.addEntity(damageLabel);
             }
 
@@ -816,6 +859,7 @@ export class GameCollisionSystem extends CollisionSystem {
         const damageLabel = refractedFireball.hitOnSpawn(hitEnemy);
 
         if (damageLabel !== undefined) {
+            this.grantHitEnergy(fireball.launcher, hitEnemy);
             world.addEntity(damageLabel);
         }
     }
@@ -1029,6 +1073,7 @@ export class GameCollisionSystem extends CollisionSystem {
         const damageLabel = enemy.takeDamage(damage, critical);
 
         if (damageLabel !== undefined) {
+            this.grantHitEnergy(summon, enemy);
             world.addEntity(damageLabel);
             summon.assaulting = false;
             this.emitAssaultImpact(world, summon, enemy);
@@ -1093,6 +1138,7 @@ export class GameCollisionSystem extends CollisionSystem {
             const damageLabel = entity.takeDamage(critDamage, critical);
 
             if (damageLabel !== undefined) {
+                this.grantHitEnergy(player, entity);
                 world.addEntity(damageLabel);
             }
         }
