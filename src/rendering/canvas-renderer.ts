@@ -167,6 +167,15 @@ export class CanvasRenderer implements Renderer {
             context.lineTo(-target.size.width / 2, target.size.height / 2);
             context.closePath();
             context.fill();
+        } else if (target.appearance.shape === "star") {
+            // 四角星（供能量星残影等复用），与 renderEnergyStar 外观一致。
+            const outerRadius = Math.max(
+                target.size.width,
+                target.size.height,
+            ) / 2;
+
+            this.traceStarPath(outerRadius, outerRadius * 0.38);
+            context.fill();
         } else {
             context.fillRect(
                 -target.size.width / 2,
@@ -383,7 +392,6 @@ export class CanvasRenderer implements Renderer {
         const centerX = star.position.x + star.size.width / 2;
         const centerY = star.position.y + star.size.height / 2;
         const outerRadius = star.size.width / 2;
-        const innerRadius = outerRadius * 0.38;
 
         context.save();
         context.globalAlpha = star.opacity;
@@ -392,6 +400,15 @@ export class CanvasRenderer implements Renderer {
         context.fillStyle = star.appearance.color;
         context.shadowColor = "#ffd700";
         context.shadowBlur = 10;
+
+        this.traceStarPath(outerRadius, outerRadius * 0.38);
+        context.fill();
+        context.restore();
+    }
+
+    /** 在当前变换下描出四角星路径（顶点在外接圆上，内切半径按比例缩小）。 */
+    private traceStarPath(outerRadius: number, innerRadius: number): void {
+        const { context } = this;
 
         context.beginPath();
 
@@ -409,8 +426,6 @@ export class CanvasRenderer implements Renderer {
         }
 
         context.closePath();
-        context.fill();
-        context.restore();
     }
 
     private renderDamageLabel(label: DamageLabel): void {

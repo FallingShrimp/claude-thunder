@@ -35,6 +35,16 @@ export abstract class Bullet extends BaseEntity {
         return !this.hitTargets.has(target.id) && this.isOpposingTarget(target);
     }
 
+    /** 该子弹是否已经命中过此目标（穿透弹选择下一个目标时用）。 */
+    public hasHit(target: Plane): boolean {
+        return this.hitTargets.has(target.id);
+    }
+
+    /** 清空命中记录，允许对同一批目标开启新一轮命中。 */
+    public resetHitTargets(): void {
+        this.hitTargets.clear();
+    }
+
     public hit(target: Plane): DamageLabel | undefined {
         if (!this.canDamage(target)) {
             return undefined;

@@ -235,20 +235,29 @@ export class PlayerPlane extends Player<PlayerStats> {
             this.dodging = false;
             this.endGuard(PlayerPlane.guardCooldownBase);
             this.previousGuardKey = this.input.isPressed("KeyK");
+            this.previousChargeKey = this.input.isPressed("KeyI");
             return;
         }
+
+        // 蓄力状态机必须每帧无条件更新：它原本只在键盘移动分支被调用，
+        // 冲刺或触摸分支会提前 return，导致蓄力期间能量消耗忽停忽续。
+        // 放在分支切换之前，保证冲刺/触摸/键盘任意状态下都按 delta 平滑消耗。
+        this.updateCharging(delta);
 
         // 按住空格即可持续冲刺：冷却结束自动再次触发，无需重新按下。
         const dodgeHeld = this.input.isPressed("Space");
 
         // 键盘操控优先：只要有任何方向/攻击/格挡键活跃，就用键盘分支，
         // 从而保证桌面端不受触摸输入影响（TouchInput 始终存在）。
+        // KeyI 也要算作键盘活跃：只按住 I 蓄力时不能落入触摸分支，
+        // 否则蓄力状态机整帧跳过，能量消耗会出现断断续续的现象。
         const keyboardActive = this.input.isPressed("KeyW")
             || this.input.isPressed("KeyA")
             || this.input.isPressed("KeyS")
             || this.input.isPressed("KeyD")
             || this.input.isPressed("KeyJ")
-            || this.input.isPressed("KeyK");
+            || this.input.isPressed("KeyK")
+            || this.input.isPressed("KeyI");
 
         const horizontal = Number(this.input.isPressed("KeyD"))
             - Number(this.input.isPressed("KeyA"));
@@ -292,8 +301,6 @@ export class PlayerPlane extends Player<PlayerStats> {
         this.position.x += this.velocity.x * delta;
         this.position.y += this.velocity.y * delta;
         this.clampToCanvas();
-
-        this.updateCharging(delta);
 
         if (this.input.isPressed("KeyJ")) {
             this.attack();
@@ -426,7 +433,8 @@ export class PlayerPlane extends Player<PlayerStats> {
      * 蓄力状态机（按住 I）：
      * - 开始：能量大于 0 时按下 I；
      * - 期间：按 delta 平滑消耗能量（每 0.5 秒消耗 50 点），攻击被封锁；
-     * - 结束：松开 I 或能量耗尽时发射金色四角星炮弹。
+     * - 能量耗尽：不自动发射，保持蓄力等待（无能量可消耗）；
+     * - 结束：松开 I 时发射金色四角星炮弹。
      */
     private updateCharging(delta: number): void {
         const chargeKey = this.input.isPressed("KeyI");
@@ -436,12 +444,14 @@ export class PlayerPlane extends Player<PlayerStats> {
         this.previousChargeKey = chargeKey;
 
         if (this.charging) {
+            // 能量耗尽时不自动退出蓄力：保持等待直到松开 I，
+            // 此时 consumed 恒为 0，不会继续消耗（期间若重新获得能量则继续消耗）。
             const consumed = Math.min(this.energy, 100 * delta);
 
             this.energy -= consumed;
             this.chargeConsumed += consumed;
 
-            if (this.energy <= 0 || chargeReleased) {
+            if (chargeReleased) {
                 this.fireEnergyStar();
             }
 
@@ -451,6 +461,7 @@ export class PlayerPlane extends Player<PlayerStats> {
         if (chargePressed && this.energy > 0) {
             this.charging = true;
             this.chargeConsumed = 0;
+            this.playSound(GAME_AUDIO_SOURCES.chargeStart);
         }
     }
 
@@ -466,6 +477,8 @@ export class PlayerPlane extends Player<PlayerStats> {
             return;
         }
 
+        this.playSound(GAME_AUDIO_SOURCES.energyStar);
+
         this.spawnEntity(new EnergyStarBullet({
             launcher: this,
             x: this.position.x + this.size.width / 2 - 10,
@@ -476,6 +489,7 @@ export class PlayerPlane extends Player<PlayerStats> {
                 * Math.max(0, this.readStat("ENERGY_DMG_MULTIPLIER")),
             penetrate: Math.max(0, this.readStat("ENERGY_PIERCE")),
             findTarget: this.findTargets ?? (() => []),
+            spawnEntity: this.spawnEntity,
         }));
     }
 

@@ -1,4 +1,9 @@
-export type RenderShape = "rectangle" | "ellipse" | "triangle" | "sprite";
+export type RenderShape =
+    | "rectangle"
+    | "ellipse"
+    | "triangle"
+    | "star"
+    | "sprite";
 
 export interface RenderAppearance {
     shape: RenderShape;
