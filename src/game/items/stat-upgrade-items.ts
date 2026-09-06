@@ -256,7 +256,8 @@ export class CounterAttackBig extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.LEGENDARY,
             PLAYER_STATS_FORMATS,
             {
-                COUNTER_MULTIPLIER: 2.5
+                COUNTER_MULTIPLIER: 2,
+                COUNTER_REFRACTION: 3
             },
             ["反击"]
         );

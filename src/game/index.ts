@@ -1,6 +1,7 @@
 import { AudioSystem } from "../audio/audio-system";
 import { CooldownBar } from "../entities/cooldown-bar";
 import { Enemy } from "../entities/enemy";
+import { WaveInfoHud } from "../entities/wave-info";
 import { GameEngine } from "../logic/game-engine";
 import type { GameSystem } from "../logic/game-system";
 import { GameWorld } from "../logic/game-world";
@@ -241,6 +242,8 @@ export async function startGame(): Promise<GameEngine> {
         waveRewardSystem
     ];
     const engine = new GameEngine(world, renderer, systems, waves, isBossWave);
+    // 左上角波次信息 HUD（“第X波 - Boss将在R波后到来”）。
+    world.addEntity(new WaveInfoHud(() => engine.getWaveIndex()));
 
     // 调试工具：在浏览器控制台手动调整道具标签的抽取权重，
     // 例如 gameDebug.addLabelWeight("激光", 200)、gameDebug.getLabelWeights()。

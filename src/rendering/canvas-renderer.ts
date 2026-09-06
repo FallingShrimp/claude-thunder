@@ -10,6 +10,7 @@ import { LaserBullet } from "../game/bullets/laser-bullet";
 import { ThunderBullet } from "../game/bullets/thunder-bullet";
 import { Boss } from "../game/enemies/boss";
 import { PlayerPlane } from "../game/player-plane";
+import { WaveInfoHud } from "../entities/wave-info";
 import { AssaultSummon } from "../game/summons/assault-summon";
 import { SummonPlane } from "../game/summons/summon-plane";
 import { ParticleSystem } from "../logic/systems/particle-system";
@@ -105,6 +106,11 @@ export class CanvasRenderer implements Renderer {
 
         if (target instanceof Item) {
             this.renderItem(target);
+            return;
+        }
+
+        if (target instanceof WaveInfoHud) {
+            this.renderWaveInfo(target);
             return;
         }
 
@@ -597,6 +603,28 @@ export class CanvasRenderer implements Renderer {
         context.arc(centerX, centerY, innerRadius, start + span, start, true);
         context.closePath();
         context.fill();
+        context.restore();
+    }
+
+    /** 左上角波次信息文字（带半透明深色底条保证可读性）。 */
+    private renderWaveInfo(waveInfo: WaveInfoHud): void {
+        const { context } = this;
+        const x = waveInfo.position.x;
+        const y = waveInfo.position.y;
+
+        context.save();
+        context.font = "16px sans-serif";
+        context.textAlign = "left";
+        context.textBaseline = "top";
+
+        const textWidth = context.measureText(waveInfo.text).width;
+
+        context.fillStyle = "rgba(0, 0, 0, 0.45)";
+        context.fillRect(x - 6, y - 4, textWidth + 12, 24);
+        context.fillStyle = "#ffffff";
+        context.shadowColor = "rgba(0, 0, 0, 0.9)";
+        context.shadowBlur = 4;
+        context.fillText(waveInfo.text, x, y);
         context.restore();
     }
 

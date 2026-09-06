@@ -36,6 +36,11 @@ export class GameEngine {
         return this.waveSystem.hasPendingEnemies();
     }
 
+    /** 当前波次索引（0 起，供 HUD 等显示使用）。 */
+    public getWaveIndex(): number {
+        return this.waveSystem.currentIndex;
+    }
+
     public stop(): void {
         if (this.animationFrameId !== null) {
             cancelAnimationFrame(this.animationFrameId);
