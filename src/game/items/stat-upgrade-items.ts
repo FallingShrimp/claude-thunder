@@ -2,6 +2,7 @@ import {
     PLAYER_STATS_FORMATS,
     type PlayerStats,
 } from "../player-plane";
+import type { Player } from "../../entities/player";
 import { Quality } from "./quality";
 import { PlayerStatUpgradeItem } from "./stat-upgrade-item-base";
 import {
@@ -96,7 +97,7 @@ export class EnergySavingItem
     extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "能量利用效率更高",
+            "能量利用效率提高",
             ".",
             Quality.LEGENDARY,
             PLAYER_STATS_FORMATS,
@@ -128,7 +129,7 @@ export class AttackSpeedUpgradeItem
             "./items/attack-speed.svg",
             Quality.NORMAL,
             PLAYER_STATS_FORMATS,
-            { ATK_SPD: 0.5 },
+            { ATK_SPD: 0.4 },
             ["通用"]
         );
     }
@@ -210,8 +211,8 @@ export class EpicShoot extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.LEGENDARY,
             PLAYER_STATS_FORMATS,
             {
-                ATK_SPD: 1,
-                SHOOT_OFFSET: 3
+                ATK_SPD: 2,
+                SHOOT_OFFSET: 4
             },
             ["通用"]
         );
@@ -226,7 +227,7 @@ export class Luck extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             {
-                LUCK: 2
+                LUCK: 5
             },
             ["通用"]
         );
@@ -267,7 +268,7 @@ export class CounterAttackBig extends PlayerStatUpgradeItem<PlayerStats> {
 export class CounterCount extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
-            "额外产生一个反击火球",
+            "额外产生反击火球",
             ".",
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
@@ -388,6 +389,46 @@ export class ThunderTrace extends PlayerStatUpgradeItem<PlayerStats> {
     }
 }
 
+/** 生命上限提高：上限 +20，并立即回复等量生命（生命标签）。 */
+export class MaxHealthItem extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "生命上限提高",
+            ".",
+            Quality.LEGENDARY,
+            PLAYER_STATS_FORMATS,
+            {},
+            ["通用"]
+        );
+    }
+
+    public override apply(player: Player): void {
+        super.apply(player);
+        player.maxHealth += 20;
+        player.health = Math.min(player.maxHealth, player.health + 20);
+    }
+}
+
+/** 立即治疗：回复 30 点生命，满血时不显示（生命标签）。 */
+export class HealItem extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "修复机体",
+            ".",
+            Quality.EPIC,
+            PLAYER_STATS_FORMATS,
+            {},
+            ["通用"],
+            (player) => player.health < player.maxHealth
+        );
+    }
+
+    public override apply(player: Player): void {
+        super.apply(player);
+        player.health = Math.min(player.maxHealth, player.health + 30);
+    }
+}
+
 export const items = [
     AttackPowerUpgradeItem,
     AttackSpeedUpgradeItem,
@@ -436,5 +477,7 @@ export const items = [
     EnergyMultiplierItem,
     EnergyPierceItem,
     EnergyCapItem,
-    EnergySavingItem
+    EnergySavingItem,
+    MaxHealthItem,
+    HealItem
 ];
