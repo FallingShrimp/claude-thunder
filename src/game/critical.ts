@@ -47,5 +47,5 @@ export function rollCritical(
     }
 
     const state = Math.random() < source.rate;
-    return [state, damage * (state ? source.dmg : 1)];
+    return [state, damage * (state ? source.dmg * (1 + Math.max(0, source.rate - 1)) : 1)];
 }

@@ -389,6 +389,23 @@ export class ThunderTrace extends PlayerStatUpgradeItem<PlayerStats> {
     }
 }
 
+/** 传说暴击：暴击率 +20% 且暴击伤害 +50%（暴击标签）。 */
+export class CriticalSurgeItem extends PlayerStatUpgradeItem<PlayerStats> {
+    public constructor() {
+        super(
+            "暴击涌动",
+            ".",
+            Quality.LEGENDARY,
+            PLAYER_STATS_FORMATS,
+            {
+                CRIT_RATE: 0.25,
+                CRIT_DMG: 0.5
+            },
+            ["暴击"]
+        );
+    }
+}
+
 /** 生命上限提高：上限 +20，并立即回复等量生命（生命标签）。 */
 export class MaxHealthItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
@@ -479,5 +496,6 @@ export const items = [
     EnergyCapItem,
     EnergySavingItem,
     MaxHealthItem,
-    HealItem
+    HealItem,
+    CriticalSurgeItem
 ];
