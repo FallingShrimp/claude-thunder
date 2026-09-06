@@ -138,7 +138,7 @@ export class Boss extends Enemy<BossStats> {
     private static readonly driftAmplitude: number = 55;
     private static readonly chargeSpeed: number = 640;
     /** 基础血量：与普通小怪一致地按波次 upgrade() 成长（×1.2/波）。 */
-    private static readonly baseHealth: number = 400;
+    private static readonly baseHealth: number = 600;
     /** 护卫死亡反伤：每阶段提高 3%（阶段一 3% / 二 6% / 三 9%）。 */
     private static readonly guardReflectPerPhase: number = 0.03;
 
