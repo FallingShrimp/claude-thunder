@@ -215,7 +215,7 @@ export class PlayerPlane extends Player<PlayerStats> {
                 LASER_DAMAGE: 5,
                 DODGE_CHARGE: 1,
                 ENERGY_CAP: 100,
-                ENERGY_DMG_MULTIPLIER: 0.5,
+                ENERGY_DMG_MULTIPLIER: 0.25,
                 ENERGY_PIERCE: 1,
                 ENERGY_SAVING: 0,
             },
