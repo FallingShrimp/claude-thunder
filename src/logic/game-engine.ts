@@ -15,8 +15,9 @@ export class GameEngine {
         private readonly renderer: Renderer,
         private readonly systems: readonly GameSystem[],
         waves: ReadonlySet<Wave> = new Set(),
+        isBossWave: (index: number) => boolean = () => false,
     ) {
-        this.waveSystem = new WaveSystem(world, waves);
+        this.waveSystem = new WaveSystem(world, waves, isBossWave);
     }
 
     public start(): void {

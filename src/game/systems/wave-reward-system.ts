@@ -9,6 +9,15 @@ import { LabelWeightItem } from "../items/label-weight-item";
 
 export type ItemFactory = () => Item;
 
+export interface WaveRewardSystemOptions {
+    /** Boss 波判定：命中时本次奖励改用 Boss 专属池，并连续选择多次。 */
+    readonly isBossWave?: (index: number) => boolean;
+    /** Boss 波专属道具池（如只含传说品质道具的池子）。 */
+    readonly bossPool?: readonly ItemFactory[];
+    /** Boss 战结束后连续选择的次数（默认 2）。 */
+    readonly bossSelectionCount?: number;
+}
+
 export class WaveRewardSystem implements GameSystem {
     private readonly choiceCount: number = 3;
     private readonly choices: Item[] = [];
@@ -21,6 +30,12 @@ export class WaveRewardSystem implements GameSystem {
     private previousRight: boolean = false;
     private previousConfirm: boolean = false;
     private readonly labelWeightIncrements = new Map<string, number>();
+    /** 本次选择使用的道具池（普通波 = itemPool，Boss 波 = bossPool）。 */
+    private activePool: readonly ItemFactory[];
+    /** Boss 战剩余的连续选择次数（0 表示普通波次奖励流程）。 */
+    private remainingBossSelections: number = 0;
+    /** 最近一次 update/初始选择的世界引用（确认后再次开启选择时复用）。 */
+    private lastWorld: GameWorld | null = null;
 
     /** 设计基准：卡片宽度对应的屏幕宽度（原 480×720 坐标系）。 */
     private static readonly designScreenWidth: number = 480;
@@ -40,7 +55,10 @@ export class WaveRewardSystem implements GameSystem {
         private readonly screenWidth: number,
         private readonly screenHeight: number = 720,
         private readonly touch?: TouchInput,
+        private readonly options: WaveRewardSystemOptions = {},
     ) {
+        this.activePool = itemPool;
+
         // 移动端：点击某张道具卡即选中并确认。
         touch?.onTap((x, y) => {
             if (!this.selecting) {
@@ -83,12 +101,20 @@ export class WaveRewardSystem implements GameSystem {
         if (hasEnemies) {
             this.waveHadEnemies = true;
         } else if (this.waveHadEnemies && !this.hasPendingWaveEnemies()) {
+            // Boss 波：改用 Boss 专属池并连续选择多次；普通波照常单次选择。
+            const bossReward = (this.options.isBossWave?.(this.currentWaveIndex) ?? false)
+                && (this.options.bossPool?.length ?? 0) >= this.choiceCount;
+
+            this.activePool = bossReward ? this.options.bossPool! : this.itemPool;
+            this.remainingBossSelections = bossReward
+                ? Math.max(1, this.options.bossSelectionCount ?? 2)
+                : 0;
             this.beginSelection(world);
         }
     }
 
     private beginSelection(world: GameWorld): void {
-        if (this.itemPool.length < this.choiceCount) {
+        if (this.activePool.length < this.choiceCount) {
             throw new RangeError("The item pool must contain at least three items.");
         }
 
@@ -113,6 +139,7 @@ export class WaveRewardSystem implements GameSystem {
     ): void {
         this.selecting = true;
         this.initialSelection = true;
+        this.lastWorld = world;
         this.setPlayerControlsEnabled(false);
         this.selectedIndex = 0;
         this.previousLeft = this.input.isPressed("KeyA");
@@ -228,6 +255,16 @@ export class WaveRewardSystem implements GameSystem {
         this.selecting = false;
         this.setPlayerControlsEnabled(true);
 
+        if (this.remainingBossSelections > 0) {
+            this.remainingBossSelections -= 1;
+
+            if (this.remainingBossSelections > 0 && this.lastWorld !== null) {
+                // Boss 掉落：还有剩余次数，紧接下一次选择（不推进波次）。
+                this.beginSelection(this.lastWorld);
+                return;
+            }
+        }
+
         if (this.initialSelection) {
             // 开局倾向选完才开启第一波。
             this.initialSelection = false;
@@ -277,7 +314,8 @@ export class WaveRewardSystem implements GameSystem {
     }
 
     private pickItems(): Item[] {
-        const allCandidates = this.itemPool.map((factory) => factory());
+        // 用 activePool（普通波 = itemPool，Boss 波 = bossPool 传说池）。
+        const allCandidates = this.activePool.map((factory) => factory());
         const eligible = allCandidates.filter(
             (item) => item.displayCondition(this.player),
         );

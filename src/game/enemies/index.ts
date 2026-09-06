@@ -1,3 +1,4 @@
+export { Boss, BossHealthbar } from "./boss";
 export { Brown } from "./brown";
 export { Cyan } from "./cyan";
 export { Orange } from "./orange";

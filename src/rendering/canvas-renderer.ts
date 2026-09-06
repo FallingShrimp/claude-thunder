@@ -8,6 +8,7 @@ import { BallThunderBullet } from "../game/bullets/ball-thunder-bullet";
 import { EnergyStarBullet } from "../game/bullets/energy-star-bullet";
 import { LaserBullet } from "../game/bullets/laser-bullet";
 import { ThunderBullet } from "../game/bullets/thunder-bullet";
+import { Boss } from "../game/enemies/boss";
 import { PlayerPlane } from "../game/player-plane";
 import { AssaultSummon } from "../game/summons/assault-summon";
 import { SummonPlane } from "../game/summons/summon-plane";
@@ -104,6 +105,11 @@ export class CanvasRenderer implements Renderer {
 
         if (target instanceof Item) {
             this.renderItem(target);
+            return;
+        }
+
+        if (target instanceof Boss) {
+            this.renderBoss(target);
             return;
         }
 
@@ -594,6 +600,63 @@ export class CanvasRenderer implements Renderer {
         context.restore();
     }
 
+    /** 熔核运输舰：宽大棕红色舰体 + 脉动熔核 + 两侧引擎吊舱。 */
+    private renderBoss(boss: Boss): void {
+        const { context } = this;
+        const width = boss.size.width;
+        const height = boss.size.height;
+
+        context.save();
+        context.globalAlpha = boss.opacity;
+        context.translate(
+            boss.position.x + width / 2,
+            boss.position.y + height / 2,
+        );
+
+        // 两侧引擎吊舱。
+        context.fillStyle = "#5d261c";
+        context.fillRect(-width / 2 - 12, -height / 2 + 18, 14, height - 52);
+        context.fillRect(width / 2 - 2, -height / 2 + 18, 14, height - 52);
+
+        // 主舰体。
+        context.fillStyle = "#8c3b2e";
+        context.fillRect(-width / 2, -height / 2, width, height);
+
+        // 顶部装甲带。
+        context.fillStyle = "#a44a33";
+        context.fillRect(-width / 2, -height / 2, width, 18);
+
+        // 货舱条纹。
+        context.fillStyle = "#6e2d22";
+        for (let index = 0; index < 4; index++) {
+            context.fillRect(
+                -width / 2 + 20 + index * ((width - 40) / 4),
+                -height / 2 + 30,
+                14,
+                height - 56,
+            );
+        }
+
+        // 前缘炮口（朝向玩家一侧）。
+        context.fillStyle = "#3a1712";
+        context.fillRect(-36, height / 2 - 10, 72, 10);
+
+        // 脉动熔核。
+        const pulse = 1 + Math.sin(boss.elapsed * 6) * 0.12;
+        context.fillStyle = "#ff7a3c";
+        context.shadowColor = "#ff5a1c";
+        context.shadowBlur = 16;
+        context.beginPath();
+        context.ellipse(0, 4, 24 * pulse, 17 * pulse, 0, 0, Math.PI * 2);
+        context.fill();
+        context.shadowBlur = 0;
+        context.fillStyle = "#ffd9a8";
+        context.beginPath();
+        context.ellipse(0, 4, 10 * pulse, 7 * pulse, 0, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+    }
+
     private renderHealthbar(healthbar: Healthbar): void {
         const { context } = this;
         const foregroundWidth = healthbar.size.width
@@ -611,6 +674,17 @@ export class CanvasRenderer implements Renderer {
         context.fillRect(0, 0, middleWidth, healthbar.size.height);
         context.fillStyle = healthbar.foregroundColor;
         context.fillRect(0, 0, foregroundWidth, healthbar.size.height);
+        context.fillStyle = "rgba(0, 0, 0, 0.55)";
+
+        for (const divider of healthbar.dividers) {
+            context.fillRect(
+                healthbar.size.width * divider - 1,
+                0,
+                2,
+                healthbar.size.height,
+            );
+        }
+
         context.restore();
     }
 }

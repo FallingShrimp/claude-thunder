@@ -21,7 +21,15 @@ import {
     type ItemFactory,
     WaveRewardSystem,
 } from "./systems/wave-reward-system";
-import { Brown, Cyan, Orange, Purple, Red } from "./enemies";
+import {
+    Boss,
+    BossHealthbar,
+    Brown,
+    Cyan,
+    Orange,
+    Purple,
+    Red,
+} from "./enemies";
 
 export async function startGame(): Promise<GameEngine> {
     const canvas = document.querySelector<HTMLCanvasElement>("#game-canvas");
@@ -74,6 +82,8 @@ export async function startGame(): Promise<GameEngine> {
         },
     );
     const environment = new SpaceEnvironment(canvas.width, canvas.height);
+    // 每 15 波（index 15/30/45…）出现一次 Boss；Boss 战期间普通波全部暂停。
+    const isBossWave = (index: number): boolean => index > 0 && index % 15 === 0;
     const waves = new Set<Wave>([
         {
             startIndex: 0,
@@ -138,6 +148,37 @@ export async function startGame(): Promise<GameEngine> {
                 );
             },
         },
+        {
+            // Boss 波：spawnValue 100 恰好在切换到 Boss 波时刷出 1 个 Boss。
+            startIndex: 15,
+            endIndex: Number.POSITIVE_INFINITY,
+            isBoss: true,
+            spawnValue: 100,
+            spawnProgress: 0,
+            spawnEnemy() {
+                const boss = new Boss(
+                    canvas.width,
+                    canvas.height,
+                    player,
+                    (entity) => world.addEntity(entity),
+                    () => [...world.entities],
+                    world.particles,
+                    audioSystem,
+                    (amplitude, duration, frequency, decay) => {
+                        renderer.camera.shake({
+                            amplitude,
+                            duration,
+                            frequency,
+                            decay,
+                        });
+                    },
+                );
+
+                // 顶部大血条（先于 Boss 加入世界，避免重复生成小血条）。
+                world.addEntity(new BossHealthbar(boss, canvas.width));
+                return boss;
+            },
+        },
     ]);
     const labelWeightItemFactories: ItemFactory[] = [
         "通用",
@@ -160,6 +201,10 @@ export async function startGame(): Promise<GameEngine> {
         ...items.map((ItemType) => () => new ItemType()),
         ...labelWeightItemFactories,
     ];
+    // Boss 掉落：只保留传说品质道具（LabelWeightItem 为史诗，自动排除）。
+    const bossItemPool: ItemFactory[] = items
+        .filter((ItemType) => new ItemType().quality === Quality.LEGENDARY)
+        .map((ItemType) => () => new ItemType());
     const waveRewardSystem = new WaveRewardSystem(
         player,
         input,
@@ -174,6 +219,11 @@ export async function startGame(): Promise<GameEngine> {
         canvas.width,
         canvas.height,
         touch,
+        {
+            isBossWave,
+            bossPool: bossItemPool,
+            bossSelectionCount: 2,
+        },
     );
     const systems: GameSystem[] = [
         world.particles,
@@ -190,7 +240,7 @@ export async function startGame(): Promise<GameEngine> {
         ),
         waveRewardSystem
     ];
-    const engine = new GameEngine(world, renderer, systems, waves);
+    const engine = new GameEngine(world, renderer, systems, waves, isBossWave);
 
     // 调试工具：在浏览器控制台手动调整道具标签的抽取权重，
     // 例如 gameDebug.addLabelWeight("激光", 200)、gameDebug.getLabelWeights()。

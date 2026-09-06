@@ -3,9 +3,11 @@ import { Plane } from "./plane";
 
 export class Healthbar extends BaseEntity {
     public readonly entity: BaseEntity;
-    public readonly backgroundColor: string = "#321010";
-    public readonly middleColor: string = "#f0b429";
-    public readonly foregroundColor: string = "#35d04f";
+    public backgroundColor: string = "#321010";
+    public middleColor: string = "#f0b429";
+    public foregroundColor: string = "#35d04f";
+    /** 阶段分割线（血量比例位置，如 [1/3, 2/3]），空数组表示不绘制。 */
+    public dividers: readonly number[] = [];
     public foregroundProgress: number;
     public middleProgress: number;
 

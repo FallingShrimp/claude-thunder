@@ -12,6 +12,8 @@ export class WaveSystem {
     public constructor(
         private readonly world: GameWorld,
         private readonly waves: ReadonlySet<Wave>,
+        /** Boss 波判定：返回 true 时仅激活 isBoss 波，普通波暂停刷怪。 */
+        private readonly isBossWave: (index: number) => boolean = () => false,
     ) { }
 
     public switchTo(index: number): void {
@@ -98,7 +100,14 @@ export class WaveSystem {
     }
 
     private isSuitable(wave: Wave): boolean {
-        return this.currentIndex >= wave.startIndex
+        const bossActive = this.isBossWave(this.currentIndex);
+
+        if (wave.isBoss === true) {
+            return bossActive && this.currentIndex >= wave.startIndex;
+        }
+
+        return !bossActive
+            && this.currentIndex >= wave.startIndex
             && this.currentIndex <= wave.endIndex;
     }
 }
