@@ -67,16 +67,16 @@ export class WaveRewardSystem implements GameSystem {
 
             for (const [index, item] of this.choices.entries()) {
                 const scale = item.scale.x;
-                const halfWidth = item.size.width * scale / 2;
-                const halfHeight = item.size.height * scale / 2;
+                const halfWidth = (item.size.width * scale) / 2;
+                const halfHeight = (item.size.height * scale) / 2;
                 const centerX = item.position.x + item.size.width / 2;
                 const centerY = item.position.y + item.size.height / 2;
 
                 if (
-                    x >= centerX - halfWidth
-                    && x <= centerX + halfWidth
-                    && y >= centerY - halfHeight
-                    && y <= centerY + halfHeight
+                    x >= centerX - halfWidth &&
+                    x <= centerX + halfWidth &&
+                    y >= centerY - halfHeight &&
+                    y <= centerY + halfHeight
                 ) {
                     this.selectedIndex = index;
                     this.confirmSelection();
@@ -102,8 +102,9 @@ export class WaveRewardSystem implements GameSystem {
             this.waveHadEnemies = true;
         } else if (this.waveHadEnemies && !this.hasPendingWaveEnemies()) {
             // Boss 波：改用 Boss 专属池并连续选择多次；普通波照常单次选择。
-            const bossReward = (this.options.isBossWave?.(this.currentWaveIndex) ?? false)
-                && (this.options.bossPool?.length ?? 0) >= this.choiceCount;
+            const bossReward =
+                (this.options.isBossWave?.(this.currentWaveIndex) ?? false) &&
+                (this.options.bossPool?.length ?? 0) >= this.choiceCount;
 
             this.activePool = bossReward ? this.options.bossPool! : this.itemPool;
             this.remainingBossSelections = bossReward
@@ -133,10 +134,7 @@ export class WaveRewardSystem implements GameSystem {
      * 开局选择：展示全部候选标签权重道具，玩家选一个作为开局倾向；
      * 确认后才由 confirmSelection 开启第一波。
      */
-    public beginInitialSelection(
-        world: GameWorld,
-        initialChoices: readonly ItemFactory[],
-    ): void {
+    public beginInitialSelection(world: GameWorld, initialChoices: readonly ItemFactory[]): void {
         this.selecting = true;
         this.initialSelection = true;
         this.lastWorld = world;
@@ -146,14 +144,18 @@ export class WaveRewardSystem implements GameSystem {
         this.previousRight = this.input.isPressed("KeyD");
         this.previousConfirm = this.input.isPressed("KeyJ");
 
-        this.layoutChoices(world, initialChoices.map((factory) => factory()));
+        this.layoutChoices(
+            world,
+            initialChoices.map((factory) => factory()),
+        );
     }
 
     /** 按屏幕宽度等比缩放卡片并居中排布；单排放不下时折成多排。 */
     private layoutChoices(world: GameWorld, items: Item[]): void {
         // 优先单排展示；设计宽度超出屏幕时折成多排，每排数量尽量均匀。
-        const totalDesignWidth = items.length * WaveRewardSystem.baseItemWidth
-            + (items.length - 1) * WaveRewardSystem.baseGap;
+        const totalDesignWidth =
+            items.length * WaveRewardSystem.baseItemWidth +
+            (items.length - 1) * WaveRewardSystem.baseGap;
         const rowCount = Math.max(
             1,
             Math.ceil(totalDesignWidth / WaveRewardSystem.designScreenWidth),
@@ -165,14 +167,13 @@ export class WaveRewardSystem implements GameSystem {
             (_, row) => basePerRow + (row < extraRows ? 1 : 0),
         );
         const columns = Math.max(...rowCounts);
-        const columnsDesignWidth = columns * WaveRewardSystem.baseItemWidth
-            + (columns - 1) * WaveRewardSystem.baseGap;
+        const columnsDesignWidth =
+            columns * WaveRewardSystem.baseItemWidth + (columns - 1) * WaveRewardSystem.baseGap;
         const scale = Math.max(
             0.5,
             Math.min(
                 2.5,
-                this.screenWidth
-                / Math.max(WaveRewardSystem.designScreenWidth, columnsDesignWidth),
+                this.screenWidth / Math.max(WaveRewardSystem.designScreenWidth, columnsDesignWidth),
             ),
         );
         const itemWidth = WaveRewardSystem.baseItemWidth * scale;
@@ -212,9 +213,8 @@ export class WaveRewardSystem implements GameSystem {
         const confirm = this.input.isPressed("KeyJ");
 
         if (left && !this.previousLeft) {
-            this.selectedIndex = (
-                this.selectedIndex - 1 + this.choices.length
-            ) % this.choices.length;
+            this.selectedIndex =
+                (this.selectedIndex - 1 + this.choices.length) % this.choices.length;
             this.updateChoiceAppearance();
         }
 
@@ -238,9 +238,7 @@ export class WaveRewardSystem implements GameSystem {
         selectedItem?.apply(this.player);
 
         if (selectedItem instanceof LabelWeightItem) {
-            const previousIncrement = this.labelWeightIncrements.get(
-                selectedItem.targetLabel,
-            ) ?? 0;
+            const previousIncrement = this.labelWeightIncrements.get(selectedItem.targetLabel) ?? 0;
             this.labelWeightIncrements.set(
                 selectedItem.targetLabel,
                 previousIncrement + selectedItem.weightIncrement,
@@ -285,13 +283,10 @@ export class WaveRewardSystem implements GameSystem {
         }
 
         if (!Number.isFinite(increment) || increment === 0) {
-            throw new RangeError(
-                "The label weight increment must be a non-zero finite number.",
-            );
+            throw new RangeError("The label weight increment must be a non-zero finite number.");
         }
 
-        const next = (this.labelWeightIncrements.get(targetLabel) ?? 0)
-            + increment;
+        const next = (this.labelWeightIncrements.get(targetLabel) ?? 0) + increment;
 
         if (next > 0) {
             this.labelWeightIncrements.set(targetLabel, next);
@@ -316,29 +311,21 @@ export class WaveRewardSystem implements GameSystem {
     private pickItems(): Item[] {
         // 用 activePool（普通波 = itemPool，Boss 波 = bossPool 传说池）。
         const allCandidates = this.activePool.map((factory) => factory());
-        const eligible = allCandidates.filter(
-            (item) => item.displayCondition(this.player),
-        );
+        const eligible = allCandidates.filter((item) => item.displayCondition(this.player));
 
         if (eligible.length < this.choiceCount) {
             // 满足条件的候选不足时，回退到全部候选，保证总能有足够选项。
             return this.drawItems(allCandidates, new Map());
         }
 
-        return this.drawItems(
-            eligible,
-            this.distributeHiddenWeights(allCandidates, eligible),
-        );
+        return this.drawItems(eligible, this.distributeHiddenWeights(allCandidates, eligible));
     }
 
     /**
      * 把不可显示道具的权重（品质基准 + 标签增量）平均分配给
      * 与其共享标签的可显示道具，避免前置道具隐藏导致流派绝迹。
      */
-    private distributeHiddenWeights(
-        allCandidates: Item[],
-        eligible: Item[],
-    ): Map<Item, number> {
+    private distributeHiddenWeights(allCandidates: Item[], eligible: Item[]): Map<Item, number> {
         const bonus = new Map<Item, number>();
 
         for (const hidden of allCandidates) {
@@ -346,8 +333,7 @@ export class WaveRewardSystem implements GameSystem {
                 continue;
             }
 
-            const hiddenWeight = this.getItemWeight(hidden)
-                + this.getLabelWeightIncrement(hidden);
+            const hiddenWeight = this.getItemWeight(hidden) + this.getLabelWeightIncrement(hidden);
 
             if (hiddenWeight <= 0) {
                 continue;
@@ -373,23 +359,20 @@ export class WaveRewardSystem implements GameSystem {
 
     private getLabelWeightIncrement(item: Item): number {
         return item.labels.reduce(
-            (total, label) => total
-                + (this.labelWeightIncrements.get(label) ?? 0),
+            (total, label) => total + (this.labelWeightIncrements.get(label) ?? 0),
             0,
         );
     }
 
-    private drawItems(
-        candidates: Item[],
-        weightBonus: Map<Item, number>,
-    ): Item[] {
+    private drawItems(candidates: Item[], weightBonus: Map<Item, number>): Item[] {
         const picked: Item[] = [];
 
         while (picked.length < this.choiceCount) {
             const weights = candidates.map((item) => {
-                const weight = this.getItemWeight(item)
-                    + this.getLabelWeightIncrement(item)
-                    + (weightBonus.get(item) ?? 0);
+                const weight =
+                    this.getItemWeight(item) +
+                    this.getLabelWeightIncrement(item) +
+                    (weightBonus.get(item) ?? 0);
                 return Number.isFinite(weight) && weight > 0 ? weight : 0;
             });
             const totalWeight = weights.reduce((total, weight) => total + weight, 0);

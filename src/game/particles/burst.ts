@@ -19,10 +19,7 @@ export interface BurstOptions {
     drag?: number;
 }
 
-export function emitBurst(
-    particles: ParticleSystem,
-    options: Readonly<BurstOptions>,
-): void {
+export function emitBurst(particles: ParticleSystem, options: Readonly<BurstOptions>): void {
     const count = Math.max(0, Math.floor(options.count));
     const angle = options.angle ?? 0;
     const spread = options.spread ?? Math.PI * 2;

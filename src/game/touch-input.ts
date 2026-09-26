@@ -47,10 +47,10 @@ export class TouchInput {
 
     /** 是否处于「点按卡片」的点击状态（按下且未超过移动阈值）。 */
     public isTap(): boolean {
-        return this.isDown && Math.hypot(
-            this.targetX - this.pressX,
-            this.targetY - this.pressY,
-        ) < this.moveThreshold;
+        return (
+            this.isDown &&
+            Math.hypot(this.targetX - this.pressX, this.targetY - this.pressY) < this.moveThreshold
+        );
     }
 
     public destroy(): void {
@@ -65,7 +65,10 @@ export class TouchInput {
         this.tapListeners.clear();
     }
 
-    private toLogicalCoordinates(clientX: number, clientY: number): {
+    private toLogicalCoordinates(
+        clientX: number,
+        clientY: number,
+    ): {
         x: number;
         y: number;
     } {

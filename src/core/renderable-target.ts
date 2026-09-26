@@ -11,11 +11,7 @@ export abstract class RenderableTarget {
     public zIndex: number;
     public appearance: RenderAppearance;
 
-    protected constructor(
-        position: Vector2,
-        size: Size2D,
-        appearance: RenderAppearance,
-    ) {
+    protected constructor(position: Vector2, size: Size2D, appearance: RenderAppearance) {
         this.position = position;
         this.size = size;
         this.appearance = appearance;

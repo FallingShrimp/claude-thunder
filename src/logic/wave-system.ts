@@ -14,7 +14,7 @@ export class WaveSystem {
         private readonly waves: ReadonlySet<Wave>,
         /** Boss 波判定：返回 true 时仅激活 isBoss 波，普通波暂停刷怪。 */
         private readonly isBossWave: (index: number) => boolean = () => false,
-    ) { }
+    ) {}
 
     public switchTo(index: number): void {
         if (!Number.isInteger(index) || index < 0) {
@@ -52,9 +52,7 @@ export class WaveSystem {
         let enemyCount = this.world.entities.filter(
             (entity) => entity.active && entity instanceof Enemy,
         ).length;
-        const suitableWaves = [...this.waves].filter(
-            (wave) => this.isSuitable(wave),
-        );
+        const suitableWaves = [...this.waves].filter((wave) => this.isSuitable(wave));
 
         if (suitableWaves.length === 0) {
             return;
@@ -74,11 +72,7 @@ export class WaveSystem {
 
                 const enemy = wave.spawnEnemy();
 
-                for (
-                    let upgradeCount = 0;
-                    upgradeCount < this.currentIndex;
-                    upgradeCount += 1
-                ) {
+                for (let upgradeCount = 0; upgradeCount < this.currentIndex; upgradeCount += 1) {
                     enemy.upgrade();
                 }
 
@@ -106,8 +100,10 @@ export class WaveSystem {
             return bossActive && this.currentIndex >= wave.startIndex;
         }
 
-        return !bossActive
-            && this.currentIndex >= wave.startIndex
-            && this.currentIndex <= wave.endIndex;
+        return (
+            !bossActive &&
+            this.currentIndex >= wave.startIndex &&
+            this.currentIndex <= wave.endIndex
+        );
     }
 }

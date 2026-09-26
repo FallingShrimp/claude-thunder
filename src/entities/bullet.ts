@@ -62,10 +62,7 @@ export abstract class Bullet extends BaseEntity {
     }
 
     public hitOnSpawn(target: Plane): DamageLabel | undefined {
-        if (
-            this.hitTargets.has(target.id)
-            || !this.isOpposingTarget(target)
-        ) {
+        if (this.hitTargets.has(target.id) || !this.isOpposingTarget(target)) {
             return undefined;
         }
 
@@ -76,12 +73,11 @@ export abstract class Bullet extends BaseEntity {
         const launcherIsSummon = this.launcher.getEntityType() === "summon";
         const targetIsSummon = target.getEntityType() === "summon";
 
-        return (this.launcher instanceof Player && target instanceof Enemy)
-            || (launcherIsSummon && target instanceof Enemy)
-            || (
-                this.launcher instanceof Enemy
-                && (target instanceof Player || targetIsSummon)
-            );
+        return (
+            (this.launcher instanceof Player && target instanceof Enemy) ||
+            (launcherIsSummon && target instanceof Enemy) ||
+            (this.launcher instanceof Enemy && (target instanceof Player || targetIsSummon))
+        );
     }
 
     private resolveHit(target: Plane): DamageLabel | undefined {
@@ -91,11 +87,7 @@ export abstract class Bullet extends BaseEntity {
 
         this.hitTargets.add(target.id);
         const [critical, dmg] = this.judgeCritical();
-        const damageLabel = target.takeDamage(
-            dmg,
-            critical,
-            this,
-        );
+        const damageLabel = target.takeDamage(dmg, critical, this);
 
         return damageLabel;
     }

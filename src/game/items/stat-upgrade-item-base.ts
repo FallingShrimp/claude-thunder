@@ -7,8 +7,7 @@ import { getQualityColor, Quality } from "./quality";
  * 属性升级道具基类：通过向玩家 statsValue 叠加数值生效。
  * 独立成文件以避免道具实现之间形成循环依赖。
  */
-export abstract class PlayerStatUpgradeItem<T extends StatsData>
-    extends Item<Quality> {
+export abstract class PlayerStatUpgradeItem<T extends StatsData> extends Item<Quality> {
     public constructor(
         displayName: string,
         avatarSource: string,
@@ -45,11 +44,7 @@ export abstract class PlayerStatUpgradeItem<T extends StatsData>
         for (const key of Object.keys(this.statsValue) as (keyof T)[]) {
             const increment = this.statsValue[key];
 
-            if (
-                typeof key === "string"
-                && typeof increment === "number"
-                && key in playerStats
-            ) {
+            if (typeof key === "string" && typeof increment === "number" && key in playerStats) {
                 playerStats[key] += increment;
             }
         }

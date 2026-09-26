@@ -7,7 +7,7 @@ export class DangerBullet extends BasicBullet {
         super({
             ...options,
             faction: "enemy",
-            damage: 5
+            damage: 5,
         });
 
         this.appearance = { shape: "ellipse", color: "#ff3030" };

@@ -64,10 +64,10 @@ export class GameCollisionSystem extends CollisionSystem {
 
         for (const entity of world.entities) {
             if (
-                !(entity instanceof Bullet)
-                || !entity.active
-                || entity.energyGranted
-                || !entity.canDamage(player)
+                !(entity instanceof Bullet) ||
+                !entity.active ||
+                entity.energyGranted ||
+                !entity.canDamage(player)
             ) {
                 continue;
             }
@@ -89,11 +89,7 @@ export class GameCollisionSystem extends CollisionSystem {
     }
 
     /** 擦弹特效：在擦弹半径圆周生成一圈朝玩家圆心收束的冲击波粒子。 */
-    private emitGrazeEffect(
-        world: GameWorld,
-        centerX: number,
-        centerY: number,
-    ): void {
+    private emitGrazeEffect(world: GameWorld, centerX: number, centerY: number): void {
         const radius = GameCollisionSystem.grazeRadius;
         const count = 28;
         const speed = 440;
@@ -124,30 +120,30 @@ export class GameCollisionSystem extends CollisionSystem {
             return;
         }
 
-        const player = launcher instanceof PlayerPlane
-            ? launcher
-            : launcher instanceof SummonPlane
-                ? launcher.player
-                : undefined;
+        const player =
+            launcher instanceof PlayerPlane
+                ? launcher
+                : launcher instanceof SummonPlane
+                  ? launcher.player
+                  : undefined;
 
         player?.gainEnergy(1);
     }
 
-    protected override shouldTest(
-        left: BaseEntity,
-        right: BaseEntity,
-    ): boolean {
-        return this.getBulletAndPlane(left, right) !== undefined
-            || this.getOpposingPlanes(left, right) !== undefined
-            || this.getAssaultPair(left, right) !== undefined;
+    protected override shouldTest(left: BaseEntity, right: BaseEntity): boolean {
+        return (
+            this.getBulletAndPlane(left, right) !== undefined ||
+            this.getOpposingPlanes(left, right) !== undefined ||
+            this.getAssaultPair(left, right) !== undefined
+        );
     }
 
     protected override intersects(left: BaseEntity, right: BaseEntity): boolean {
         const bulletPair = this.getBulletAndPlane(left, right);
 
         if (
-            bulletPair?.bullet instanceof ThunderBullet
-            || bulletPair?.bullet instanceof LaserBullet
+            bulletPair?.bullet instanceof ThunderBullet ||
+            bulletPair?.bullet instanceof LaserBullet
         ) {
             return bulletPair.bullet.intersects(bulletPair.plane);
         }
@@ -171,20 +167,14 @@ export class GameCollisionSystem extends CollisionSystem {
             }
 
             if (
-                bulletPair.plane instanceof PlayerPlane
-                && bulletPair.bullet.canDamage(bulletPair.plane)
+                bulletPair.plane instanceof PlayerPlane &&
+                bulletPair.bullet.canDamage(bulletPair.plane)
             ) {
-                const parry = bulletPair.plane.resolveParry(
-                    bulletPair.bullet.canParry,
-                );
+                const parry = bulletPair.plane.resolveParry(bulletPair.bullet.canParry);
 
                 if (parry !== "none") {
                     bulletPair.bullet.active = false;
-                    this.emitCounterAttacks(
-                        world,
-                        bulletPair.plane,
-                        bulletPair.bullet.launcher,
-                    );
+                    this.emitCounterAttacks(world, bulletPair.plane, bulletPair.bullet.launcher);
                     this.emitParryEffect(world, bulletPair.plane, parry);
 
                     if (parry === "perfect") {
@@ -209,52 +199,31 @@ export class GameCollisionSystem extends CollisionSystem {
 
             const damageLabel = bulletPair.bullet.hit(bulletPair.plane);
 
-            if (
-                damageLabel !== undefined
-                && bulletPair.plane instanceof Enemy
-            ) {
-                this.grantHitEnergy(
-                    bulletPair.bullet.launcher,
-                    bulletPair.plane,
-                );
+            if (damageLabel !== undefined && bulletPair.plane instanceof Enemy) {
+                this.grantHitEnergy(bulletPair.bullet.launcher, bulletPair.plane);
 
                 if (bulletPair.bullet instanceof FireballBullet) {
-                    this.refractFireball(
-                        world,
-                        bulletPair.bullet,
-                        bulletPair.plane,
-                    );
+                    this.refractFireball(world, bulletPair.bullet, bulletPair.plane);
                 }
 
                 if (
-                    bulletPair.bullet instanceof ThunderBullet
-                    || bulletPair.bullet instanceof BallThunderBullet
+                    bulletPair.bullet instanceof ThunderBullet ||
+                    bulletPair.bullet instanceof BallThunderBullet
                 ) {
-                    this.chainThunder(
-                        world,
-                        bulletPair.bullet,
-                        bulletPair.plane,
-                    );
+                    this.chainThunder(world, bulletPair.bullet, bulletPair.plane);
                 } else if (bulletPair.bullet instanceof LaserBullet) {
-                    this.refractLaser(
-                        world,
-                        bulletPair.bullet,
-                        bulletPair.plane,
-                    );
+                    this.refractLaser(world, bulletPair.bullet, bulletPair.plane);
                 } else {
                     const launcher = bulletPair.bullet.launcher;
-                    const thunderSource = launcher instanceof PlayerPlane
-                        ? launcher
-                        : launcher instanceof SummonPlane
-                            ? launcher.player
-                            : undefined;
+                    const thunderSource =
+                        launcher instanceof PlayerPlane
+                            ? launcher
+                            : launcher instanceof SummonPlane
+                              ? launcher.player
+                              : undefined;
 
                     if (thunderSource !== undefined) {
-                        this.splitThunder(
-                            world,
-                            thunderSource,
-                            bulletPair.plane,
-                        );
+                        this.splitThunder(world, thunderSource, bulletPair.plane);
                     }
                 }
             }
@@ -300,11 +269,12 @@ export class GameCollisionSystem extends CollisionSystem {
             return;
         }
 
-        const player = planePair.first instanceof PlayerPlane
-            ? planePair.first
-            : planePair.second instanceof PlayerPlane
-                ? planePair.second
-                : undefined;
+        const player =
+            planePair.first instanceof PlayerPlane
+                ? planePair.first
+                : planePair.second instanceof PlayerPlane
+                  ? planePair.second
+                  : undefined;
         const parry = player?.resolveParry() ?? "none";
 
         if (player !== undefined && parry !== "none") {
@@ -313,32 +283,34 @@ export class GameCollisionSystem extends CollisionSystem {
             );
 
             for (let index = 0; index < counterCount; index++) {
-                player.counterAttackAtAngle(
-                    Math.random() * Math.PI * 2,
-                    undefined,
-                    (source) => this.findNearestFireballTarget(world, source),
+                player.counterAttackAtAngle(Math.random() * Math.PI * 2, undefined, (source) =>
+                    this.findNearestFireballTarget(world, source),
                 );
             }
 
             this.emitParryEffect(world, player, parry);
         }
 
-        const firstIncomingDamage = planePair.first === player
-            ? planePair.second.collisionDamage * (parry === "guard" ? 0.75 : 1)
-            : planePair.second.collisionDamage;
-        const secondIncomingDamage = planePair.second === player
-            ? planePair.first.collisionDamage * (parry === "guard" ? 0.75 : 1)
-            : planePair.first.collisionDamage;
-        const firstDamageLabel = planePair.first === player && parry === "perfect"
-            ? undefined
-            : planePair.first === player && parry === "guard"
-                ? player.takeGuardDamage(firstIncomingDamage, false)
-                : planePair.first.takeDamage(firstIncomingDamage, false);
-        const secondDamageLabel = planePair.second === player && parry === "perfect"
-            ? undefined
-            : planePair.second === player && parry === "guard"
-                ? player.takeGuardDamage(secondIncomingDamage, false)
-                : planePair.second.takeDamage(secondIncomingDamage, false);
+        const firstIncomingDamage =
+            planePair.first === player
+                ? planePair.second.collisionDamage * (parry === "guard" ? 0.75 : 1)
+                : planePair.second.collisionDamage;
+        const secondIncomingDamage =
+            planePair.second === player
+                ? planePair.first.collisionDamage * (parry === "guard" ? 0.75 : 1)
+                : planePair.first.collisionDamage;
+        const firstDamageLabel =
+            planePair.first === player && parry === "perfect"
+                ? undefined
+                : planePair.first === player && parry === "guard"
+                  ? player.takeGuardDamage(firstIncomingDamage, false)
+                  : planePair.first.takeDamage(firstIncomingDamage, false);
+        const secondDamageLabel =
+            planePair.second === player && parry === "perfect"
+                ? undefined
+                : planePair.second === player && parry === "guard"
+                  ? player.takeGuardDamage(secondIncomingDamage, false)
+                  : planePair.second.takeDamage(secondIncomingDamage, false);
 
         if (firstDamageLabel !== undefined) {
             world.addEntity(firstDamageLabel);
@@ -351,27 +323,26 @@ export class GameCollisionSystem extends CollisionSystem {
         // 玩家撞击敌人也算命中：敌人一侧受到伤害时奖励能量。
         if (player !== undefined) {
             const enemyIsFirst = planePair.first !== player;
-            const enemyDamageLabel = enemyIsFirst
-                ? firstDamageLabel
-                : secondDamageLabel;
+            const enemyDamageLabel = enemyIsFirst ? firstDamageLabel : secondDamageLabel;
 
             if (enemyDamageLabel !== undefined) {
-                this.grantHitEnergy(
-                    player,
-                    enemyIsFirst ? planePair.first : planePair.second,
-                );
+                this.grantHitEnergy(player, enemyIsFirst ? planePair.first : planePair.second);
             }
         }
 
         if (firstDamageLabel !== undefined || secondDamageLabel !== undefined) {
-            const collisionX = (
-                planePair.first.position.x + planePair.first.size.width / 2
-                + planePair.second.position.x + planePair.second.size.width / 2
-            ) / 2;
-            const collisionY = (
-                planePair.first.position.y + planePair.first.size.height / 2
-                + planePair.second.position.y + planePair.second.size.height / 2
-            ) / 2;
+            const collisionX =
+                (planePair.first.position.x +
+                    planePair.first.size.width / 2 +
+                    planePair.second.position.x +
+                    planePair.second.size.width / 2) /
+                2;
+            const collisionY =
+                (planePair.first.position.y +
+                    planePair.first.size.height / 2 +
+                    planePair.second.position.y +
+                    planePair.second.size.height / 2) /
+                2;
             emitBurst(world.particles, {
                 x: collisionX,
                 y: collisionY,
@@ -389,15 +360,8 @@ export class GameCollisionSystem extends CollisionSystem {
         }
     }
 
-    private splitThunder(
-        world: GameWorld,
-        player: PlayerPlane,
-        hitEnemy: Enemy,
-    ): void {
-        const splitCount = Math.max(
-            0,
-            Math.floor(player.readStat("THUNDER_SPLIT_COUNT")),
-        );
+    private splitThunder(world: GameWorld, player: PlayerPlane, hitEnemy: Enemy): void {
+        const splitCount = Math.max(0, Math.floor(player.readStat("THUNDER_SPLIT_COUNT")));
 
         if (splitCount === 0) {
             return;
@@ -426,10 +390,7 @@ export class GameCollisionSystem extends CollisionSystem {
         }
     }
 
-    private findNearestTraceTarget(
-        world: GameWorld,
-        source: BallThunderBullet,
-    ): Enemy | undefined {
+    private findNearestTraceTarget(world: GameWorld, source: BallThunderBullet): Enemy | undefined {
         const sourceX = source.position.x + source.size.width / 2;
         const sourceY = source.position.y + source.size.height / 2;
         let nearest: Enemy | undefined;
@@ -437,9 +398,9 @@ export class GameCollisionSystem extends CollisionSystem {
 
         for (const entity of world.entities) {
             if (
-                !(entity instanceof Enemy)
-                || !entity.active
-                || source.chainTargetIds.has(entity.id)
+                !(entity instanceof Enemy) ||
+                !entity.active ||
+                source.chainTargetIds.has(entity.id)
             ) {
                 continue;
             }
@@ -480,23 +441,20 @@ export class GameCollisionSystem extends CollisionSystem {
         thunder.chainTargetIds.add(hitEnemy.id);
         const originX = hitEnemy.position.x + hitEnemy.size.width / 2;
         const originY = hitEnemy.position.y + hitEnemy.size.height / 2;
-        const thunderRange = Math.max(
-            0,
-            thunder.launcher.readStat("THUNDER_RANGE"),
-        );
+        const thunderRange = Math.max(0, thunder.launcher.readStat("THUNDER_RANGE"));
         let nearest: Enemy | BallThunderBullet | undefined;
         let nearestDistanceSquared = thunderRange * thunderRange;
 
         for (const entity of world.entities) {
             const isEnemy = entity instanceof Enemy;
-            const isFriendlyBallThunder = entity instanceof BallThunderBullet
-                && entity.launcher === thunder.launcher;
+            const isFriendlyBallThunder =
+                entity instanceof BallThunderBullet && entity.launcher === thunder.launcher;
 
             if (
-                (!isEnemy && !isFriendlyBallThunder)
-                || !entity.active
-                || entity === hitEnemy
-                || thunder.chainTargetIds.has(entity.id)
+                (!isEnemy && !isFriendlyBallThunder) ||
+                !entity.active ||
+                entity === hitEnemy ||
+                thunder.chainTargetIds.has(entity.id)
             ) {
                 continue;
             }
@@ -554,32 +512,26 @@ export class GameCollisionSystem extends CollisionSystem {
         thunder: ThunderBullet,
         ballThunder: BallThunderBullet,
     ): void {
-        if (
-            thunder.remainingChains <= 0
-            || !(thunder.launcher instanceof PlayerPlane)
-        ) {
+        if (thunder.remainingChains <= 0 || !(thunder.launcher instanceof PlayerPlane)) {
             return;
         }
 
         const originX = ballThunder.position.x + ballThunder.size.width / 2;
         const originY = ballThunder.position.y + ballThunder.size.height / 2;
-        const thunderRange = Math.max(
-            0,
-            thunder.launcher.readStat("THUNDER_RANGE"),
-        );
+        const thunderRange = Math.max(0, thunder.launcher.readStat("THUNDER_RANGE"));
         let nearest: Enemy | BallThunderBullet | undefined;
         let nearestDistanceSquared = thunderRange * thunderRange;
 
         for (const entity of world.entities) {
             const isEnemy = entity instanceof Enemy;
-            const isFriendlyBallThunder = entity instanceof BallThunderBullet
-                && entity.launcher === thunder.launcher;
+            const isFriendlyBallThunder =
+                entity instanceof BallThunderBullet && entity.launcher === thunder.launcher;
 
             if (
-                (!isEnemy && !isFriendlyBallThunder)
-                || !entity.active
-                || entity === ballThunder
-                || thunder.chainTargetIds.has(entity.id)
+                (!isEnemy && !isFriendlyBallThunder) ||
+                !entity.active ||
+                entity === ballThunder ||
+                thunder.chainTargetIds.has(entity.id)
             ) {
                 continue;
             }
@@ -670,20 +622,13 @@ export class GameCollisionSystem extends CollisionSystem {
      * 场上仅剩单个敌人时，将剩余折射伤害逐段衰减结算到该敌人。
      * 每次折射的下一段伤害 = 当前伤害 × LASER_REFRACTION_DECAY（基础 75%）。
      */
-    private refractLaser(
-        world: GameWorld,
-        laser: LaserBullet,
-        hitPlane: Plane,
-    ): void {
+    private refractLaser(world: GameWorld, laser: LaserBullet, hitPlane: Plane): void {
         if (!(laser.launcher instanceof PlayerPlane) || !(hitPlane instanceof Enemy)) {
             return;
         }
 
         const player = laser.launcher;
-        const targetCount = Math.max(
-            0,
-            Math.floor(player.readStat("LASER_REFRACTION_TARGETS")),
-        );
+        const targetCount = Math.max(0, Math.floor(player.readStat("LASER_REFRACTION_TARGETS")));
 
         if (targetCount === 0 || laser.remainingRefractions <= 0) {
             return;
@@ -709,31 +654,18 @@ export class GameCollisionSystem extends CollisionSystem {
             const rightX = right.position.x + right.size.width / 2 - originX;
             const rightY = right.position.y + right.size.height / 2 - originY;
 
-            return (leftX * leftX + leftY * leftY)
-                - (rightX * rightX + rightY * rightY);
+            return leftX * leftX + leftY * leftY - (rightX * rightX + rightY * rightY);
         };
         // 优先未折射过的敌人；不足时允许向已折射过的敌人循环折射。
-        const freshTargets = enemies.filter(
-            (enemy) => !laser.refractionTargetIds.has(enemy.id),
-        );
-        const recycledTargets = enemies.filter(
-            (enemy) => enemy !== hitPlane,
-        );
-        const candidates = (freshTargets.length > 0
-            ? freshTargets
-            : recycledTargets
-        ).sort(byDistance).slice(0, targetCount);
+        const freshTargets = enemies.filter((enemy) => !laser.refractionTargetIds.has(enemy.id));
+        const recycledTargets = enemies.filter((enemy) => enemy !== hitPlane);
+        const candidates = (freshTargets.length > 0 ? freshTargets : recycledTargets)
+            .sort(byDistance)
+            .slice(0, targetCount);
 
         if (candidates.length === 0) {
             // 场上只剩这一个敌人：剩余折射伤害全部结算到它身上。
-            this.settleRefractions(
-                world,
-                player,
-                laser,
-                hitPlane,
-                refractedDamage,
-                decay,
-            );
+            this.settleRefractions(world, player, laser, hitPlane, refractedDamage, decay);
             return;
         }
 
@@ -808,21 +740,18 @@ export class GameCollisionSystem extends CollisionSystem {
         }
     }
 
-    private refractFireball(
-        world: GameWorld,
-        fireball: FireballBullet,
-        hitEnemy: Enemy,
-    ): void {
+    private refractFireball(world: GameWorld, fireball: FireballBullet, hitEnemy: Enemy): void {
         if (fireball.remainingRefractions <= 0) {
             return;
         }
 
         fireball.refractionTargetIds.add(hitEnemy.id);
         const candidates = world.entities.filter(
-            (entity): entity is Enemy => entity instanceof Enemy
-                && entity.active
-                && entity !== hitEnemy
-                && !fireball.refractionTargetIds.has(entity.id),
+            (entity): entity is Enemy =>
+                entity instanceof Enemy &&
+                entity.active &&
+                entity !== hitEnemy &&
+                !fireball.refractionTargetIds.has(entity.id),
         );
 
         if (candidates.length === 0) {
@@ -847,10 +776,7 @@ export class GameCollisionSystem extends CollisionSystem {
             faction: fireball.faction,
             traceAngle: fireball.traceAngle,
             traceTarget: target,
-            findTraceTarget: (source) => this.findNearestFireballTarget(
-                world,
-                source,
-            ),
+            findTraceTarget: (source) => this.findNearestFireballTarget(world, source),
             remainingRefractions: nextRefractions,
             refractionTargetIds: fireball.refractionTargetIds,
         });
@@ -864,10 +790,7 @@ export class GameCollisionSystem extends CollisionSystem {
         }
     }
 
-    private findNearestFireballTarget(
-        world: GameWorld,
-        source: FireballBullet,
-    ): Enemy | undefined {
+    private findNearestFireballTarget(world: GameWorld, source: FireballBullet): Enemy | undefined {
         const sourceX = source.position.x + source.size.width / 2;
         const sourceY = source.position.y + source.size.height / 2;
         let nearest: Enemy | undefined;
@@ -875,9 +798,9 @@ export class GameCollisionSystem extends CollisionSystem {
 
         for (const entity of world.entities) {
             if (
-                !(entity instanceof Enemy)
-                || !entity.active
-                || source.refractionTargetIds.has(entity.id)
+                !(entity instanceof Enemy) ||
+                !entity.active ||
+                source.refractionTargetIds.has(entity.id)
             ) {
                 continue;
             }
@@ -902,45 +825,35 @@ export class GameCollisionSystem extends CollisionSystem {
         player: PlayerPlane,
         primaryTarget: BaseEntity,
     ): void {
-        player.counterAttack(
-            primaryTarget,
-            (source) => this.findNearestFireballTarget(world, source),
+        player.counterAttack(primaryTarget, (source) =>
+            this.findNearestFireballTarget(world, source),
         );
 
-        const extraCount = Math.max(
-            0,
-            Math.floor(player.readStat("COUNTER_COUNT")) - 1,
-        );
+        const extraCount = Math.max(0, Math.floor(player.readStat("COUNTER_COUNT")) - 1);
 
         if (extraCount === 0) {
             return;
         }
 
         const candidates = world.entities.filter(
-            (entity): entity is Enemy => entity instanceof Enemy
-                && entity.active
-                && entity !== primaryTarget,
+            (entity): entity is Enemy =>
+                entity instanceof Enemy && entity.active && entity !== primaryTarget,
         );
         const selectedCount = Math.min(extraCount, candidates.length);
 
         for (let index = 0; index < selectedCount; index++) {
-            const selectedIndex = index + Math.floor(
-                Math.random() * (candidates.length - index),
-            );
+            const selectedIndex = index + Math.floor(Math.random() * (candidates.length - index));
             const selected = candidates[selectedIndex];
             candidates[selectedIndex] = candidates[index];
             candidates[index] = selected;
-            player.counterAttack(
-                selected,
-                (source) => this.findNearestFireballTarget(world, source),
+            player.counterAttack(selected, (source) =>
+                this.findNearestFireballTarget(world, source),
             );
         }
 
         for (let index = selectedCount; index < extraCount; index++) {
-            player.counterAttackAtAngle(
-                Math.random() * Math.PI * 2,
-                undefined,
-                (source) => this.findNearestFireballTarget(world, source),
+            player.counterAttackAtAngle(Math.random() * Math.PI * 2, undefined, (source) =>
+                this.findNearestFireballTarget(world, source),
             );
         }
     }
@@ -1030,8 +943,8 @@ export class GameCollisionSystem extends CollisionSystem {
         right: BaseEntity,
     ): { first: Plane; second: Plane } | undefined {
         if (
-            (left instanceof Player && right instanceof Enemy)
-            || (left instanceof Enemy && right instanceof Player)
+            (left instanceof Player && right instanceof Enemy) ||
+            (left instanceof Enemy && right instanceof Player)
         ) {
             return { first: left, second: right };
         }
@@ -1044,19 +957,19 @@ export class GameCollisionSystem extends CollisionSystem {
         right: BaseEntity,
     ): { summon: AssaultSummon; enemy: Enemy } | undefined {
         if (
-            left instanceof AssaultSummon
-            && right instanceof Enemy
-            && left.assaulting
-            && left.player.active
+            left instanceof AssaultSummon &&
+            right instanceof Enemy &&
+            left.assaulting &&
+            left.player.active
         ) {
             return { summon: left, enemy: right };
         }
 
         if (
-            right instanceof AssaultSummon
-            && left instanceof Enemy
-            && right.assaulting
-            && right.player.active
+            right instanceof AssaultSummon &&
+            left instanceof Enemy &&
+            right.assaulting &&
+            right.player.active
         ) {
             return { summon: right, enemy: left };
         }
@@ -1064,10 +977,7 @@ export class GameCollisionSystem extends CollisionSystem {
         return undefined;
     }
 
-    private applyAssaultHit(
-        world: GameWorld,
-        pair: { summon: AssaultSummon; enemy: Enemy },
-    ): void {
+    private applyAssaultHit(world: GameWorld, pair: { summon: AssaultSummon; enemy: Enemy }): void {
         const { summon, enemy } = pair;
         const [critical, damage] = rollCritical(summon, summon.assaultDamage);
         const damageLabel = enemy.takeDamage(damage, critical);
@@ -1080,15 +990,16 @@ export class GameCollisionSystem extends CollisionSystem {
         }
     }
 
-    private emitAssaultImpact(
-        world: GameWorld,
-        summon: AssaultSummon,
-        enemy: Enemy,
-    ): void {
-        const centerX = (summon.position.x + summon.size.width / 2
-            + enemy.position.x + enemy.size.width / 2) / 2;
-        const centerY = (summon.position.y + summon.size.height / 2
-            + enemy.position.y + enemy.size.height / 2) / 2;
+    private emitAssaultImpact(world: GameWorld, summon: AssaultSummon, enemy: Enemy): void {
+        const centerX =
+            (summon.position.x + summon.size.width / 2 + enemy.position.x + enemy.size.width / 2) /
+            2;
+        const centerY =
+            (summon.position.y +
+                summon.size.height / 2 +
+                enemy.position.y +
+                enemy.size.height / 2) /
+            2;
         emitBurst(world.particles, {
             x: centerX,
             y: centerY,

@@ -1,7 +1,4 @@
-import {
-    PLAYER_STATS_FORMATS,
-    type PlayerStats,
-} from "../player-plane";
+import { PLAYER_STATS_FORMATS, type PlayerStats } from "../player-plane";
 import type { Player } from "../../entities/player";
 import { Quality } from "./quality";
 import { PlayerStatUpgradeItem } from "./stat-upgrade-item-base";
@@ -37,20 +34,14 @@ import {
 /** 闪避充能加快：DODGE_CHARGE +1（通用标签）。 */
 export class DodgeChargeItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
-        super(
-            "闪避充能加快",
-            ".",
-            Quality.RARE,
-            PLAYER_STATS_FORMATS,
-            { DODGE_CHARGE: 1 },
-            ["通用"]
-        );
+        super("闪避充能加快", ".", Quality.RARE, PLAYER_STATS_FORMATS, { DODGE_CHARGE: 1 }, [
+            "通用",
+        ]);
     }
 }
 
 /** 能量倍率提高：ENERGY_DMG_MULTIPLIER +0.25（通用标签）。 */
-export class EnergyMultiplierItem
-    extends PlayerStatUpgradeItem<PlayerStats> {
+export class EnergyMultiplierItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
             "充能速度更快",
@@ -58,43 +49,29 @@ export class EnergyMultiplierItem
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
             { ENERGY_DMG_MULTIPLIER: 0.4 },
-            ["充能"]
+            ["充能"],
         );
     }
 }
 
-
-export class EnergyCapItem
-    extends PlayerStatUpgradeItem<PlayerStats> {
+export class EnergyCapItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
-        super(
-            "可储存更多能量",
-            ".",
-            Quality.NORMAL,
-            PLAYER_STATS_FORMATS,
-            { ENERGY_CAP: 20 },
-            ["充能"]
-        );
+        super("可储存更多能量", ".", Quality.NORMAL, PLAYER_STATS_FORMATS, { ENERGY_CAP: 20 }, [
+            "充能",
+        ]);
     }
 }
 
 /** 能量弹穿透增加：ENERGY_PIERCE +1（通用标签）。 */
-export class EnergyPierceItem
-    extends PlayerStatUpgradeItem<PlayerStats> {
+export class EnergyPierceItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
-        super(
-            "电磁陨星可穿透敌人",
-            ".",
-            Quality.RARE,
-            PLAYER_STATS_FORMATS,
-            { ENERGY_PIERCE: 1 },
-            ["充能"]
-        );
+        super("电磁陨星可穿透敌人", ".", Quality.RARE, PLAYER_STATS_FORMATS, { ENERGY_PIERCE: 1 }, [
+            "充能",
+        ]);
     }
 }
 
-export class EnergySavingItem
-    extends PlayerStatUpgradeItem<PlayerStats> {
+export class EnergySavingItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
             "能量利用效率提高",
@@ -102,13 +79,12 @@ export class EnergySavingItem
             Quality.LEGENDARY,
             PLAYER_STATS_FORMATS,
             { ENERGY_SAVING: 0.5 },
-            ["充能"]
+            ["充能"],
         );
     }
 }
 
-export class AttackPowerUpgradeItem
-    extends PlayerStatUpgradeItem<PlayerStats> {
+export class AttackPowerUpgradeItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
             "攻击力小幅提高",
@@ -116,13 +92,12 @@ export class AttackPowerUpgradeItem
             Quality.NORMAL,
             PLAYER_STATS_FORMATS,
             { ATK: 5 },
-            ["通用"]
+            ["通用"],
         );
     }
 }
 
-export class AttackSpeedUpgradeItem
-    extends PlayerStatUpgradeItem<PlayerStats> {
+export class AttackSpeedUpgradeItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
             "射速小幅提高",
@@ -130,13 +105,12 @@ export class AttackSpeedUpgradeItem
             Quality.NORMAL,
             PLAYER_STATS_FORMATS,
             { ATK_SPD: 0.4 },
-            ["通用"]
+            ["通用"],
         );
     }
 }
 
-export class CriticalRateUpgradeItem
-    extends PlayerStatUpgradeItem<PlayerStats> {
+export class CriticalRateUpgradeItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
             "暴击率提高",
@@ -144,13 +118,12 @@ export class CriticalRateUpgradeItem
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
             { CRIT_RATE: 0.1 },
-            ["暴击"]
+            ["暴击"],
         );
     }
 }
 
-export class CriticalDamageUpgradeItem
-    extends PlayerStatUpgradeItem<PlayerStats> {
+export class CriticalDamageUpgradeItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
         super(
             "暴击伤害大幅增加",
@@ -159,21 +132,16 @@ export class CriticalDamageUpgradeItem
             PLAYER_STATS_FORMATS,
             { CRIT_DMG: 0.3 },
             ["暴击"],
-            (player) => player.readStat("CRIT_RATE") > 0
+            (player) => player.readStat("CRIT_RATE") > 0,
         );
     }
 }
 
 export class ShootOffsetUpgradeItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
-        super(
-            "射击更加精准",
-            ".",
-            Quality.WASTE,
-            PLAYER_STATS_FORMATS,
-            { SHOOT_OFFSET: -0.5 },
-            ["通用"]
-        );
+        super("射击更加精准", ".", Quality.WASTE, PLAYER_STATS_FORMATS, { SHOOT_OFFSET: -0.5 }, [
+            "通用",
+        ]);
     }
 }
 
@@ -185,21 +153,16 @@ export class MultipleShootUpgradeItem extends PlayerStatUpgradeItem<PlayerStats>
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             { MULTIPLE_SHOOT: 0.4 },
-            ["通用"]
+            ["通用"],
         );
     }
 }
 
 export class MultipleShoot2 extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
-        super(
-            "更多弹道",
-            ".",
-            Quality.LEGENDARY,
-            PLAYER_STATS_FORMATS,
-            { MULTIPLE_SHOOT: 2 },
-            ["通用"]
-        );
+        super("更多弹道", ".", Quality.LEGENDARY, PLAYER_STATS_FORMATS, { MULTIPLE_SHOOT: 2 }, [
+            "通用",
+        ]);
     }
 }
 
@@ -212,9 +175,9 @@ export class EpicShoot extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             {
                 ATK_SPD: 2,
-                SHOOT_OFFSET: 4
+                SHOOT_OFFSET: 4,
             },
-            ["通用"]
+            ["通用"],
         );
     }
 }
@@ -227,9 +190,9 @@ export class Luck extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             {
-                LUCK: 5
+                LUCK: 5,
             },
-            ["通用"]
+            ["通用"],
         );
     }
 }
@@ -242,9 +205,9 @@ export class CounterAttack extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             {
-                COUNTER_MULTIPLIER: 0.4
+                COUNTER_MULTIPLIER: 0.4,
             },
-            ["反击"]
+            ["反击"],
         );
     }
 }
@@ -258,9 +221,9 @@ export class CounterAttackBig extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             {
                 COUNTER_MULTIPLIER: 2,
-                COUNTER_REFRACTION: 3
+                COUNTER_REFRACTION: 3,
             },
-            ["反击"]
+            ["反击"],
         );
     }
 }
@@ -273,9 +236,9 @@ export class CounterCount extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.EPIC,
             PLAYER_STATS_FORMATS,
             {
-                COUNTER_COUNT: 1
+                COUNTER_COUNT: 1,
             },
-            ["反击"]
+            ["反击"],
         );
     }
 }
@@ -288,9 +251,9 @@ export class ChainCounter extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             {
-                COUNTER_REFRACTION: 1
+                COUNTER_REFRACTION: 1,
             },
-            ["反击"]
+            ["反击"],
         );
     }
 }
@@ -303,9 +266,9 @@ export class CounterTrace extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             {
-                COUNTER_TRACE: 0.25
+                COUNTER_TRACE: 0.25,
             },
-            ["反击"]
+            ["反击"],
         );
     }
 }
@@ -318,9 +281,9 @@ export class ThunderSplit extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.NORMAL,
             PLAYER_STATS_FORMATS,
             {
-                THUNDER_SPLIT_COUNT: 1
+                THUNDER_SPLIT_COUNT: 1,
             },
-            ["雷电"]
+            ["雷电"],
         );
     }
 }
@@ -333,10 +296,10 @@ export class ThunderChain extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.NORMAL,
             PLAYER_STATS_FORMATS,
             {
-                THUNDER_CHAIN_COUNT: 1
+                THUNDER_CHAIN_COUNT: 1,
             },
             ["雷电"],
-            (player) => player.readStat("THUNDER_SPLIT_COUNT") > 0
+            (player) => player.readStat("THUNDER_SPLIT_COUNT") > 0,
         );
     }
 }
@@ -349,10 +312,10 @@ export class ThunderPower extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             {
-                THUNDER_MULTIPLIER: 0.35
+                THUNDER_MULTIPLIER: 0.35,
             },
             ["雷电"],
-            (player) => player.readStat("THUNDER_SPLIT_COUNT") > 0
+            (player) => player.readStat("THUNDER_SPLIT_COUNT") > 0,
         );
     }
 }
@@ -365,10 +328,10 @@ export class ThunderRange extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             {
-                THUNDER_RANGE: 30
+                THUNDER_RANGE: 30,
             },
             ["雷电"],
-            (player) => player.readStat("THUNDER_SPLIT_COUNT") > 0
+            (player) => player.readStat("THUNDER_SPLIT_COUNT") > 0,
         );
     }
 }
@@ -381,10 +344,10 @@ export class ThunderTrace extends PlayerStatUpgradeItem<PlayerStats> {
             Quality.RARE,
             PLAYER_STATS_FORMATS,
             {
-                THUNDER_BALL_TRACE: 0.25
+                THUNDER_BALL_TRACE: 0.25,
             },
             ["雷电"],
-            (player) => player.readStat("THUNDER_SPLIT_COUNT") > 0
+            (player) => player.readStat("THUNDER_SPLIT_COUNT") > 0,
         );
     }
 }
@@ -399,9 +362,9 @@ export class CriticalSurgeItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             {
                 CRIT_RATE: 0.25,
-                CRIT_DMG: 0.5
+                CRIT_DMG: 0.5,
             },
-            ["暴击"]
+            ["暴击"],
         );
     }
 }
@@ -409,14 +372,7 @@ export class CriticalSurgeItem extends PlayerStatUpgradeItem<PlayerStats> {
 /** 生命上限提高：上限 +20，并立即回复等量生命（生命标签）。 */
 export class MaxHealthItem extends PlayerStatUpgradeItem<PlayerStats> {
     public constructor() {
-        super(
-            "生命上限提高",
-            ".",
-            Quality.LEGENDARY,
-            PLAYER_STATS_FORMATS,
-            {},
-            ["通用"]
-        );
+        super("生命上限提高", ".", Quality.LEGENDARY, PLAYER_STATS_FORMATS, {}, ["通用"]);
     }
 
     public override apply(player: Player): void {
@@ -436,7 +392,7 @@ export class HealItem extends PlayerStatUpgradeItem<PlayerStats> {
             PLAYER_STATS_FORMATS,
             {},
             ["通用"],
-            (player) => player.health < player.maxHealth
+            (player) => player.health < player.maxHealth,
         );
     }
 
@@ -497,5 +453,5 @@ export const items = [
     EnergySavingItem,
     MaxHealthItem,
     HealItem,
-    CriticalSurgeItem
+    CriticalSurgeItem,
 ];

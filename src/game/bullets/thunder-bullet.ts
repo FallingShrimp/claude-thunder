@@ -54,10 +54,7 @@ export class ThunderBullet extends Bullet {
         this.damage = options.damage ?? 0;
         this.faction = options.faction ?? "player";
         this.remainingLifetime = ThunderBullet.lifetime;
-        this.remainingChains = Math.max(
-            0,
-            Math.floor(options.remainingChains ?? 0),
-        );
+        this.remainingChains = Math.max(0, Math.floor(options.remainingChains ?? 0));
         this.chainTargetIds = new Set(options.chainTargetIds);
         this.canParry = false;
         this.penetrate = 0;
@@ -79,16 +76,12 @@ export class ThunderBullet extends Bullet {
 
     public intersects(target: Plane): boolean {
         const halfThickness = ThunderBullet.thickness / 2;
-        const minX = target.position.x + target.collisionBounds.offset.x
-            - halfThickness;
-        const minY = target.position.y + target.collisionBounds.offset.y
-            - halfThickness;
-        const maxX = minX
-            + target.collisionBounds.size.width * target.scale.x
-            + ThunderBullet.thickness;
-        const maxY = minY
-            + target.collisionBounds.size.height * target.scale.y
-            + ThunderBullet.thickness;
+        const minX = target.position.x + target.collisionBounds.offset.x - halfThickness;
+        const minY = target.position.y + target.collisionBounds.offset.y - halfThickness;
+        const maxX =
+            minX + target.collisionBounds.size.width * target.scale.x + ThunderBullet.thickness;
+        const maxY =
+            minY + target.collisionBounds.size.height * target.scale.y + ThunderBullet.thickness;
         const directionX = this.endX - this.originX;
         const directionY = this.endY - this.originY;
         let entry = 0;

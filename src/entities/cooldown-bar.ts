@@ -22,10 +22,7 @@ export class CooldownBar extends BaseEntity {
     private readonly player: BaseEntity;
     private readonly playerSize: { width: number; height: number };
 
-    public constructor(
-        player: BaseEntity,
-        options: CooldownBarOptions,
-    ) {
+    public constructor(player: BaseEntity, options: CooldownBarOptions) {
         super(
             crypto.randomUUID(),
             { x: 0, y: 0 },
@@ -44,12 +41,11 @@ export class CooldownBar extends BaseEntity {
     public override ai(delta: number): void {
         void delta;
         // 竖条贴在机身左右两侧，垂直居中。
-        this.position.x = this.alignment === "left"
-            ? this.player.position.x - this.size.width - CooldownBar.gap
-            : this.player.position.x + this.playerSize.width
-                + CooldownBar.gap;
-        this.position.y = this.player.position.y
-            + (this.playerSize.height - this.size.height) / 2;
+        this.position.x =
+            this.alignment === "left"
+                ? this.player.position.x - this.size.width - CooldownBar.gap
+                : this.player.position.x + this.playerSize.width + CooldownBar.gap;
+        this.position.y = this.player.position.y + (this.playerSize.height - this.size.height) / 2;
         this.active = this.player.active;
         this.visible = this.player.visible;
     }

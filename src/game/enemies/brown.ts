@@ -79,14 +79,16 @@ export class Brown extends Enemy<BrownStats> {
         const targetX = this.player.position.x + this.player.size.width / 2;
         const targetY = this.player.position.y + this.player.size.height / 2;
 
-        this.spawnEntity(new MissileBullet({
-            launcher: this,
-            x: bulletX,
-            y: bulletY,
-            rotation: Math.atan2(targetY - bulletY, targetX - bulletX),
-            // 导弹速度 = 玩家移速。
-            speed: this.player.speed,
-            findTarget: () => [this.player],
-        }));
+        this.spawnEntity(
+            new MissileBullet({
+                launcher: this,
+                x: bulletX,
+                y: bulletY,
+                rotation: Math.atan2(targetY - bulletY, targetX - bulletX),
+                // 导弹速度 = 玩家移速。
+                speed: this.player.speed,
+                findTarget: () => [this.player],
+            }),
+        );
     }
 }

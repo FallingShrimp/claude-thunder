@@ -1,23 +1,23 @@
 import type { Player } from "../../entities/player";
-import {
-    PLAYER_STATS_FORMATS,
-    type PlayerStats,
-} from "../player-plane";
+import { PLAYER_STATS_FORMATS, type PlayerStats } from "../player-plane";
 import { Quality } from "./quality";
 import { PlayerStatUpgradeItem } from "./stat-upgrade-item-base";
 
 /** 是否至少拥有一台任意类型的小飞机。 */
 function hasAnySummon(player: Player): boolean {
-    return player.readStat("SUMMON_GUNNER_COUNT") > 0
-        || player.readStat("SUMMON_CANNON_COUNT") > 0
-        || player.readStat("SUMMON_ASSAULT_COUNT") > 0;
+    return (
+        player.readStat("SUMMON_GUNNER_COUNT") > 0 ||
+        player.readStat("SUMMON_CANNON_COUNT") > 0 ||
+        player.readStat("SUMMON_ASSAULT_COUNT") > 0
+    );
 }
 
 /** 当前持有的召唤物总和加上新增数量是否仍在召唤上限之内。 */
 function hasSummonRoom(player: Player, grantCount: number): boolean {
-    const total = player.readStat("SUMMON_GUNNER_COUNT")
-        + player.readStat("SUMMON_CANNON_COUNT")
-        + player.readStat("SUMMON_ASSAULT_COUNT");
+    const total =
+        player.readStat("SUMMON_GUNNER_COUNT") +
+        player.readStat("SUMMON_CANNON_COUNT") +
+        player.readStat("SUMMON_ASSAULT_COUNT");
 
     return total + grantCount <= player.readStat("SUMMON_CAP");
 }

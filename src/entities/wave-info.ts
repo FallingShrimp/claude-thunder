@@ -27,11 +27,9 @@ export class WaveInfoHud extends BaseEntity {
         // Boss 波次隐藏波次信息（Boss 血条已占顶部）。
         this.visible = !(index > 0 && index % this.bossInterval === 0);
 
-        const nextBossIndex = (Math.floor(index / this.bossInterval) + 1)
-            * this.bossInterval;
+        const nextBossIndex = (Math.floor(index / this.bossInterval) + 1) * this.bossInterval;
 
-        this.text
-            = `第${index + 1}波 - Boss将在${nextBossIndex - index}波后到来`;
+        this.text = `第${index + 1}波 - Boss将在${nextBossIndex - index}波后到来`;
     }
 
     public override getEntityType(): "wave-info" {

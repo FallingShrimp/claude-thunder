@@ -17,9 +17,7 @@ function resolveCriticalStats(
         return undefined;
     }
 
-    const player = launcher instanceof Player
-        ? launcher
-        : (launcher as { player?: Player }).player;
+    const player = launcher instanceof Player ? launcher : (launcher as { player?: Player }).player;
 
     if (!(player instanceof Player)) {
         return undefined;
@@ -36,10 +34,7 @@ function resolveCriticalStats(
  * 统一的暴击判定：玩家及其召唤物造成的所有伤害均可暴击。
  * 返回 [是否暴击, 实际伤害]；非玩家来源固定返回不暴击。
  */
-export function rollCritical(
-    launcher: BaseEntity | undefined,
-    damage: number,
-): [boolean, number] {
+export function rollCritical(launcher: BaseEntity | undefined, damage: number): [boolean, number] {
     const source = resolveCriticalStats(launcher);
 
     if (source === undefined) {

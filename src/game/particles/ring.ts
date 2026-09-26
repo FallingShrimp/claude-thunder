@@ -14,12 +14,9 @@ export interface RingOptions {
     drag?: number;
 }
 
-export function emitRing(
-    particles: ParticleSystem,
-    options: Readonly<RingOptions>,
-): void {
+export function emitRing(particles: ParticleSystem, options: Readonly<RingOptions>): void {
     const count = Math.max(0, Math.floor(options.count));
-    const angleStep = Math.PI * 2 / Math.max(1, count);
+    const angleStep = (Math.PI * 2) / Math.max(1, count);
     const startAngle = options.startAngle ?? 0;
     const speed = options.speed ?? 240;
 

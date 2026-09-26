@@ -30,15 +30,12 @@ export class Healthbar extends BaseEntity {
     }
 
     public override ai(delta: number): void {
-        this.position.x = this.entity.position.x
-            + (this.entity.size.width - this.size.width) / 2;
+        this.position.x = this.entity.position.x + (this.entity.size.width - this.size.width) / 2;
         this.position.y = this.entity.position.y - this.size.height - 10;
         this.foregroundProgress = this.getHealthProgress();
 
         const lerpFactor = 1 - Math.pow(1 - 0.1, delta * 60);
-        this.middleProgress += (
-            this.foregroundProgress - this.middleProgress
-        ) * lerpFactor;
+        this.middleProgress += (this.foregroundProgress - this.middleProgress) * lerpFactor;
         this.active = this.entity.active;
         this.visible = this.entity.visible;
     }

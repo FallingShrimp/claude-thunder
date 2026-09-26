@@ -56,10 +56,7 @@ export class LaserBullet extends Bullet {
         this.damage = options.damage ?? 0;
         this.faction = options.faction ?? "player";
         this.remainingLifetime = LaserBullet.lifetime;
-        this.remainingRefractions = Math.max(
-            0,
-            Math.floor(options.remainingRefractions ?? 0),
-        );
+        this.remainingRefractions = Math.max(0, Math.floor(options.remainingRefractions ?? 0));
         this.refractionTargetIds = options.refractionTargetIds ?? new Set();
         this.canParry = false;
         this.penetrate = Number.POSITIVE_INFINITY;
@@ -76,23 +73,18 @@ export class LaserBullet extends Bullet {
     }
 
     public override canDamage(target: Plane): boolean {
-        return !this.refractionTargetIds.has(target.id)
-            && super.canDamage(target);
+        return !this.refractionTargetIds.has(target.id) && super.canDamage(target);
     }
 
     /** 射线与目标碰撞盒的 slab 相交测试（与 ThunderBullet 相同的算法）。 */
     public intersects(target: Plane): boolean {
         const halfThickness = LaserBullet.thickness / 2;
-        const minX = target.position.x + target.collisionBounds.offset.x
-            - halfThickness;
-        const minY = target.position.y + target.collisionBounds.offset.y
-            - halfThickness;
-        const maxX = minX
-            + target.collisionBounds.size.width * target.scale.x
-            + LaserBullet.thickness;
-        const maxY = minY
-            + target.collisionBounds.size.height * target.scale.y
-            + LaserBullet.thickness;
+        const minX = target.position.x + target.collisionBounds.offset.x - halfThickness;
+        const minY = target.position.y + target.collisionBounds.offset.y - halfThickness;
+        const maxX =
+            minX + target.collisionBounds.size.width * target.scale.x + LaserBullet.thickness;
+        const maxY =
+            minY + target.collisionBounds.size.height * target.scale.y + LaserBullet.thickness;
         const directionX = this.endX - this.originX;
         const directionY = this.endY - this.originY;
         let entry = 0;

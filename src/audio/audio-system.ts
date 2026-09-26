@@ -85,16 +85,13 @@ export class AudioSystem {
         const response = await fetch(source);
 
         if (!response.ok) {
-            throw new Error(
-                `Failed to load audio: ${source} (${response.status}).`,
-            );
+            throw new Error(`Failed to load audio: ${source} (${response.status}).`);
         }
 
         const blob = await response.blob();
         const objectUrl = URL.createObjectURL(blob);
-        const slots = Array.from(
-            { length: AudioSystem.maxParallelCount },
-            () => this.createSlot(objectUrl),
+        const slots = Array.from({ length: AudioSystem.maxParallelCount }, () =>
+            this.createSlot(objectUrl),
         );
 
         if (this.pools.has(source)) {

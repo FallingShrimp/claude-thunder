@@ -15,6 +15,4 @@ export const GAME_AUDIO_SOURCES = {
     graze: "./assets/audio/granted.mp3",
 } as const;
 
-export const ALL_GAME_AUDIO_SOURCES: readonly string[] = Object.values(
-    GAME_AUDIO_SOURCES,
-);
+export const ALL_GAME_AUDIO_SOURCES: readonly string[] = Object.values(GAME_AUDIO_SOURCES);

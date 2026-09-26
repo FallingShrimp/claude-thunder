@@ -20,13 +20,8 @@ export class LabelWeightItem extends Item<Quality> {
             throw new RangeError("The target item label must not be empty.");
         }
 
-        if (
-            !Number.isFinite(options.weightIncrement)
-            || options.weightIncrement <= 0
-        ) {
-            throw new RangeError(
-                "The label weight increment must be a positive finite number.",
-            );
+        if (!Number.isFinite(options.weightIncrement) || options.weightIncrement <= 0) {
+            throw new RangeError("The label weight increment must be a positive finite number.");
         }
 
         super(

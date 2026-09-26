@@ -4,6 +4,6 @@ export default defineConfig({
     base: "/claude-thunder/",
     build: {
         outDir: "dist",
-        emptyOutDir: true
+        emptyOutDir: true,
     },
 });

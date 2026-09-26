@@ -47,11 +47,7 @@ export class ParticleSystem extends RenderableTarget implements GameSystem {
             throw new RangeError("Particle capacity must be a positive integer.");
         }
 
-        super(
-            { x: 0, y: 0 },
-            { width: 0, height: 0 },
-            { shape: "rectangle", color: "#ffffff" },
-        );
+        super({ x: 0, y: 0 }, { width: 0, height: 0 }, { shape: "rectangle", color: "#ffffff" });
         this.capacity = capacity;
         this.zIndex = 150;
         this.x = new Float32Array(capacity);
@@ -125,15 +121,10 @@ export class ParticleSystem extends RenderableTarget implements GameSystem {
             }
 
             const progress = this.age[index] / this.lifetime[index];
-            const size = this.startSize[index]
-                + (this.endSize[index] - this.startSize[index]) * progress;
+            const size =
+                this.startSize[index] + (this.endSize[index] - this.startSize[index]) * progress;
             context.globalAlpha = (1 - progress) * this.opacity;
-            context.fillRect(
-                this.x[index] - size * 0.5,
-                this.y[index] - size * 0.5,
-                size,
-                size,
-            );
+            context.fillRect(this.x[index] - size * 0.5, this.y[index] - size * 0.5, size, size);
         }
 
         context.restore();

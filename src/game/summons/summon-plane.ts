@@ -45,12 +45,11 @@ export abstract class SummonPlane extends Plane<SummonStats> {
         appearance: RenderAppearance,
         options: SummonPlaneOptions,
     ) {
-        const maxHealth = SummonPlane.baseMaxHealth
-            + Math.max(0, options.player.readStat("SUMMON_HEALTH"));
-        const radius = SummonPlane.baseOrbitRadius * (1 + Math.max(
-            0,
-            options.player.readStat("SUMMON_RANGE") - 1,
-        ) * 0.5);
+        const maxHealth =
+            SummonPlane.baseMaxHealth + Math.max(0, options.player.readStat("SUMMON_HEALTH"));
+        const radius =
+            SummonPlane.baseOrbitRadius *
+            (1 + Math.max(0, options.player.readStat("SUMMON_RANGE") - 1) * 0.5);
         const center = SummonPlane.getPlayerCenter(options.player);
         const angle = options.orbitAngle ?? Math.random() * Math.PI * 2;
         const centerX = center.x + Math.cos(angle) * radius;
@@ -144,10 +143,8 @@ export abstract class SummonPlane extends Plane<SummonStats> {
             return;
         }
 
-        const speed = SummonPlane.baseOrbitSpeed * Math.max(
-            0.1,
-            this.player.readStat("SUMMON_ORBIT_SPEED"),
-        );
+        const speed =
+            SummonPlane.baseOrbitSpeed * Math.max(0.1, this.player.readStat("SUMMON_ORBIT_SPEED"));
         this.orbitAngle += speed * delta;
 
         const center = this.getOrbitCenter();

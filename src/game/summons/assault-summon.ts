@@ -1,10 +1,7 @@
 import type { Vector2 } from "../../core/geometry";
 import { GAME_AUDIO_SOURCES } from "../audio-assets";
 import { Enemy } from "../../entities/enemy";
-import {
-    SummonPlane,
-    type SummonPlaneOptions,
-} from "./summon-plane";
+import { SummonPlane, type SummonPlaneOptions } from "./summon-plane";
 
 /**
  * 突击者召唤物：非冲刺时以玩家两倍速度移动——距离目标过远则先移向目标，
@@ -78,17 +75,13 @@ export class AssaultSummon extends SummonPlane {
             return;
         }
 
-        const cooldownReduction = Math.max(
-            0,
-            this.player.readStat("SUMMON_ASSAULT_SPEED"),
-        );
-        this.assaultCooldown = AssaultSummon.baseAssaultInterval
-            / (1 + cooldownReduction);
+        const cooldownReduction = Math.max(0, this.player.readStat("SUMMON_ASSAULT_SPEED"));
+        this.assaultCooldown = AssaultSummon.baseAssaultInterval / (1 + cooldownReduction);
         this.assaultDamage = Math.max(
             0,
-            (this.player.readStat("ATK") * AssaultSummon.baseAssaultDamageFactor
-                + this.player.readStat("SUMMON_ASSAULT_DAMAGE"))
-            * this.getDamageMultiplier(),
+            (this.player.readStat("ATK") * AssaultSummon.baseAssaultDamageFactor +
+                this.player.readStat("SUMMON_ASSAULT_DAMAGE")) *
+                this.getDamageMultiplier(),
         );
         this.assaulting = true;
         this.assaultRemaining = AssaultSummon.assaultDuration;
@@ -149,10 +142,8 @@ export class AssaultSummon extends SummonPlane {
 
         // 无目标：沿玩家周围轨道点移动。
         this.orbitingTarget = false;
-        const orbitSpeed = SummonPlane.baseOrbitSpeed * Math.max(
-            0.1,
-            this.player.readStat("SUMMON_ORBIT_SPEED"),
-        );
+        const orbitSpeed =
+            SummonPlane.baseOrbitSpeed * Math.max(0.1, this.player.readStat("SUMMON_ORBIT_SPEED"));
         this.orbitAngle += orbitSpeed * delta;
         const playerCenter = this.getPlayerCenter();
         const goalX = playerCenter.x + Math.cos(this.orbitAngle) * this.baseRadius;

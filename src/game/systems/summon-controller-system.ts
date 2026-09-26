@@ -62,10 +62,7 @@ export class SummonControllerSystem implements GameSystem {
         void deltaTime;
 
         for (const kind of SUMMON_KINDS) {
-            const targetCount = Math.max(
-                0,
-                Math.floor(this.player.readStat(kind.statKey)),
-            );
+            const targetCount = Math.max(0, Math.floor(this.player.readStat(kind.statKey)));
             const activeCount = world.entities.filter(
                 (entity) => isSummon(entity) && entity.active && kind.matches(entity),
             ).length;

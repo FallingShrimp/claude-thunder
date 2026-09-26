@@ -14,10 +14,7 @@ export type { SummonType } from "./summon-plane";
 export type CreateSummonContext = Omit<SummonPlaneOptions, "orbitAngle">;
 
 /** 按指定类型生成一台小飞机。 */
-export function createSummon(
-    type: SummonType,
-    context: CreateSummonContext,
-): SummonPlane {
+export function createSummon(type: SummonType, context: CreateSummonContext): SummonPlane {
     switch (type) {
         case "gunner":
             return new GunnerSummon(context);

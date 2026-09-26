@@ -60,11 +60,13 @@ export class Red extends Enemy<RedStats> {
     private fire(): void {
         const bulletWidth = 6;
 
-        this.spawnEntity(new DangerBullet({
-            launcher: this,
-            x: this.position.x + this.size.width / 2 - bulletWidth / 2,
-            y: this.position.y + this.size.height,
-            rotation: Math.PI / 2,
-        }));
+        this.spawnEntity(
+            new DangerBullet({
+                launcher: this,
+                x: this.position.x + this.size.width / 2 - bulletWidth / 2,
+                y: this.position.y + this.size.height,
+                rotation: Math.PI / 2,
+            }),
+        );
     }
 }

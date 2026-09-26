@@ -12,14 +12,10 @@ export class SpaceEnvironment extends BaseEnvironment {
     private readonly stars: Star[];
 
     public constructor(width: number, height: number, starCount: number = 100) {
-        super(
-            { width, height },
-            { shape: "rectangle", color: "#02040f" },
-        );
+        super({ width, height }, { shape: "rectangle", color: "#02040f" });
 
-        this.stars = Array.from(
-            { length: starCount },
-            () => this.createStar(Math.random() * height),
+        this.stars = Array.from({ length: starCount }, () =>
+            this.createStar(Math.random() * height),
         );
     }
 
@@ -35,12 +31,7 @@ export class SpaceEnvironment extends BaseEnvironment {
 
     public override draw(context: CanvasRenderingContext2D): void {
         context.fillStyle = this.appearance.color;
-        context.fillRect(
-            this.position.x,
-            this.position.y,
-            this.size.width,
-            this.size.height,
-        );
+        context.fillRect(this.position.x, this.position.y, this.size.width, this.size.height);
 
         for (const star of this.stars) {
             context.beginPath();

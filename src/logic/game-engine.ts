@@ -51,9 +51,7 @@ export class GameEngine {
     }
 
     private readonly tick = (currentTime: number): void => {
-        const deltaTime = this.previousTime === null
-            ? 0
-            : (currentTime - this.previousTime) / 1000;
+        const deltaTime = this.previousTime === null ? 0 : (currentTime - this.previousTime) / 1000;
 
         this.previousTime = currentTime;
 

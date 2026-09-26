@@ -1,10 +1,7 @@
 import { GAME_AUDIO_SOURCES } from "../audio-assets";
 import { Enemy } from "../../entities/enemy";
 import { CannonBullet } from "../bullets/cannon-bullet";
-import {
-    SummonPlane,
-    type SummonPlaneOptions,
-} from "./summon-plane";
+import { SummonPlane, type SummonPlaneOptions } from "./summon-plane";
 
 /**
  * 炮台召唤物：每 1 秒向当前目标齐射 2 颗大体积 CannonBullet。
@@ -39,15 +36,14 @@ export class CannonSummon extends SummonPlane {
 
         this.shotCooldown = CannonSummon.baseFireInterval;
 
-        const shotCount = CannonSummon.baseShotCount + Math.max(
-            0,
-            Math.floor(this.player.readStat("SUMMON_CANNON_MULTISHOT")),
-        );
+        const shotCount =
+            CannonSummon.baseShotCount +
+            Math.max(0, Math.floor(this.player.readStat("SUMMON_CANNON_MULTISHOT")));
         const damage = Math.max(
             0,
-            (this.player.readStat("ATK") * CannonSummon.baseDamageFactor
-                + this.player.readStat("SUMMON_CANNON_DAMAGE"))
-            * this.getDamageMultiplier(),
+            (this.player.readStat("ATK") * CannonSummon.baseDamageFactor +
+                this.player.readStat("SUMMON_CANNON_DAMAGE")) *
+                this.getDamageMultiplier(),
         );
         this.player.playSound(GAME_AUDIO_SOURCES.cannon);
         const bulletWidth = 28;
@@ -62,14 +58,16 @@ export class CannonSummon extends SummonPlane {
 
         for (let index = 0; index < shotCount; index++) {
             const offset = (index - (shotCount - 1) / 2) * 0.16;
-            this.spawnEntity(new CannonBullet({
-                launcher: this,
-                x: sourceX,
-                y: sourceY,
-                rotation: baseRotation + offset,
-                damage,
-                faction: "player",
-            }));
+            this.spawnEntity(
+                new CannonBullet({
+                    launcher: this,
+                    x: sourceX,
+                    y: sourceY,
+                    rotation: baseRotation + offset,
+                    damage,
+                    faction: "player",
+                }),
+            );
         }
     }
 }

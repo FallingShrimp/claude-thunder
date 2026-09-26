@@ -29,8 +29,7 @@ export class Afterimage extends BaseEntity {
 
     public override ai(delta: number): void {
         this.remainingLifetime = Math.max(0, this.remainingLifetime - delta);
-        this.opacity = this.baseOpacity
-            * (this.remainingLifetime / this.totalLifetime);
+        this.opacity = this.baseOpacity * (this.remainingLifetime / this.totalLifetime);
 
         if (this.remainingLifetime === 0) {
             this.active = false;

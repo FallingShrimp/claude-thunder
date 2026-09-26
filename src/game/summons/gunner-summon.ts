@@ -1,10 +1,7 @@
 import { GAME_AUDIO_SOURCES } from "../audio-assets";
 import { Enemy } from "../../entities/enemy";
 import { BasicBullet } from "../bullets/basic-bullet";
-import {
-    SummonPlane,
-    type SummonPlaneOptions,
-} from "./summon-plane";
+import { SummonPlane, type SummonPlaneOptions } from "./summon-plane";
 
 /**
  * 机枪手召唤物：每 0.1 秒向当前目标发射 1 颗 BasicBullet。
@@ -36,15 +33,13 @@ export class GunnerSummon extends SummonPlane {
         const rate = Math.max(0, this.player.readStat("SUMMON_GUNNER_RATE"));
         this.fireCooldown = GunnerSummon.baseFireInterval / (1 + rate);
 
-        const bulletCount = 1 + Math.max(
-            0,
-            Math.floor(this.player.readStat("SUMMON_GUNNER_MULTISHOT")),
-        );
+        const bulletCount =
+            1 + Math.max(0, Math.floor(this.player.readStat("SUMMON_GUNNER_MULTISHOT")));
         const damage = Math.max(
             0,
-            this.player.readStat("ATK")
-            * GunnerSummon.baseDamageFactor
-            * this.getDamageMultiplier(),
+            this.player.readStat("ATK") *
+                GunnerSummon.baseDamageFactor *
+                this.getDamageMultiplier(),
         );
         this.player.playSound(GAME_AUDIO_SOURCES.pew);
         const bulletWidth = 6;
@@ -59,15 +54,17 @@ export class GunnerSummon extends SummonPlane {
 
         for (let index = 0; index < bulletCount; index++) {
             const offset = (index - (bulletCount - 1) / 2) * 0.12;
-            this.spawnEntity(new BasicBullet({
-                launcher: this,
-                x: sourceX,
-                y: sourceY,
-                rotation: baseRotation + offset,
-                speed: BasicBullet.defaultSpeed,
-                damage,
-                faction: "player",
-            }));
+            this.spawnEntity(
+                new BasicBullet({
+                    launcher: this,
+                    x: sourceX,
+                    y: sourceY,
+                    rotation: baseRotation + offset,
+                    speed: BasicBullet.defaultSpeed,
+                    damage,
+                    faction: "player",
+                }),
+            );
         }
     }
 }

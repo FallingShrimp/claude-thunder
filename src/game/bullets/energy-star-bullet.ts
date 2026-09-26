@@ -26,8 +26,7 @@ export interface EnergyStarBulletOptions {
 
 /** 蓄力释放的金色旋转四角星炮弹：无限追踪、无限生命周期，带同外观拖尾。 */
 export class EnergyStarBullet extends Bullet {
-    public static readonly defaultSpeed: number = BasicBullet.defaultSpeed
-        * 2;
+    public static readonly defaultSpeed: number = BasicBullet.defaultSpeed * 2;
     /** 拖尾残影生成间隔（秒）。 */
     public static readonly afterimageInterval: number = 0.03;
     /** 拖尾残影存续时长（秒）。 */
@@ -73,11 +72,7 @@ export class EnergyStarBullet extends Bullet {
         let nearest = this.pickNearestTarget(sourceX, sourceY, true);
 
         if (nearest === undefined) {
-            const anyCandidate = this.pickNearestTarget(
-                sourceX,
-                sourceY,
-                false,
-            );
+            const anyCandidate = this.pickNearestTarget(sourceX, sourceY, false);
 
             if (anyCandidate !== undefined) {
                 this.resetHitTargets();

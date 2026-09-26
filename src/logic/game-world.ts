@@ -21,8 +21,7 @@ export class GameWorld {
 
     private hasHealthbar(entity: Plane): boolean {
         return this.entities.some(
-            (candidate) => candidate instanceof Healthbar
-                && candidate.entity === entity,
+            (candidate) => candidate instanceof Healthbar && candidate.entity === entity,
         );
     }
 

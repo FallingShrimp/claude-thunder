@@ -60,11 +60,13 @@ export class Purple extends Enemy<PurpleStats> {
     private fire(): void {
         const bulletWidth = 10;
 
-        this.spawnEntity(new GreatDangerBullet({
-            launcher: this,
-            x: this.position.x + this.size.width / 2 - bulletWidth / 2,
-            y: this.position.y + this.size.height,
-            rotation: Math.PI / 2,
-        }));
+        this.spawnEntity(
+            new GreatDangerBullet({
+                launcher: this,
+                x: this.position.x + this.size.width / 2 - bulletWidth / 2,
+                y: this.position.y + this.size.height,
+                rotation: Math.PI / 2,
+            }),
+        );
     }
 }

@@ -94,11 +94,13 @@ export class Cyan extends Enemy<CyanStats> {
         const targetY = this.player.position.y + this.player.size.height / 2;
         const rotation = Math.atan2(targetY - bulletY, targetX - bulletX);
 
-        this.spawnEntity(new DangerBullet({
-            launcher: this,
-            x: bulletX,
-            y: bulletY,
-            rotation,
-        }));
+        this.spawnEntity(
+            new DangerBullet({
+                launcher: this,
+                x: bulletX,
+                y: bulletY,
+                rotation,
+            }),
+        );
     }
 }

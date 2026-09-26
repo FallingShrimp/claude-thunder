@@ -1,113 +1,113 @@
 <!doctype html>
 <html lang="zh-CN">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#02040f">
-    <title>Claude VS Thunder</title>
-    <style>
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            overscroll-behavior: none;
-            background: #02040f;
-            touch-action: none;
-            -webkit-user-select: none;
-            user-select: none;
-            -webkit-touch-callout: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        #game {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Canvas 元素铺满整个视口（尺寸无视比例），但内部游戏画面永远等比。 */
-        #game-canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            touch-action: none;
-            background: #02040f;
-        }
-
-        /* 桌面（非触摸主设备）：保持 480×720 原始尺寸居中，不放大。 */
-        @media (pointer: fine) {
-            #game-canvas {
-                width: 480px;
-                height: 720px;
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+        />
+        <meta name="theme-color" content="#02040f" />
+        <title>Claude VS Thunder</title>
+        <style>
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                overscroll-behavior: none;
+                background: #02040f;
+                touch-action: none;
+                -webkit-user-select: none;
+                user-select: none;
+                -webkit-touch-callout: none;
+                -webkit-tap-highlight-color: transparent;
             }
-        }
 
-        #player-hud {
-            position: fixed;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 2;
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            padding: max(8px, env(safe-area-inset-top)) 12px 8px;
-            color: #ffffff;
-            font-family: sans-serif;
-            font-size: 13px;
-            pointer-events: none;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-        }
+            #game {
+                position: relative;
+                width: 100vw;
+                height: 100vh;
+                height: 100dvh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
 
-        #player-hud [data-field] {
-            background: rgba(5, 8, 23, 0.55);
-            border-radius: 4px;
-            padding: 2px 6px;
-        }
+            /* Canvas 元素铺满整个视口（尺寸无视比例），但内部游戏画面永远等比。 */
+            #game-canvas {
+                display: block;
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                touch-action: none;
+                background: #02040f;
+            }
 
-        #loading-screen {
-            position: absolute;
-            inset: 0;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            background: #050817;
-            font-family: sans-serif;
-        }
+            /* 桌面（非触摸主设备）：保持 480×720 原始尺寸居中，不放大。 */
+            @media (pointer: fine) {
+                #game-canvas {
+                    width: 480px;
+                    height: 720px;
+                }
+            }
 
-        #loading-screen[hidden] {
-            display: none;
-        }
+            #player-hud {
+                position: fixed;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 2;
+                display: flex;
+                gap: 8px;
+                justify-content: center;
+                padding: max(8px, env(safe-area-inset-top)) 12px 8px;
+                color: #ffffff;
+                font-family: sans-serif;
+                font-size: 13px;
+                pointer-events: none;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+            }
 
-        #loading-progress {
-            width: 240px;
-        }
-    </style>
-</head>
+            #player-hud [data-field] {
+                background: rgba(5, 8, 23, 0.55);
+                border-radius: 4px;
+                padding: 2px 6px;
+            }
 
-<body>
-    <main id="game">
-        <canvas id="game-canvas" width="480" height="720"></canvas>
-        <section id="player-hud" aria-label="玩家状态"></section>
-        <section id="loading-screen" aria-live="polite">
-            <p id="loading-status">正在加载资源……</p>
-            <progress id="loading-progress">0</progress>
-        </section>
-    </main>
-    <script type="module" src="/src/game/index.ts"></script>
-</body>
+            #loading-screen {
+                position: absolute;
+                inset: 0;
+                z-index: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: #ffffff;
+                background: #050817;
+                font-family: sans-serif;
+            }
 
+            #loading-screen[hidden] {
+                display: none;
+            }
+
+            #loading-progress {
+                width: 240px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <main id="game">
+            <canvas id="game-canvas" width="480" height="720"></canvas>
+            <section id="player-hud" aria-label="玩家状态"></section>
+            <section id="loading-screen" aria-live="polite">
+                <p id="loading-status">正在加载资源……</p>
+                <progress id="loading-progress">0</progress>
+            </section>
+        </main>
+        <script type="module" src="/src/game/index.ts"></script>
+    </body>
 </html>

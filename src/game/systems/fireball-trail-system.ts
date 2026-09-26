@@ -37,9 +37,7 @@ export class FireballTrailSystem implements GameSystem {
         }
     }
 
-    private static resolveConfig(
-        entity: BaseEntity,
-    ): TrailConfig | undefined {
+    private static resolveConfig(entity: BaseEntity): TrailConfig | undefined {
         const cached = TRAIL_CONFIGS.get(entity);
         if (cached !== undefined) {
             return cached;
@@ -72,8 +70,7 @@ export class FireballTrailSystem implements GameSystem {
         config: TrailConfig,
         delta: number,
     ): void {
-        const emission = (this.emissionRemainders.get(entity) ?? 0)
-            + config.emissionRate * delta;
+        const emission = (this.emissionRemainders.get(entity) ?? 0) + config.emissionRate * delta;
         const count = Math.floor(emission);
         this.emissionRemainders.set(entity, emission - count);
 
@@ -92,24 +89,19 @@ export class FireballTrailSystem implements GameSystem {
         const perpendicularY = directionX;
 
         for (let index = 0; index < count; index++) {
-            const spread = (Math.random() - 0.5)
-                * entity.size.height * 0.55 * config.scale;
+            const spread = (Math.random() - 0.5) * entity.size.height * 0.55 * config.scale;
             const backwardSpeed = (55 + Math.random() * 125) * config.scale;
 
             particles.emit({
                 x: tailX + perpendicularX * spread,
                 y: tailY + perpendicularY * spread,
-                velocityX: -directionX * backwardSpeed
-                    + perpendicularX * spread * 2,
-                velocityY: -directionY * backwardSpeed
-                    + perpendicularY * spread * 2,
+                velocityX: -directionX * backwardSpeed + perpendicularX * spread * 2,
+                velocityY: -directionY * backwardSpeed + perpendicularY * spread * 2,
                 drag: 2.8,
                 size: (7 + Math.random() * 10) * config.scale,
                 endSize: 0,
                 lifetime: (0.18 + Math.random() * 0.32) * config.scale,
-                color: FLAME_COLORS[
-                    Math.floor(Math.random() * FLAME_COLORS.length)
-                ],
+                color: FLAME_COLORS[Math.floor(Math.random() * FLAME_COLORS.length)],
             });
         }
     }

@@ -160,15 +160,7 @@ export class CanvasRenderer implements Renderer {
             }
         } else if (target.appearance.shape === "ellipse") {
             context.beginPath();
-            context.ellipse(
-                0,
-                0,
-                target.size.width / 2,
-                target.size.height / 2,
-                0,
-                0,
-                Math.PI * 2,
-            );
+            context.ellipse(0, 0, target.size.width / 2, target.size.height / 2, 0, 0, Math.PI * 2);
             context.fill();
         } else if (target.appearance.shape === "triangle") {
             // 所有具有方向性的形状都以局部坐标系的 +X 方向为零度朝向，
@@ -181,10 +173,7 @@ export class CanvasRenderer implements Renderer {
             context.fill();
         } else if (target.appearance.shape === "star") {
             // 四角星（供能量星残影等复用），与 renderEnergyStar 外观一致。
-            const outerRadius = Math.max(
-                target.size.width,
-                target.size.height,
-            ) / 2;
+            const outerRadius = Math.max(target.size.width, target.size.height) / 2;
 
             this.traceStarPath(outerRadius, outerRadius * 0.38);
             context.fill();
@@ -297,18 +286,12 @@ export class CanvasRenderer implements Renderer {
             const angle = Math.random() * Math.PI * 2;
             const innerRadius = radius * 0.25;
             context.beginPath();
-            context.moveTo(
-                Math.cos(angle) * innerRadius,
-                Math.sin(angle) * innerRadius,
-            );
+            context.moveTo(Math.cos(angle) * innerRadius, Math.sin(angle) * innerRadius);
             context.lineTo(
                 Math.cos(angle + 0.25) * radius * 0.7,
                 Math.sin(angle + 0.25) * radius * 0.7,
             );
-            context.lineTo(
-                Math.cos(angle) * radius * 1.2,
-                Math.sin(angle) * radius * 1.2,
-            );
+            context.lineTo(Math.cos(angle) * radius * 1.2, Math.sin(angle) * radius * 1.2);
             context.stroke();
         }
 
@@ -336,10 +319,8 @@ export class CanvasRenderer implements Renderer {
             const progress = index / segments;
             const jitter = (Math.random() - 0.5) * 18;
             context.lineTo(
-                thunder.originX + (thunder.endX - thunder.originX) * progress
-                + normalX * jitter,
-                thunder.originY + (thunder.endY - thunder.originY) * progress
-                + normalY * jitter,
+                thunder.originX + (thunder.endX - thunder.originX) * progress + normalX * jitter,
+                thunder.originY + (thunder.endY - thunder.originY) * progress + normalY * jitter,
             );
         }
 
@@ -382,12 +363,7 @@ export class CanvasRenderer implements Renderer {
         context.save();
         context.globalAlpha = bar.opacity;
         context.fillStyle = bar.backgroundColor;
-        context.fillRect(
-            bar.position.x,
-            bar.position.y,
-            bar.size.width,
-            bar.size.height,
-        );
+        context.fillRect(bar.position.x, bar.position.y, bar.size.width, bar.size.height);
         context.fillStyle = bar.foregroundColor;
         context.fillRect(
             bar.position.x,
@@ -538,10 +514,14 @@ export class CanvasRenderer implements Renderer {
         }
 
         const image = new Image();
-        image.addEventListener("error", () => {
-            this.itemAvatarCache.delete(source);
-            this.failedItemAvatars.add(source);
-        }, { once: true });
+        image.addEventListener(
+            "error",
+            () => {
+                this.itemAvatarCache.delete(source);
+                this.failedItemAvatars.add(source);
+            },
+            { once: true },
+        );
         image.src = source;
         this.itemAvatarCache.set(source, image);
         return image;
@@ -589,8 +569,7 @@ export class CanvasRenderer implements Renderer {
         const { context } = this;
         const centerX = player.position.x + player.size.width / 2;
         const centerY = player.position.y + player.size.height / 2;
-        const outerRadius = Math.max(player.size.width, player.size.height)
-            * 0.62;
+        const outerRadius = Math.max(player.size.width, player.size.height) * 0.62;
         const innerRadius = outerRadius - 6;
         const span = Math.PI * 2 * ratio;
         const start = -Math.PI / 2;
@@ -636,10 +615,7 @@ export class CanvasRenderer implements Renderer {
 
         context.save();
         context.globalAlpha = boss.opacity;
-        context.translate(
-            boss.position.x + width / 2,
-            boss.position.y + height / 2,
-        );
+        context.translate(boss.position.x + width / 2, boss.position.y + height / 2);
 
         // 两侧引擎吊舱。
         context.fillStyle = "#5d261c";
@@ -687,8 +663,7 @@ export class CanvasRenderer implements Renderer {
 
     private renderHealthbar(healthbar: Healthbar): void {
         const { context } = this;
-        const foregroundWidth = healthbar.size.width
-            * healthbar.foregroundProgress;
+        const foregroundWidth = healthbar.size.width * healthbar.foregroundProgress;
         const middleWidth = healthbar.size.width * healthbar.middleProgress;
 
         context.save();
@@ -705,12 +680,7 @@ export class CanvasRenderer implements Renderer {
         context.fillStyle = "rgba(0, 0, 0, 0.55)";
 
         for (const divider of healthbar.dividers) {
-            context.fillRect(
-                healthbar.size.width * divider - 1,
-                0,
-                2,
-                healthbar.size.height,
-            );
+            context.fillRect(healthbar.size.width * divider - 1, 0, 2, healthbar.size.height);
         }
 
         context.restore();

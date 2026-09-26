@@ -29,12 +29,7 @@ class WarningBeam extends BaseEntity {
         duration: number,
         color: string = "#ff3030",
     ) {
-        super(
-            crypto.randomUUID(),
-            { x, y: 0 },
-            { width, height },
-            { shape: "rectangle", color },
-        );
+        super(crypto.randomUUID(), { x, y: 0 }, { width, height }, { shape: "rectangle", color });
 
         this.remaining = duration;
         this.opacity = 0.3;
@@ -104,7 +99,14 @@ class HulkLaser extends Bullet {
 type BossState =
     | { kind: "entry" }
     | { kind: "reposition" }
-    | { kind: "shift"; remaining: number; duration: number; fromX: number; fromY: number; toX: number }
+    | {
+          kind: "shift";
+          remaining: number;
+          duration: number;
+          fromX: number;
+          fromY: number;
+          toX: number;
+      }
     | { kind: "idle"; remaining: number }
     | { kind: "fan"; volleys: number; cooldown: number }
     | { kind: "summon"; remaining: number; cooldown: number }
@@ -170,12 +172,7 @@ export class Boss extends Enemy<BossStats> {
         private readonly findEntities: () => readonly BaseEntity[],
         particles: ParticleSystem,
         audioSystem: AudioSystem,
-        shake: (
-            amplitude: number,
-            duration: number,
-            frequency?: number,
-            decay?: number,
-        ) => void,
+        shake: (amplitude: number, duration: number, frequency?: number, decay?: number) => void,
     ) {
         super(
             crypto.randomUUID(),
@@ -307,10 +304,7 @@ export class Boss extends Enemy<BossStats> {
         const offset = Math.sin(this.elapsed * 0.85) * Boss.driftAmplitude;
         const x = this.anchorX + offset - Boss.width / 2;
 
-        this.position.x = Math.max(
-            6,
-            Math.min(this.canvasWidth - Boss.width - 6, x),
-        );
+        this.position.x = Math.max(6, Math.min(this.canvasWidth - Boss.width - 6, x));
     }
 
     private randomAnchorX(): number {
@@ -346,10 +340,10 @@ export class Boss extends Enemy<BossStats> {
 
         // 濒死冲锋（HP < 10%）：优先于常规循环执行连续冲撞。
         if (
-            this.phase === 3
-            && fraction < 0.1
-            && this.dyingChargesRemaining > 0
-            && this.state.kind === "idle"
+            this.phase === 3 &&
+            fraction < 0.1 &&
+            this.dyingChargesRemaining > 0 &&
+            this.state.kind === "idle"
         ) {
             this.dyingChargesRemaining -= 1;
             this.state = { kind: "chargeWarn", remaining: 0.45 };
@@ -407,8 +401,7 @@ export class Boss extends Enemy<BossStats> {
         state.remaining = Math.max(0, state.remaining - delta);
         const t = 1 - state.remaining / state.duration;
 
-        this.position.x
-            = state.fromX + (state.toX - Boss.width / 2 - state.fromX) * t;
+        this.position.x = state.fromX + (state.toX - Boss.width / 2 - state.fromX) * t;
         this.position.y = state.fromY + (Boss.hoverY - state.fromY) * t;
 
         if (state.remaining === 0) {
@@ -475,13 +468,9 @@ export class Boss extends Enemy<BossStats> {
                 this.enterIdle(1);
                 break;
             case "laser": {
-                const beamX = this.player.position.x
-                    + this.player.size.width / 2
-                    - 13;
+                const beamX = this.player.position.x + this.player.size.width / 2 - 13;
 
-                this.spawnEntity(
-                    new WarningBeam(beamX, 26, this.canvasHeight, 1),
-                );
+                this.spawnEntity(new WarningBeam(beamX, 26, this.canvasHeight, 1));
                 this.state = { kind: "laserWarn", remaining: 1, beamX };
                 break;
             }
@@ -556,12 +545,7 @@ export class Boss extends Enemy<BossStats> {
         );
 
         for (let index = 0; index < 7; index += 1) {
-            this.fireBulletFrom(
-                originX,
-                originY,
-                baseRotation + (index - 3) * 0.11,
-                240,
-            );
+            this.fireBulletFrom(originX, originY, baseRotation + (index - 3) * 0.11, 240);
         }
     }
 
@@ -588,17 +572,9 @@ export class Boss extends Enemy<BossStats> {
             const side = this.guards.length % 2 === 0 ? -1 : 1;
             const x = Math.max(
                 4,
-                Math.min(
-                    this.canvasWidth - 46,
-                    this.centerX + side * (this.size.width / 2 + 20),
-                ),
+                Math.min(this.canvasWidth - 46, this.centerX + side * (this.size.width / 2 + 20)),
             );
-            const guard = new Brown(
-                x,
-                this.canvasHeight,
-                this.player,
-                this.spawnEntity,
-            );
+            const guard = new Brown(x, this.canvasHeight, this.player, this.spawnEntity);
 
             this.guards.push(guard);
             this.spawnEntity(guard);
@@ -623,10 +599,7 @@ export class Boss extends Enemy<BossStats> {
             if (this.state.kind !== "dying") {
                 this.health = Math.max(
                     1,
-                    this.health
-                    - this.maxHealth
-                    * Boss.guardReflectPerPhase
-                    * this.phase,
+                    this.health - this.maxHealth * Boss.guardReflectPerPhase * this.phase,
                 );
                 emitBurst(this.particles, {
                     x: this.centerX,
@@ -660,11 +633,8 @@ export class Boss extends Enemy<BossStats> {
         }
 
         this.opacity = 1;
-        const direction = this.player.position.x
-            + this.player.size.width / 2
-            > this.centerX
-            ? 1
-            : -1;
+        const direction =
+            this.player.position.x + this.player.size.width / 2 > this.centerX ? 1 : -1;
 
         this.state = { kind: "chargeDash", direction };
         this.playAudio(GAME_AUDIO_SOURCES.dash);
@@ -694,10 +664,7 @@ export class Boss extends Enemy<BossStats> {
             });
         }
 
-        if (
-            this.position.x > this.canvasWidth + 30
-            || this.position.x < -Boss.width - 30
-        ) {
+        if (this.position.x > this.canvasWidth + 30 || this.position.x < -Boss.width - 30) {
             this.anchorX = this.randomAnchorX();
             this.position.x = this.anchorX - Boss.width / 2;
             this.position.y = -Boss.height - 30;
@@ -752,9 +719,7 @@ export class Boss extends Enemy<BossStats> {
             return;
         }
 
-        this.spawnEntity(
-            new HulkLaser(this, state.beamX, 26, this.canvasHeight, 22),
-        );
+        this.spawnEntity(new HulkLaser(this, state.beamX, 26, this.canvasHeight, 22));
         this.playAudio(GAME_AUDIO_SOURCES.laserShot);
         this.shake(8, 0.4, 26, 2.2);
         this.enterIdle(1);
@@ -792,33 +757,26 @@ export class Boss extends Enemy<BossStats> {
         ];
 
         for (const [cornerX, cornerY] of corners) {
-            const baseRotation = Math.atan2(
-                targetY - cornerY,
-                targetX - cornerX,
-            );
+            const baseRotation = Math.atan2(targetY - cornerY, targetX - cornerX);
 
             for (let index = 0; index < 8; index += 1) {
-                this.fireBulletFrom(
-                    cornerX,
-                    cornerY,
-                    baseRotation + (index - 3.5) * 0.06,
-                    210,
-                    { size: 12, color: "#ff6a4a", damage: 5 },
-                );
+                this.fireBulletFrom(cornerX, cornerY, baseRotation + (index - 3.5) * 0.06, 210, {
+                    size: 12,
+                    color: "#ff6a4a",
+                    damage: 5,
+                });
             }
         }
     }
 
     private firePetal(): void {
         const count = 26;
-        const step = Math.PI * 2 / count;
+        const step = (Math.PI * 2) / count;
         const playerDirection = this.player.active
             ? Math.atan2(
-                this.player.position.y + this.player.size.height / 2
-                - this.centerY,
-                this.player.position.x + this.player.size.width / 2
-                - this.centerX,
-            )
+                  this.player.position.y + this.player.size.height / 2 - this.centerY,
+                  this.player.position.x + this.player.size.width / 2 - this.centerX,
+              )
             : Math.PI / 2;
 
         for (let index = 0; index < count; index += 1) {
@@ -838,13 +796,11 @@ export class Boss extends Enemy<BossStats> {
                 continue;
             }
 
-            this.fireBulletFrom(
-                this.centerX,
-                this.centerY,
-                angle,
-                155 + (index % 3) * 14,
-                { size: 13, color: "#ff7a3c", damage: 5 },
-            );
+            this.fireBulletFrom(this.centerX, this.centerY, angle, 155 + (index % 3) * 14, {
+                size: 13,
+                color: "#ff7a3c",
+                damage: 5,
+            });
         }
     }
 
@@ -861,14 +817,16 @@ export class Boss extends Enemy<BossStats> {
         );
 
         for (let index = 0; index < 3; index += 1) {
-            this.spawnEntity(new MissileBullet({
-                launcher: this,
-                x: originX - 11 + (index - 1) * 46,
-                y: originY,
-                rotation: baseRotation + (index - 1) * 0.35,
-                speed: Math.max(200, this.player.speed),
-                findTarget: () => [this.player],
-            }));
+            this.spawnEntity(
+                new MissileBullet({
+                    launcher: this,
+                    x: originX - 11 + (index - 1) * 46,
+                    y: originY,
+                    rotation: baseRotation + (index - 1) * 0.35,
+                    speed: Math.max(200, this.player.speed),
+                    findTarget: () => [this.player],
+                }),
+            );
         }
     }
 
@@ -886,11 +844,7 @@ export class Boss extends Enemy<BossStats> {
 
     private clearEnemyBullets(): void {
         for (const entity of this.findEntities()) {
-            if (
-                entity instanceof Bullet
-                && entity.faction === "enemy"
-                && entity.active
-            ) {
+            if (entity instanceof Bullet && entity.faction === "enemy" && entity.active) {
                 entity.active = false;
             }
         }

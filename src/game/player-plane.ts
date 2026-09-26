@@ -254,18 +254,19 @@ export class PlayerPlane extends Player<PlayerStats> {
         // 从而保证桌面端不受触摸输入影响（TouchInput 始终存在）。
         // KeyI 也要算作键盘活跃：只按住 I 蓄力时不能落入触摸分支，
         // 否则蓄力状态机整帧跳过，能量消耗会出现断断续续的现象。
-        const keyboardActive = this.input.isPressed("KeyW")
-            || this.input.isPressed("KeyA")
-            || this.input.isPressed("KeyS")
-            || this.input.isPressed("KeyD")
-            || this.input.isPressed("KeyJ")
-            || this.input.isPressed("KeyK")
-            || this.input.isPressed("KeyI");
+        const keyboardActive =
+            this.input.isPressed("KeyW") ||
+            this.input.isPressed("KeyA") ||
+            this.input.isPressed("KeyS") ||
+            this.input.isPressed("KeyD") ||
+            this.input.isPressed("KeyJ") ||
+            this.input.isPressed("KeyK") ||
+            this.input.isPressed("KeyI");
 
-        const horizontal = Number(this.input.isPressed("KeyD"))
-            - Number(this.input.isPressed("KeyA"));
-        const vertical = Number(this.input.isPressed("KeyS"))
-            - Number(this.input.isPressed("KeyW"));
+        const horizontal =
+            Number(this.input.isPressed("KeyD")) - Number(this.input.isPressed("KeyA"));
+        const vertical =
+            Number(this.input.isPressed("KeyS")) - Number(this.input.isPressed("KeyW"));
 
         // 按空格闪避：移动中朝移动方向；无触摸拖动时向下冲刺。
         if (dodgeHeld && (horizontal !== 0 || vertical !== 0)) {
@@ -314,21 +315,17 @@ export class PlayerPlane extends Player<PlayerStats> {
 
     /** 将玩家限制在画布范围内，避免移动到屏幕外。 */
     private clampToCanvas(): void {
-        const canvasWidth = this.touch?.canvas.width
-            ?? document.querySelector<HTMLCanvasElement>("#game-canvas")?.width
-            ?? 480;
-        const canvasHeight = this.touch?.canvas.height
-            ?? document.querySelector<HTMLCanvasElement>("#game-canvas")?.height
-            ?? 720;
+        const canvasWidth =
+            this.touch?.canvas.width ??
+            document.querySelector<HTMLCanvasElement>("#game-canvas")?.width ??
+            480;
+        const canvasHeight =
+            this.touch?.canvas.height ??
+            document.querySelector<HTMLCanvasElement>("#game-canvas")?.height ??
+            720;
 
-        this.position.x = Math.max(
-            0,
-            Math.min(canvasWidth - this.size.width, this.position.x),
-        );
-        this.position.y = Math.max(
-            0,
-            Math.min(canvasHeight - this.size.height, this.position.y),
-        );
+        this.position.x = Math.max(0, Math.min(canvasWidth - this.size.width, this.position.x));
+        this.position.y = Math.max(0, Math.min(canvasHeight - this.size.height, this.position.y));
     }
 
     /**
@@ -398,10 +395,7 @@ export class PlayerPlane extends Player<PlayerStats> {
         const centerX = this.position.x + this.size.width / 2;
         const centerY = this.position.y + this.size.height / 2;
 
-        return Math.hypot(
-            this.touch.targetX - centerX,
-            this.touch.targetY - centerY,
-        ) > 1;
+        return Math.hypot(this.touch.targetX - centerX, this.touch.targetY - centerY) > 1;
     }
 
     /** 触发闪避：朝给定方向冲刺，冲刺期间无敌。 */
@@ -426,10 +420,7 @@ export class PlayerPlane extends Player<PlayerStats> {
 
     /** 获取能量：直接按基础值获取，不吃攻速加成。 */
     public gainEnergy(base: number): void {
-        this.energy = Math.min(
-            Math.max(0, this.readStat("ENERGY_CAP")),
-            this.energy + base,
-        );
+        this.energy = Math.min(Math.max(0, this.readStat("ENERGY_CAP")), this.energy + base);
     }
 
     /**
@@ -457,8 +448,7 @@ export class PlayerPlane extends Player<PlayerStats> {
             this.energy -= consumed;
             // 节能：本次蓄力按 (1 + 节能) 放大结算值，
             // 逐帧累加保证总效果等价于总消耗 × (1 + 节能) 且不产生复利。
-            this.chargeConsumed
-                += consumed * (1 + Math.max(0, this.readStat("ENERGY_SAVING")));
+            this.chargeConsumed += consumed * (1 + Math.max(0, this.readStat("ENERGY_SAVING")));
 
             if (chargeReleased) {
                 this.fireEnergyStar();
@@ -488,26 +478,26 @@ export class PlayerPlane extends Player<PlayerStats> {
 
         this.playSound(GAME_AUDIO_SOURCES.energyStar);
 
-        this.spawnEntity(new EnergyStarBullet({
-            launcher: this,
-            x: this.position.x + this.size.width / 2 - 80,
-            y: this.position.y + this.size.height / 2 - 80,
-            rotation: -Math.PI / 2,
-            damage: this.readStat("ATK")
-                * consumed
-                * Math.max(0, this.readStat("ENERGY_DMG_MULTIPLIER")),
-            penetrate: Math.max(0, this.readStat("ENERGY_PIERCE")),
-            findTarget: this.findTargets ?? (() => []),
-            spawnEntity: this.spawnEntity,
-        }));
+        this.spawnEntity(
+            new EnergyStarBullet({
+                launcher: this,
+                x: this.position.x + this.size.width / 2 - 80,
+                y: this.position.y + this.size.height / 2 - 80,
+                rotation: -Math.PI / 2,
+                damage:
+                    this.readStat("ATK") *
+                    consumed *
+                    Math.max(0, this.readStat("ENERGY_DMG_MULTIPLIER")),
+                penetrate: Math.max(0, this.readStat("ENERGY_PIERCE")),
+                findTarget: this.findTargets ?? (() => []),
+                spawnEntity: this.spawnEntity,
+            }),
+        );
     }
 
     /** 攻击时发射激光（需持有冲刺激光道具）：始终向上，并朝预期偏转角最小的敌人修正。 */
     private fireLasers(): void {
-        const laserCount = Math.max(
-            0,
-            Math.floor(this.readStat("LASER_COUNT")),
-        );
+        const laserCount = Math.max(0, Math.floor(this.readStat("LASER_COUNT")));
 
         if (laserCount === 0) {
             return;
@@ -517,21 +507,17 @@ export class PlayerPlane extends Player<PlayerStats> {
         const baseRotation = -Math.PI / 2;
         // 激光角度修正：从所有敌人中选取与正上方夹角最小者，
         // 修正量钳制在 LASER_AIM_ANGLE（度）内。
-        const maxCorrection = radians(
-            Math.max(0, this.readStat("LASER_AIM_ANGLE")),
-        );
-        const candidates = maxCorrection > 0
-            ? this.findTargets?.() ?? []
-            : [];
+        const maxCorrection = radians(Math.max(0, this.readStat("LASER_AIM_ANGLE")));
+        const candidates = maxCorrection > 0 ? (this.findTargets?.() ?? []) : [];
         let aimRotation = baseRotation;
         let bestDiff = Number.POSITIVE_INFINITY;
 
         for (const target of candidates) {
             const targetAngle = Math.atan2(
-                target.position.y + target.size.height / 2 - (this.position.y
-                    + this.size.height / 2),
-                target.position.x + target.size.width / 2 - (this.position.x
-                    + this.size.width / 2),
+                target.position.y +
+                    target.size.height / 2 -
+                    (this.position.y + this.size.height / 2),
+                target.position.x + target.size.width / 2 - (this.position.x + this.size.width / 2),
             );
             let diff = targetAngle - baseRotation;
 
@@ -547,10 +533,7 @@ export class PlayerPlane extends Player<PlayerStats> {
         }
 
         if (Number.isFinite(bestDiff)) {
-            const clamped = Math.max(
-                -maxCorrection,
-                Math.min(maxCorrection, bestDiff),
-            );
+            const clamped = Math.max(-maxCorrection, Math.min(maxCorrection, bestDiff));
 
             aimRotation = baseRotation + clamped;
         }
@@ -562,19 +545,18 @@ export class PlayerPlane extends Player<PlayerStats> {
         for (let index = 0; index < laserCount; index++) {
             const offset = (index - (laserCount - 1) / 2) * 10;
 
-            this.spawnEntity(new LaserBullet({
-                launcher: this,
-                originX: originX + offset,
-                originY,
-                rotation: aimRotation,
-                damage: this.readStat("ATK")
-                    * this.readStat("LASER_DAMAGE"),
-                faction: "player",
-                remainingRefractions: 1 + Math.max(
-                    0,
-                    Math.floor(this.readStat("LASER_REFRACTION_COUNT")),
-                ),
-            }));
+            this.spawnEntity(
+                new LaserBullet({
+                    launcher: this,
+                    originX: originX + offset,
+                    originY,
+                    rotation: aimRotation,
+                    damage: this.readStat("ATK") * this.readStat("LASER_DAMAGE"),
+                    faction: "player",
+                    remainingRefractions:
+                        1 + Math.max(0, Math.floor(this.readStat("LASER_REFRACTION_COUNT"))),
+                }),
+            );
         }
 
         this.playSound(GAME_AUDIO_SOURCES.laserShot);
@@ -595,23 +577,22 @@ export class PlayerPlane extends Player<PlayerStats> {
 
         if (this.dodgeAfterimageTimer <= 0) {
             this.dodgeAfterimageTimer = PlayerPlane.dodgeAfterimageInterval;
-            this.spawnEntity(new Afterimage(
-                { ...this.position },
-                { ...this.size },
-                { shape: "rectangle", color: "#8fd8ff" },
-                this.rotation,
-                this.scale,
-                PlayerPlane.dodgeAfterimageLifetime,
-            ));
+            this.spawnEntity(
+                new Afterimage(
+                    { ...this.position },
+                    { ...this.size },
+                    { shape: "rectangle", color: "#8fd8ff" },
+                    this.rotation,
+                    this.scale,
+                    PlayerPlane.dodgeAfterimageLifetime,
+                ),
+            );
         }
 
         if (this.dodgeElapsed >= PlayerPlane.dodgeDuration) {
             this.dodging = false;
             // 实际冷却 = 基值 / 闪避充能，充能越高闪避越频繁。
-            const charge = Math.max(
-                0.1,
-                this.readStat("DODGE_CHARGE"),
-            );
+            const charge = Math.max(0.1, this.readStat("DODGE_CHARGE"));
             this.dodgeCooldown = PlayerPlane.dodgeCooldown / charge;
         }
     }
@@ -641,20 +622,14 @@ export class PlayerPlane extends Player<PlayerStats> {
                 return 0;
             }
 
-            return 1 - Math.min(
-                1,
-                this.guardElapsed / PlayerPlane.guardDuration,
-            );
+            return 1 - Math.min(1, this.guardElapsed / PlayerPlane.guardDuration);
         }
 
         if (PlayerPlane.guardCooldownBase <= 0) {
             return 1;
         }
 
-        return 1 - Math.min(
-            1,
-            this.guardCooldown / PlayerPlane.guardCooldownBase,
-        );
+        return 1 - Math.min(1, this.guardCooldown / PlayerPlane.guardCooldownBase);
     }
 
     /** 冲刺冷却恢复进度（0 = 刚触发，1 = 就绪），冷却总时长受闪避充能影响。 */
@@ -723,22 +698,20 @@ export class PlayerPlane extends Player<PlayerStats> {
         const centerX = this.position.x + this.size.width / 2;
         const centerY = this.position.y + this.size.height / 2;
 
-        this.spawnEntity(new FireballBullet({
-            launcher: this,
-            x: centerX - bulletWidth / 2,
-            y: centerY - bulletHeight / 2,
-            rotation,
-            damage: this.readStat("ATK")
-                * (1 + this.readStat("COUNTER_MULTIPLIER")),
-            faction: "player",
-            traceAngle: this.readStat("COUNTER_TRACE"),
-            traceTarget,
-            findTraceTarget,
-            remainingRefractions: Math.max(
-                0,
-                Math.floor(this.readStat("COUNTER_REFRACTION")),
-            ),
-        }));
+        this.spawnEntity(
+            new FireballBullet({
+                launcher: this,
+                x: centerX - bulletWidth / 2,
+                y: centerY - bulletHeight / 2,
+                rotation,
+                damage: this.readStat("ATK") * (1 + this.readStat("COUNTER_MULTIPLIER")),
+                faction: "player",
+                traceAngle: this.readStat("COUNTER_TRACE"),
+                traceTarget,
+                findTraceTarget,
+                remainingRefractions: Math.max(0, Math.floor(this.readStat("COUNTER_REFRACTION"))),
+            }),
+        );
     }
 
     public emitThunder(
@@ -746,10 +719,7 @@ export class PlayerPlane extends Player<PlayerStats> {
         originY: number,
         rotation: number,
         length: number = ThunderBullet.splitLength,
-        remainingChains: number = Math.max(
-            0,
-            Math.floor(this.readStat("THUNDER_CHAIN_COUNT")),
-        ),
+        remainingChains: number = Math.max(0, Math.floor(this.readStat("THUNDER_CHAIN_COUNT"))),
         chainTargetIds?: ReadonlySet<string>,
     ): ThunderBullet {
         const thunder = new ThunderBullet({
@@ -758,8 +728,7 @@ export class PlayerPlane extends Player<PlayerStats> {
             originY,
             rotation,
             length,
-            damage: this.readStat("ATK")
-                * this.readStat("THUNDER_MULTIPLIER"),
+            damage: this.readStat("ATK") * this.readStat("THUNDER_MULTIPLIER"),
             faction: "player",
             remainingChains,
             chainTargetIds,
@@ -783,16 +752,12 @@ export class PlayerPlane extends Player<PlayerStats> {
             x: centerX - size / 2,
             y: centerY - size / 2,
             rotation,
-            damage: this.readStat("ATK")
-                * this.readStat("THUNDER_MULTIPLIER"),
+            damage: this.readStat("ATK") * this.readStat("THUNDER_MULTIPLIER"),
             faction: "player",
             traceAngle: this.readStat("THUNDER_BALL_TRACE"),
             traceTarget,
             findTraceTarget,
-            remainingChains: Math.max(
-                0,
-                Math.floor(this.readStat("THUNDER_CHAIN_COUNT")),
-            ),
+            remainingChains: Math.max(0, Math.floor(this.readStat("THUNDER_CHAIN_COUNT"))),
             chainTargetIds,
         });
 
@@ -816,9 +781,7 @@ export class PlayerPlane extends Player<PlayerStats> {
             return "perfect";
         }
 
-        this.endGuard(
-            PlayerPlane.guardCooldownBase * PlayerPlane.guardCooldownPenalty,
-        );
+        this.endGuard(PlayerPlane.guardCooldownBase * PlayerPlane.guardCooldownPenalty);
         void this.playParryAudio(GAME_AUDIO_SOURCES.unexactParry);
         return "guard";
     }
@@ -842,16 +805,22 @@ export class PlayerPlane extends Player<PlayerStats> {
         const centerX = this.position.x + this.size.width / 2;
 
         const { MULTIPLE_SHOOT } = this.statsValue;
-        const bulletCount = 1 + Math.floor(MULTIPLE_SHOOT) + Number(rate(MULTIPLE_SHOOT - Math.floor(MULTIPLE_SHOOT)));
+        const bulletCount =
+            1 +
+            Math.floor(MULTIPLE_SHOOT) +
+            Number(rate(MULTIPLE_SHOOT - Math.floor(MULTIPLE_SHOOT)));
         for (let i = 0; i < bulletCount; i++) {
-            this.spawnEntity(new BasicBullet({
-                launcher: this,
-                x: centerX - bulletWidth / 2,
-                y: this.position.y - bulletHeight,
-                rotation: -Math.PI / 2 + radians(randomFloat(-1, 1) * this.readStat("SHOOT_OFFSET")),
-                damage: this.readStat("ATK"),
-                faction: "player",
-            }));
+            this.spawnEntity(
+                new BasicBullet({
+                    launcher: this,
+                    x: centerX - bulletWidth / 2,
+                    y: this.position.y - bulletHeight,
+                    rotation:
+                        -Math.PI / 2 + radians(randomFloat(-1, 1) * this.readStat("SHOOT_OFFSET")),
+                    damage: this.readStat("ATK"),
+                    faction: "player",
+                }),
+            );
         }
         void this.audioSystem.playAudio(GAME_AUDIO_SOURCES.pew).catch(() => {
             // 浏览器可能在用户交互前禁止播放音频，静默忽略即可。
@@ -869,12 +838,7 @@ export class PlayerPlane extends Player<PlayerStats> {
     private updateGuard(delta: number): void {
         const guardKey = this.input.isPressed("KeyK");
 
-        if (
-            guardKey
-            && !this.previousGuardKey
-            && !this.guarding
-            && this.guardCooldown === 0
-        ) {
+        if (guardKey && !this.previousGuardKey && !this.guarding && this.guardCooldown === 0) {
             this.guarding = true;
             this.guardElapsed = 0;
         }
